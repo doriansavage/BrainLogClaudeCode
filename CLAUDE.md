@@ -41,12 +41,50 @@ Types : `feat`, `fix`, `docs`, `refactor`, `chore`, `test`
 - **feat**: Extraction données → `data/questionnaire-fields.json` (97 champs, 8 sections) + `data/tariffs-standard.json` (21 postes tarifaires, 3 catégories)
 - **docs**: ADN graphique Brain e-Log → `adn-graphique-brain-log.md` (couleurs, logo, typo, UI, images)
 - **docs**: Plan complet Module 1 Tarifs → `docs/brain-elog-app-plan.md` (user stories, DB schema, UI, branches)
+- **docs**: Architecture globale 17 écrans → `docs/app-screens-architecture.md` (sitemap, flows UX)
+- **feat(app)**: Bootstrap Next.js 15 + Tailwind CSS + TypeScript dans le repo
+- **feat(app)**: Design system Brain E-Log (CSS vars, font Nunito, palette navy)
+- **feat(app)**: 17 routes App Router + layout admin avec sidebar Lucide + dashboard
 
 ---
 
 ## Architecture
 
-_À documenter au fur et à mesure des développements._
+### Stack
+- **Framework**: Next.js 15 (App Router)
+- **CSS**: Tailwind CSS 4 + CSS variables Brain E-Log
+- **Font**: Nunito (Google Fonts via CSS @import)
+- **Icons**: Lucide React
+- **State**: Zustand (installé)
+- **Forms**: React Hook Form + Zod (installé)
+- **Hosting**: Vercel (à configurer)
+- **DB**: Supabase (à configurer)
+
+### Structure des routes
+```
+src/app/
+├── page.tsx                          → redirect /dashboard
+├── layout.tsx                        → root layout (Nunito, globals.css)
+├── login/page.tsx
+├── prospect/[token]/page.tsx         → portail public prospect
+└── (admin)/
+    ├── layout.tsx                    → sidebar + main content
+    ├── dashboard/page.tsx            ✅ Dashboard complet
+    ├── prospects/page.tsx            → à développer (Module 2)
+    ├── prospects/[id]/page.tsx
+    ├── prospects/nouveau/page.tsx
+    ├── tarifs/page.tsx               → à développer (Module 1 — priorité)
+    ├── tarifs/[id]/comparer/page.tsx
+    ├── regles/page.tsx               → à développer (Module 3)
+    ├── regles/[id]/page.tsx
+    ├── offres/page.tsx               → à développer (Module 4)
+    ├── offres/[id]/page.tsx
+    ├── offres/generer/page.tsx
+    └── parametres/page.tsx
+```
+
+### Prochaine priorité : Module 1 — Gestionnaire de Tarifs
+Voir `docs/brain-elog-app-plan.md` pour les 24 user stories et le schéma DB.
 
 ---
 

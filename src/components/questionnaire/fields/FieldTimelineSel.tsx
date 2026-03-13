@@ -25,21 +25,27 @@ export function FieldTimelineSel({ field, value, error, onChange }: FieldProps) 
             key={opt}
             type="button"
             onClick={() => onChange(field.id, opt)}
-            className="flex flex-col items-center gap-2 py-5 px-2 rounded-xl border-2 transition-all cursor-pointer"
+            className="flex flex-col items-center gap-2.5 py-6 px-2 rounded-xl border-2 transition-all cursor-pointer"
             style={{
-              backgroundColor: selected ? colors.bg : 'var(--bg)',
-              borderColor: selected ? colors.border : error ? '#ef4444' : 'var(--border)',
+              backgroundColor: selected ? colors.bg : 'var(--bg-alt)',
+              borderColor: selected ? colors.border : error ? '#ef4444' : 'transparent',
               color: selected ? colors.text : 'var(--text-muted)',
+              boxShadow: selected ? `0 4px 14px ${colors.border}50` : '0 1px 3px rgba(0,0,0,0.04)',
+            }}
+            onMouseEnter={(e) => {
+              if (!selected) e.currentTarget.style.borderColor = colors.border
+            }}
+            onMouseLeave={(e) => {
+              if (!selected) e.currentTarget.style.borderColor = 'transparent'
             }}
           >
             <span className="text-2xl leading-none">{icon}</span>
-            <span className="text-xs font-bold text-center">{opt}</span>
+            <span className="text-xs font-bold text-center leading-tight">{opt}</span>
             <span
-              className="text-[10px] font-medium px-2 py-0.5 rounded-full"
+              className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full"
               style={{
                 backgroundColor: selected ? colors.border : 'var(--border)',
-                color: selected ? colors.text : 'var(--text-muted)',
-                opacity: 0.8,
+                color: selected ? (i === 0 ? '#fff' : colors.text) : 'var(--text-muted)',
               }}
             >
               {colors.label}

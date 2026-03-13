@@ -38,14 +38,21 @@ export function FieldMultiSelect({ field, value, error, onChange }: FieldProps) 
             key={opt}
             type="button"
             onClick={() => toggle(opt)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-semibold border-2 transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-full text-sm font-semibold border-2 transition-all cursor-pointer"
             style={{
-              backgroundColor: isSelected ? 'var(--primary)' : 'var(--bg)',
-              borderColor: isSelected ? 'var(--primary)' : error ? '#ef4444' : 'var(--border)',
+              backgroundColor: isSelected ? 'var(--primary)' : 'var(--bg-alt)',
+              borderColor: isSelected ? 'var(--primary)' : error ? '#ef4444' : 'transparent',
               color: isSelected ? '#fff' : 'var(--text)',
+              boxShadow: isSelected ? '0 2px 8px rgba(9,77,128,0.22)' : '0 1px 2px rgba(0,0,0,0.05)',
+            }}
+            onMouseEnter={(e) => {
+              if (!isSelected) e.currentTarget.style.borderColor = 'var(--primary)'
+            }}
+            onMouseLeave={(e) => {
+              if (!isSelected) e.currentTarget.style.borderColor = 'transparent'
             }}
           >
-            {icon && <span className="text-base leading-none">{icon}</span>}
+            {icon && <span className="text-sm leading-none">{icon}</span>}
             {opt}
           </button>
         )

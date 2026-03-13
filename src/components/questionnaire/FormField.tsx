@@ -26,17 +26,17 @@ export function FormField({ field, value, error, onChange }: FormFieldProps) {
   const props = { field, value, error, onChange }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2.5">
 
       {/* Label */}
       <label
         htmlFor={field.id}
-        className="text-sm font-semibold"
-        style={{ color: 'var(--text)' }}
+        className="text-sm font-semibold leading-snug"
+        style={{ color: 'var(--dark-navy)' }}
       >
         {field.label}
         {field.required && (
-          <span className="ml-1 font-bold" style={{ color: 'var(--primary)' }}>*</span>
+          <span className="ml-1.5 text-xs font-medium" style={{ color: 'var(--primary)' }}>*</span>
         )}
       </label>
 
@@ -57,16 +57,19 @@ export function FormField({ field, value, error, onChange }: FormFieldProps) {
 
       {/* Hint contextuel (masqué si erreur) */}
       {field.hint && !error && (
-        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+        <p className="text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
           {field.hint}
         </p>
       )}
 
       {/* Erreur de validation */}
       {error && (
-        <p className="text-xs font-medium" style={{ color: '#ef4444' }}>
-          ⚠ {error}
-        </p>
+        <div className="flex items-center gap-1.5">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <p className="text-xs font-medium" style={{ color: '#ef4444' }}>{error}</p>
+        </div>
       )}
     </div>
   )

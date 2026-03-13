@@ -38,12 +38,12 @@ export function NouveauProspectForm() {
   const [error, setError] = useState('')
 
   const [form, setForm] = useState({
-    companyName: '',
-    contactName: '',
-    contactEmail: '',
-    websiteUrl: '',
-    sector: '',
-    notes: '',
+    companyName: 'Acme SRL',
+    contactName: 'Jean Dupont',
+    contactEmail: 'jean.dupont@acme.be',
+    websiteUrl: 'https://www.acme.be',
+    sector: 'Mode & Textile',
+    notes: 'Lead via salon Paris — intéressé par la formule Premium',
   })
 
   function set(field: string, value: string) {

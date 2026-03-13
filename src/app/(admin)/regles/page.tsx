@@ -211,7 +211,12 @@ interface RuleCardProps {
 
 function RuleCard({ rule, groups, isFirst, isLast, onEdit, onDelete, onToggle, onMoveUp, onMoveDown }: RuleCardProps) {
   const condSummary = rule.conditions.map((c) => {
-    const op = c.operator === 'eq' ? '=' : c.operator === 'neq' ? '≠' : c.operator === 'in' ? '∈ {' : '∉ {'
+    const opLabels: Record<string, string> = {
+      eq: '=', neq: '≠', in: '∈ {', not_in: '∉ {',
+      lt: '<', lte: '≤', gt: '>', gte: '≥',
+      contains: '⊃', not_contains: '⊅',
+    }
+    const op = opLabels[c.operator] ?? c.operator
     const val = (c.operator === 'in' || c.operator === 'not_in') ? c.value + '}' : `"${c.value}"`
     return `${c.questionCode} ${op} ${val}`
   }).join(rule.conditionLogic === 'AND' ? ' ET ' : ' OU ')
@@ -397,6 +402,8 @@ function RuleEditor({ rule, groups, onSave, onCancel }: RuleEditorProps) {
 function ConditionRow({ condition, onChange, onRemove }: { condition: RuleCondition; onChange: (c: Partial<RuleCondition>) => void; onRemove: () => void }) {
   const field = Q_FIELDS.find((f) => f.code === condition.questionCode)
   const isMulti = condition.operator === 'in' || condition.operator === 'not_in'
+  const isNumeric = ['lt', 'lte', 'gt', 'gte'].includes(condition.operator)
+  const isText = ['contains', 'not_contains'].includes(condition.operator)
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
@@ -412,20 +419,36 @@ function ConditionRow({ condition, onChange, onRemove }: { condition: RuleCondit
       </select>
 
       {/* Opérateur */}
-      <select value={condition.operator} onChange={(e) => onChange({ operator: e.target.value as ConditionOperator, value: '' })} style={{ ...selectSt, width: 160 }}>
-        <option value="eq">= est égal à</option>
-        <option value="neq">≠ est différent de</option>
-        <option value="in">∈ est parmi</option>
-        <option value="not_in">∉ n'est pas parmi</option>
+      <select value={condition.operator} onChange={(e) => onChange({ operator: e.target.value as ConditionOperator, value: '' })} style={{ ...selectSt, width: 180 }}>
+        <optgroup label="Égalité">
+          <option value="eq">= est égal à</option>
+          <option value="neq">≠ est différent de</option>
+          <option value="in">∈ est parmi</option>
+          <option value="not_in">∉ n&apos;est pas parmi</option>
+        </optgroup>
+        <optgroup label="Comparaison numérique">
+          <option value="lt">&lt; est inférieur à</option>
+          <option value="lte">≤ est inférieur ou égal à</option>
+          <option value="gt">&gt; est supérieur à</option>
+          <option value="gte">≥ est supérieur ou égal à</option>
+        </optgroup>
+        <optgroup label="Texte">
+          <option value="contains">⊃ contient</option>
+          <option value="not_contains">⊅ ne contient pas</option>
+        </optgroup>
       </select>
 
       {/* Valeur */}
-      {!isMulti && field?.options ? (
+      {isMulti && field?.options ? (
+        <MultiCheckbox options={field.options} value={condition.value} onChange={(v) => onChange({ value: v })} />
+      ) : isNumeric ? (
+        <input type="number" value={condition.value} onChange={(e) => onChange({ value: e.target.value })} placeholder="ex: 25" style={{ ...inputSt, width: 90 }} />
+      ) : isText ? (
+        <input value={condition.value} onChange={(e) => onChange({ value: e.target.value })} placeholder="texte recherché" style={inputSt} />
+      ) : !isMulti && field?.options ? (
         <select value={condition.value} onChange={(e) => onChange({ value: e.target.value })} style={selectSt}>
           {field.options.map((o) => <option key={o}>{o}</option>)}
         </select>
-      ) : isMulti && field?.options ? (
-        <MultiCheckbox options={field.options} value={condition.value} onChange={(v) => onChange({ value: v })} />
       ) : (
         <input value={condition.value} onChange={(e) => onChange({ value: e.target.value })} placeholder="valeur" style={inputSt} />
       )}

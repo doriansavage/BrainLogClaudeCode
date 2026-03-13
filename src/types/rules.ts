@@ -1,7 +1,7 @@
 // ─── Types du moteur de règles Brain E-Log ───────────────────────────────────
 // Une règle = SI condition(s) questionnaire → ALORS action(s) sur les tarifs
 
-export type ConditionOperator = 'eq' | 'neq' | 'in' | 'not_in'
+export type ConditionOperator = 'eq' | 'neq' | 'in' | 'not_in' | 'lt' | 'lte' | 'gt' | 'gte' | 'contains' | 'not_contains'
 
 export interface RuleCondition {
   id: string

@@ -51,6 +51,23 @@ Types : `feat`, `fix`, `docs`, `refactor`, `chore`, `test`
 - **feat(app)**: 17 routes App Router + layout admin avec sidebar Lucide + dashboard
 - **feat(tarifs)**: Module 1 Sprint 1 — TariffManager complet (3 groupes, 22 postes, Zustand store)
 - **feat(ui)**: Redesign complet — Inter font, gray scale, shadows, sidebar épurée, dashboard moderne, TariffManager épuré
+- **feat(prospect)**: Redesign complet du formulaire questionnaire prospect (19 fichiers)
+  - Page wrapper : fond dégradé bleu, card shadow premium, border subtile
+  - Header : bandeau gradient navy + pill nom entreprise
+  - Landing : hero SVG, 3 feature cards, dots d'étapes, CTA gradient avec hover lift
+  - ProgressBar : segments par étape avec hauteur active, badge % coloré
+  - SectionForm : badge numéro d'étape, séparateur, boutons nav avec SVG arrows
+  - FormField : label dark-navy, erreur avec icône SVG circle-info
+  - FieldText / Textarea / Url : border-2 rounded-xl, bg-alt, focus ring bleu avec glow
+  - FieldToggle : pill switcher intégré style iOS sur fond bg-alt
+  - FieldRadioCards / IconGrid / LogoPicker : hover border + box-shadow sélection
+  - FieldMultiSelect : pills avec hover border transition
+  - FieldSlider : thumb blanc visible + border, track gradient bleu, badge valeur
+  - FieldPriceRange : € répétés selon rang, hover border
+  - FieldScale3 / TimelineSel : shadow coloré thématique, hover border
+  - FieldGeoSplit : thumb visible sur sliders, counter statut coloré (vert/rouge/gris)
+  - RecapView : sections avec header coloré, badge %, bouton submit avec spinner SVG
+  - Confirmation : checkmark SVG gradient vert, badge "contacté sous 48h"
 
 ---
 

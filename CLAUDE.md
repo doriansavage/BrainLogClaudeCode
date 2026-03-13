@@ -45,6 +45,8 @@ Types : `feat`, `fix`, `docs`, `refactor`, `chore`, `test`
 - **feat(app)**: Bootstrap Next.js 15 + Tailwind CSS + TypeScript dans le repo
 - **feat(app)**: Design system Brain E-Log (CSS vars, font Nunito, palette navy)
 - **feat(app)**: 17 routes App Router + layout admin avec sidebar Lucide + dashboard
+- **feat(tarifs)**: Module 1 Sprint 1 — TariffManager complet (3 groupes, 22 postes, Zustand store)
+- **feat(ui)**: Redesign complet — Inter font, gray scale, shadows, sidebar épurée, dashboard moderne, TariffManager épuré
 
 ---
 
@@ -53,7 +55,7 @@ Types : `feat`, `fix`, `docs`, `refactor`, `chore`, `test`
 ### Stack
 - **Framework**: Next.js 15 (App Router)
 - **CSS**: Tailwind CSS 4 + CSS variables Brain E-Log
-- **Font**: Nunito (Google Fonts via CSS @import)
+- **Font**: Inter (Google Fonts via CSS @import)
 - **Icons**: Lucide React
 - **State**: Zustand (installé)
 - **Forms**: React Hook Form + Zod (installé)

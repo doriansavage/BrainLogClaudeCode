@@ -34,6 +34,8 @@ Style     : Sans-serif géométrique, clean, typographie corporative
 | Lettres principales | Navy bleu | `#24487B` |
 | Cadre / éléments secondaires | Gris charcoal | `#4F4C4D` |
 
+**URL directe :** `https://www.brain-log.com/web/image/website/1/logo/Brain%20e-Log?unique=cb967e0`
+
 **Description :** Wordmark "Brain e-Log" en caractères géométriques bold, deux tonalités — le navy pour la marque, le gris pour les éléments supports. Traitement minimal, aucun icône symbolique, aucun ornement.
 
 ---
@@ -210,14 +212,14 @@ Logo carousel visible avec : **BPost · Colissimo · DHL · DPD · Deutsche Post
 
 | Type | URL / Chemin |
 |------|-------------|
-| Logo SVG | `/web/image/website/1/logo/Brain%20e-Log?unique=cb967e0` |
-| Forme décorative | `/en/web_editor/shape/theme_paptic/s_picture.svg?c1=%23094D80` |
-| Photo dépôt | `/web/image/49721-a4a2e96a/IMAGE_DEPOT_001.webp` |
-| Icône e-commerce | `/web/image/25185-81e83cf3/shopping-outline_mobile-cart2.svg` |
-| Icône storage | `/web/image/24482-15564422/furniture-outline_storage.svg` |
-| Icône fulfillment | `/web/image/25186-918bc699/shopping-outline_box%202.svg` |
-| Icône shipping | `/web/image/25187-47aa3cb5/shopping-outline_delivery-fast2.svg` |
-| Icônes process | `/web/image/25198-45fe25d6/ecomm_step_1.svg` → `step_4.svg` |
+| Logo SVG | `https://www.brain-log.com/web/image/website/1/logo/Brain%20e-Log?unique=cb967e0` |
+| Forme décorative | `https://www.brain-log.com/en/web_editor/shape/theme_paptic/s_picture.svg?c1=%23094D80` |
+| Photo dépôt | `https://www.brain-log.com/web/image/49721-a4a2e96a/IMAGE_DEPOT_001.webp` |
+| Icône e-commerce | `https://www.brain-log.com/web/image/25185-81e83cf3/shopping-outline_mobile-cart2.svg` |
+| Icône storage | `https://www.brain-log.com/web/image/24482-15564422/furniture-outline_storage.svg` |
+| Icône fulfillment | `https://www.brain-log.com/web/image/25186-918bc699/shopping-outline_box%202.svg` |
+| Icône shipping | `https://www.brain-log.com/web/image/25187-47aa3cb5/shopping-outline_delivery-fast2.svg` |
+| Icônes process | `https://www.brain-log.com/web/image/25198-45fe25d6/ecomm_step_1.svg` → `step_4.svg` |
 
 ---
 

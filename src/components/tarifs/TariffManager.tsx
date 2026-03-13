@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback, type KeyboardEvent } from 'react'
-import { Plus, MoreHorizontal, Eye, EyeOff, Lock, Star, Copy, Pencil, Archive, Trash2, Scale, ChevronDown, ChevronRight } from 'lucide-react'
-import { useTariffStore } from '@/store/tariffs'
-import type { TariffGroup, TariffItem } from '@/types/tariffs'
+import { Plus, MoreHorizontal, Eye, EyeOff, Lock, Star, Copy, Pencil, Archive, Trash2, Scale, ChevronDown, ChevronRight, Sliders } from 'lucide-react'
+import { useTariffStore, type DuplicateOptions } from '@/store/tariffs'
+import type { TariffGroup, TariffItem, TariffCategory } from '@/types/tariffs'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -37,39 +37,85 @@ function useOutsideClick(handler: () => void) {
   return ref
 }
 
-// ─── Modal ────────────────────────────────────────────────────────────────────
+const ROUND_OPTIONS = [
+  { value: 0,    label: 'Aucun' },
+  { value: 0.05, label: '0,05 €' },
+  { value: 0.10, label: '0,10 €' },
+  { value: 0.50, label: '0,50 €' },
+  { value: 1.00, label: '1,00 €' },
+]
 
-interface ModalProps {
+const modalOverlay: React.CSSProperties = {
+  position: 'fixed', inset: 0, zIndex: 50,
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  background: 'rgba(15,23,42,0.4)', backdropFilter: 'blur(2px)',
+}
+const modalBox = (width: number): React.CSSProperties => ({
+  width, maxHeight: '90vh', overflowY: 'auto',
+  background: '#fff', borderRadius: 14,
+  border: '1px solid var(--border)',
+  boxShadow: '0 20px 40px rgba(0,0,0,0.12)',
+  padding: 28,
+})
+const inputBase: React.CSSProperties = {
+  width: '100%', padding: '8px 11px', borderRadius: 8,
+  border: '1px solid var(--border)', fontSize: 13,
+  color: 'var(--gray-900)', outline: 'none', boxSizing: 'border-box',
+}
+const labelSm: React.CSSProperties = {
+  display: 'block', fontSize: 11, fontWeight: 700,
+  color: 'var(--gray-500)', textTransform: 'uppercase' as const,
+  letterSpacing: '0.06em', marginBottom: 10,
+}
+const divider: React.CSSProperties = { height: 1, background: 'var(--border)', margin: '20px -28px' }
+
+function RoundPills({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  return (
+    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+      {ROUND_OPTIONS.map((r) => (
+        <button key={r.value} onClick={() => onChange(r.value)} style={{
+          padding: '5px 12px', borderRadius: 20, fontSize: 12, fontWeight: 500, cursor: 'pointer',
+          border: `1px solid ${value === r.value ? 'var(--primary)' : 'var(--border)'}`,
+          background: value === r.value ? 'var(--primary-light)' : '#fff',
+          color: value === r.value ? 'var(--primary)' : 'var(--gray-600)',
+          transition: 'all 120ms',
+        }}>
+          {r.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+// ─── Modal Créer/Renommer groupe ──────────────────────────────────────────────
+
+interface GroupModalProps {
   title: string; subtitle?: string; onClose: () => void
   onConfirm: (name: string, description?: string) => void
   confirmLabel?: string; initialName?: string; initialDesc?: string
 }
 
-function GroupModal({ title, subtitle, onClose, onConfirm, confirmLabel = 'Créer', initialName = '', initialDesc = '' }: ModalProps) {
+function GroupModal({ title, subtitle, onClose, onConfirm, confirmLabel = 'Créer', initialName = '', initialDesc = '' }: GroupModalProps) {
   const [name, setName] = useState(initialName)
   const [desc, setDesc] = useState(initialDesc)
   const inputRef = useRef<HTMLInputElement>(null)
   useEffect(() => { inputRef.current?.focus() }, [])
-
   function submit() { if (name.trim()) { onConfirm(name.trim(), desc.trim() || undefined); onClose() } }
 
   return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(15,23,42,0.4)', backdropFilter: 'blur(2px)' }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ width: 460, background: '#fff', borderRadius: 14, border: '1px solid var(--border)', boxShadow: '0 20px 40px rgba(0,0,0,0.12)', padding: 28 }}>
+    <div onClick={onClose} style={modalOverlay}>
+      <div onClick={(e) => e.stopPropagation()} style={modalBox(460)}>
         <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--gray-900)', marginBottom: subtitle ? 4 : 20 }}>{title}</h2>
         {subtitle && <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>{subtitle}</p>}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 24 }}>
           <div>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--gray-700)', marginBottom: 6 }}>Nom du groupe *</label>
             <input ref={inputRef} value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e: KeyboardEvent) => e.key === 'Enter' && submit()}
-              style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid var(--border)', fontSize: 13, color: 'var(--gray-900)', outline: 'none', boxSizing: 'border-box' }}
-              placeholder="ex: On se fait plaisir" />
+              style={inputBase} placeholder="ex: On se fait plaisir" />
           </div>
           <div>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--gray-700)', marginBottom: 6 }}>Description</label>
-            <input value={desc} onChange={(e) => setDesc(e.target.value)}
-              style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid var(--border)', fontSize: 13, color: 'var(--gray-900)', outline: 'none', boxSizing: 'border-box' }}
-              placeholder="Optionnel" />
+            <input value={desc} onChange={(e) => setDesc(e.target.value)} style={inputBase} placeholder="Optionnel" />
           </div>
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
@@ -85,27 +131,285 @@ function GroupModal({ title, subtitle, onClose, onConfirm, confirmLabel = 'Crée
   )
 }
 
-function DuplicateModal({ source, onClose, onConfirm }: { source: TariffGroup; onClose: () => void; onConfirm: (sourceId: string, newName: string) => void }) {
+// ─── Modal Dupliquer ──────────────────────────────────────────────────────────
+
+interface DupState {
+  adjustType: 'none' | 'global' | 'per_category'
+  modType: 'percent' | 'flat'
+  globalVal: string
+  catVals: Record<string, string>
+  roundTo: number
+}
+
+function DuplicateModal({ source, onClose, onConfirm }: {
+  source: TariffGroup
+  onClose: () => void
+  onConfirm: (sourceId: string, newName: string, options: DuplicateOptions) => void
+}) {
+  const { categories } = useTariffStore()
   const [name, setName] = useState(`${source.name} (copie)`)
+  const [dup, setDup] = useState<DupState>({
+    adjustType: 'none',
+    modType: 'percent',
+    globalVal: '',
+    catVals: Object.fromEntries(categories.map((c) => [c.id, ''])),
+    roundTo: 0,
+  })
   const inputRef = useRef<HTMLInputElement>(null)
   useEffect(() => { inputRef.current?.focus(); inputRef.current?.select() }, [])
-  function submit() { if (name.trim()) { onConfirm(source.id, name.trim()); onClose() } }
+
+  function setD<K extends keyof DupState>(k: K, v: DupState[K]) { setDup((p) => ({ ...p, [k]: v })) }
+
+  function submit() {
+    if (!name.trim()) return
+    const parse = (s: string) => parseFloat(s.replace(',', '.')) || 0
+    const options: DuplicateOptions = {
+      adjustType: dup.adjustType,
+      modifierType: dup.modType,
+      globalValue: parse(dup.globalVal),
+      perCategory: Object.fromEntries(Object.entries(dup.catVals).map(([k, v]) => [k, parse(v)])),
+      roundTo: dup.roundTo,
+    }
+    onConfirm(source.id, name.trim(), options)
+    onClose()
+  }
+
+  const typeLabel = dup.modType === 'percent' ? '%' : '€'
+  const adjustTypes: { key: DupState['adjustType']; label: string }[] = [
+    { key: 'none', label: 'Copie exacte' },
+    { key: 'global', label: 'Global' },
+    { key: 'per_category', label: 'Par catégorie' },
+  ]
+
   return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(15,23,42,0.4)', backdropFilter: 'blur(2px)' }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ width: 460, background: '#fff', borderRadius: 14, border: '1px solid var(--border)', boxShadow: '0 20px 40px rgba(0,0,0,0.12)', padding: 28 }}>
-        <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--gray-900)', marginBottom: 4 }}>Dupliquer &quot;{source.name}&quot;</h2>
-        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>Tous les items et prix seront copiés à l&apos;identique.</p>
+    <div onClick={onClose} style={modalOverlay}>
+      <div onClick={(e) => e.stopPropagation()} style={modalBox(520)}>
+
+        {/* Header */}
+        <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--gray-900)', marginBottom: 4 }}>
+          Dupliquer &quot;{source.name}&quot;
+        </h2>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>
+          Créez une variante de cette grille tarifaire avec des prix ajustés.
+        </p>
+
+        {/* Nom */}
         <div style={{ marginBottom: 20 }}>
-          <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--gray-700)', marginBottom: 6 }}>Nom du nouveau groupe</label>
-          <input ref={inputRef} value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e: KeyboardEvent) => e.key === 'Enter' && submit()}
-            style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid var(--border)', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--gray-700)', marginBottom: 6 }}>Nom du nouveau groupe *</label>
+          <input ref={inputRef} value={name} onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e: KeyboardEvent) => e.key === 'Enter' && submit()} style={inputBase} />
         </div>
-        <div style={{ padding: '10px 12px', borderRadius: 8, background: 'var(--primary-light)', border: '1px solid #d0e4f5', marginBottom: 24, fontSize: 12, color: 'var(--gray-600)' }}>
-          💡 Options d&apos;ajustement (+X% global/catégorie) disponibles au Sprint 2
+
+        <div style={divider} />
+
+        {/* Section ajustement */}
+        <p style={labelSm}>Ajustement des prix</p>
+
+        {/* Radio type */}
+        <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+          {adjustTypes.map(({ key, label }) => (
+            <button key={key} onClick={() => setD('adjustType', key)} style={{
+              flex: 1, padding: '8px 12px', borderRadius: 8, cursor: 'pointer',
+              border: `1px solid ${dup.adjustType === key ? 'var(--primary)' : 'var(--border)'}`,
+              background: dup.adjustType === key ? 'var(--primary-light)' : '#fff',
+              fontSize: 12, fontWeight: dup.adjustType === key ? 700 : 500,
+              color: dup.adjustType === key ? 'var(--primary)' : 'var(--gray-600)',
+              transition: 'all 120ms',
+            }}>
+              {label}
+            </button>
+          ))}
         </div>
+
+        {/* Global */}
+        {dup.adjustType === 'global' && (
+          <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginBottom: 16 }}>
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--gray-700)', marginBottom: 6 }}>
+                Valeur <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(+ augmentation · – réduction)</span>
+              </label>
+              <input value={dup.globalVal} onChange={(e) => setD('globalVal', e.target.value)}
+                type="number" step="0.01" placeholder={dup.modType === 'percent' ? 'ex: 10 ou -15' : 'ex: 0.10 ou -5'}
+                style={{ ...inputBase, width: '100%' }} />
+            </div>
+            <select value={dup.modType} onChange={(e) => setD('modType', e.target.value as 'percent' | 'flat')}
+              style={{ padding: '8px 11px', borderRadius: 8, border: '1px solid var(--border)', fontSize: 13, color: 'var(--gray-700)', background: '#fff', cursor: 'pointer', outline: 'none', flexShrink: 0 }}>
+              <option value="percent">%</option>
+              <option value="flat">€ (flat)</option>
+            </select>
+          </div>
+        )}
+
+        {/* Par catégorie */}
+        {dup.adjustType === 'per_category' && (
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+              <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-700)' }}>
+                Valeur par catégorie <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(+ / –)</span>
+              </label>
+              <select value={dup.modType} onChange={(e) => setD('modType', e.target.value as 'percent' | 'flat')}
+                style={{ padding: '5px 8px', borderRadius: 7, border: '1px solid var(--border)', fontSize: 12, color: 'var(--gray-700)', background: '#fff', cursor: 'pointer', outline: 'none' }}>
+                <option value="percent">%</option>
+                <option value="flat">€ (flat)</option>
+              </select>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {[...categories].sort((a, b) => a.sortOrder - b.sortOrder).map((cat) => (
+                <div key={cat.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ flex: 1, fontSize: 13, color: 'var(--gray-700)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {cat.label}
+                  </span>
+                  <div style={{ position: 'relative', flexShrink: 0 }}>
+                    <input
+                      value={dup.catVals[cat.id] ?? ''}
+                      onChange={(e) => setD('catVals', { ...dup.catVals, [cat.id]: e.target.value })}
+                      type="number" step="0.01" placeholder="0"
+                      style={{ width: 90, padding: '6px 30px 6px 10px', borderRadius: 7, border: '1px solid var(--border)', fontSize: 13, color: 'var(--gray-900)', outline: 'none', textAlign: 'right' }} />
+                    <span style={{ position: 'absolute', right: 9, top: '50%', transform: 'translateY(-50%)', fontSize: 12, color: 'var(--gray-400)', pointerEvents: 'none' }}>
+                      {typeLabel}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div style={divider} />
+
+        {/* Section arrondi */}
+        <p style={labelSm}>Arrondi après calcul</p>
+        <div style={{ marginBottom: 24 }}>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>
+            Arrondir les prix au plus proche de :
+          </p>
+          <RoundPills value={dup.roundTo} onChange={(v) => setD('roundTo', v)} />
+        </div>
+
+        {/* Actions */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-          <button onClick={onClose} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border)', background: '#fff', fontSize: 13, fontWeight: 500, color: 'var(--gray-600)', cursor: 'pointer' }}>Annuler</button>
-          <button onClick={submit} disabled={!name.trim()} style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: 'var(--primary)', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer' }}>Dupliquer →</button>
+          <button onClick={onClose} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border)', background: '#fff', fontSize: 13, fontWeight: 500, color: 'var(--gray-600)', cursor: 'pointer' }}>
+            Annuler
+          </button>
+          <button onClick={submit} disabled={!name.trim()} style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: name.trim() ? 'var(--primary)' : 'var(--gray-200)', fontSize: 13, fontWeight: 600, color: name.trim() ? '#fff' : 'var(--gray-400)', cursor: name.trim() ? 'pointer' : 'default' }}>
+            Dupliquer →
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Modal Ajustement en masse ────────────────────────────────────────────────
+
+function BulkAdjustModal({ group, onClose }: { group: TariffGroup; onClose: () => void }) {
+  const { categories, items, applyBulkAdjustment } = useTariffStore()
+  const [catTarget, setCatTarget] = useState('all')
+  const [modType, setModType] = useState<'percent' | 'flat'>('percent')
+  const [rawVal, setRawVal] = useState('')
+  const [roundTo, setRoundTo] = useState(0)
+
+  const value = parseFloat(rawVal.replace(',', '.')) || 0
+  const hasAction = value !== 0 || roundTo > 0
+
+  const targetItems = items.filter((i) => {
+    if (i.groupId !== group.id) return false
+    if (catTarget !== 'all' && i.categoryId !== catTarget) return false
+    return i.priceType === 'fixed' && i.price !== null
+  })
+
+  // Aperçu sur le premier item éligible
+  const firstItem = targetItems[0]
+  let previewAfter: number | null = null
+  if (firstItem?.price != null && hasAction) {
+    let adj = firstItem.price
+    if (value !== 0) adj = modType === 'percent' ? adj * (1 + value / 100) : adj + value
+    if (roundTo > 0) adj = Math.round(adj / roundTo) * roundTo
+    previewAfter = Math.max(0, Math.round(adj * 100) / 100)
+  }
+
+  function apply() {
+    if (!hasAction) return
+    applyBulkAdjustment(group.id, modType, value, roundTo, catTarget === 'all' ? undefined : catTarget)
+    onClose()
+  }
+
+  return (
+    <div onClick={onClose} style={modalOverlay}>
+      <div onClick={(e) => e.stopPropagation()} style={modalBox(460)}>
+
+        <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--gray-900)', marginBottom: 4 }}>
+          Ajuster les prix
+        </h2>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>
+          Applique un ajustement à la grille &quot;{group.name}&quot;.
+        </p>
+
+        {/* Cible */}
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--gray-700)', marginBottom: 6 }}>Appliquer à</label>
+          <select value={catTarget} onChange={(e) => setCatTarget(e.target.value)}
+            style={{ ...inputBase, cursor: 'pointer' }}>
+            <option value="all">Toutes les catégories</option>
+            {[...categories].sort((a, b) => a.sortOrder - b.sortOrder).map((c) => (
+              <option key={c.id} value={c.id}>{c.label}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Ajustement */}
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--gray-700)', marginBottom: 6 }}>
+            Ajustement <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(+ augmentation · – réduction)</span>
+          </label>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input value={rawVal} onChange={(e) => setRawVal(e.target.value)}
+              type="number" step="0.01"
+              placeholder={modType === 'percent' ? 'ex: 10 ou -15' : 'ex: 0.10 ou -5'}
+              style={{ ...inputBase, flex: 1 }} />
+            <select value={modType} onChange={(e) => setModType(e.target.value as 'percent' | 'flat')}
+              style={{ padding: '8px 11px', borderRadius: 8, border: '1px solid var(--border)', fontSize: 13, color: 'var(--gray-700)', background: '#fff', cursor: 'pointer', outline: 'none', flexShrink: 0 }}>
+              <option value="percent">%</option>
+              <option value="flat">€ (flat)</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Arrondi */}
+        <div style={{ marginBottom: 20 }}>
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--gray-700)', marginBottom: 8 }}>
+            Arrondi après calcul
+          </label>
+          <RoundPills value={roundTo} onChange={setRoundTo} />
+        </div>
+
+        {/* Aperçu */}
+        <div style={{ padding: '12px 14px', borderRadius: 8, background: 'var(--gray-50)', border: '1px solid var(--border)', marginBottom: 24 }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--gray-500)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Aperçu</p>
+          {hasAction ? (
+            <p style={{ fontSize: 13, color: 'var(--gray-700)' }}>
+              <strong>{targetItems.length}</strong> prix fixes seront modifiés
+              {firstItem?.price != null && previewAfter !== null && (
+                <> · ex:{' '}
+                  <span style={{ fontFamily: 'monospace' }}>{formatPrice(firstItem.price, 'fixed')}</span>
+                  {' → '}
+                  <strong style={{ color: 'var(--primary)', fontFamily: 'monospace' }}>{formatPrice(previewAfter, 'fixed')}</strong>
+                </>
+              )}
+            </p>
+          ) : (
+            <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>Configurez un ajustement ou un arrondi ci-dessus.</p>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+          <button onClick={onClose} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border)', background: '#fff', fontSize: 13, fontWeight: 500, color: 'var(--gray-600)', cursor: 'pointer' }}>
+            Annuler
+          </button>
+          <button onClick={apply} disabled={!hasAction} style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: hasAction ? 'var(--primary)' : 'var(--gray-200)', fontSize: 13, fontWeight: 600, color: hasAction ? '#fff' : 'var(--gray-400)', cursor: hasAction ? 'pointer' : 'default' }}>
+            Appliquer
+          </button>
         </div>
       </div>
     </div>
@@ -137,7 +441,7 @@ function GroupDropdown({ group, onRename, onDuplicate, onArchive, onDelete, onSe
         <MoreHorizontal size={14} />
       </button>
       {open && (
-        <div style={{ position: 'absolute', right: 0, top: 30, zIndex: 40, width: 180, background: '#fff', border: '1px solid var(--border)', borderRadius: 10, boxShadow: '0 8px 24px rgba(0,0,0,0.1)', padding: '4px', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', right: 0, top: 30, zIndex: 40, width: 190, background: '#fff', border: '1px solid var(--border)', borderRadius: 10, boxShadow: '0 8px 24px rgba(0,0,0,0.1)', padding: 4, overflow: 'hidden' }}>
           {actions.map(({ icon: Icon, label, fn, danger }) => (
             <button key={label} onClick={() => { fn(); setOpen(false) }}
               style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '8px 10px', border: 'none', background: 'transparent', fontSize: 13, fontWeight: 500, color: danger ? '#e11d48' : 'var(--gray-700)', borderRadius: 6, cursor: 'pointer', textAlign: 'left' }}>
@@ -173,7 +477,6 @@ function PriceCell({ item }: { item: TariffItem }) {
   }
 
   const isSpecial = item.priceType === 'tbd' || item.priceType === 'quote'
-  const formatted = formatPrice(item.price, item.priceType)
 
   if (editing) {
     return (
@@ -185,8 +488,7 @@ function PriceCell({ item }: { item: TariffItem }) {
   }
 
   return (
-    <span onClick={startEdit}
-      title={!isSpecial ? 'Cliquer pour modifier' : undefined}
+    <span onClick={startEdit} title={!isSpecial ? 'Cliquer pour modifier' : undefined}
       style={{
         fontSize: 13, fontFamily: 'ui-monospace, monospace',
         color: isSpecial ? 'var(--gray-400)' : 'var(--gray-800)',
@@ -195,9 +497,8 @@ function PriceCell({ item }: { item: TariffItem }) {
         cursor: isSpecial ? 'default' : 'pointer',
         padding: '2px 4px', borderRadius: 4,
         transition: 'background 150ms',
-      }}
-    >
-      {formatted}
+      }}>
+      {formatPrice(item.price, item.priceType)}
     </span>
   )
 }
@@ -265,6 +566,7 @@ function ItemsPanel() {
   const { groups, items, categories, selectedGroupId, duplicateGroup, renameGroup, archiveGroup, deleteGroup, setDefaultGroup } = useTariffStore()
   const [showDuplicateModal, setShowDuplicateModal] = useState(false)
   const [showRenameModal, setShowRenameModal] = useState(false)
+  const [showBulkModal, setShowBulkModal] = useState(false)
   const [search, setSearch] = useState('')
   const [catFilter, setCatFilter] = useState('all')
 
@@ -301,7 +603,12 @@ function ItemsPanel() {
           {group.description && <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{group.description}</p>}
         </div>
         <span style={{ fontSize: 12, color: 'var(--gray-400)', flexShrink: 0 }}>{visibleCount}/{groupItems.length} actifs · {group.usedCount}× utilisé</span>
-        <GroupDropdown group={group} onRename={() => setShowRenameModal(true)} onDuplicate={() => setShowDuplicateModal(true)} onArchive={() => archiveGroup(group.id)} onDelete={() => deleteGroup(group.id)} onSetDefault={() => setDefaultGroup(group.id)} />
+        <GroupDropdown group={group}
+          onRename={() => setShowRenameModal(true)}
+          onDuplicate={() => setShowDuplicateModal(true)}
+          onArchive={() => archiveGroup(group.id)}
+          onDelete={() => deleteGroup(group.id)}
+          onSetDefault={() => setDefaultGroup(group.id)} />
       </div>
 
       {/* Toolbar */}
@@ -309,11 +616,17 @@ function ItemsPanel() {
         <select value={catFilter} onChange={(e) => setCatFilter(e.target.value)}
           style={{ padding: '6px 10px', borderRadius: 7, border: '1px solid var(--border)', fontSize: 12, fontWeight: 500, color: 'var(--gray-700)', background: '#fff', cursor: 'pointer', outline: 'none' }}>
           <option value="all">Toutes catégories</option>
-          {categories.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+          {[...categories].sort((a, b) => a.sortOrder - b.sortOrder).map((c) => (
+            <option key={c.id} value={c.id}>{c.label}</option>
+          ))}
         </select>
         <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher un item…"
           style={{ flex: 1, maxWidth: 280, padding: '6px 10px', borderRadius: 7, border: '1px solid var(--border)', fontSize: 12, color: 'var(--gray-700)', background: '#fff', outline: 'none' }} />
-        <div style={{ marginLeft: 'auto' }}>
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+          <button onClick={() => setShowBulkModal(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 13px', borderRadius: 7, border: '1px solid var(--border)', background: '#fff', color: 'var(--gray-600)', fontSize: 12, fontWeight: 500, cursor: 'pointer' }}>
+            <Sliders size={13} /> Ajuster les prix
+          </button>
           <button style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 13px', borderRadius: 7, border: 'none', background: 'var(--primary)', color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
             <Plus size={13} /> Item
           </button>
@@ -323,7 +636,7 @@ function ItemsPanel() {
       {/* Items table */}
       <div style={{ flex: 1, overflowY: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          {categories.sort((a, b) => a.sortOrder - b.sortOrder).map((cat) => {
+          {[...categories].sort((a, b) => a.sortOrder - b.sortOrder).map((cat) => {
             const catItems = filteredItems.filter((i) => i.categoryId === cat.id)
             if (catItems.length === 0) return null
             return <CategorySection key={cat.id} categoryId={cat.id} label={cat.label} items={catItems} />
@@ -331,8 +644,15 @@ function ItemsPanel() {
         </table>
       </div>
 
-      {showDuplicateModal && <DuplicateModal source={group} onClose={() => setShowDuplicateModal(false)} onConfirm={duplicateGroup} />}
-      {showRenameModal && <GroupModal title={`Renommer "${group.name}"`} onClose={() => setShowRenameModal(false)} onConfirm={(n, d) => renameGroup(group.id, n, d)} confirmLabel="Enregistrer" initialName={group.name} initialDesc={group.description ?? ''} />}
+      {showDuplicateModal && (
+        <DuplicateModal source={group} onClose={() => setShowDuplicateModal(false)} onConfirm={duplicateGroup} />
+      )}
+      {showRenameModal && (
+        <GroupModal title={`Renommer "${group.name}"`} onClose={() => setShowRenameModal(false)} onConfirm={(n, d) => renameGroup(group.id, n, d)} confirmLabel="Enregistrer" initialName={group.name} initialDesc={group.description ?? ''} />
+      )}
+      {showBulkModal && (
+        <BulkAdjustModal group={group} onClose={() => setShowBulkModal(false)} />
+      )}
     </div>
   )
 }
@@ -402,9 +722,15 @@ function GroupPanel() {
         </button>
       </div>
 
-      {showCreateModal && <GroupModal title="Nouveau groupe tarifaire" onClose={() => setShowCreateModal(false)} onConfirm={createGroup} confirmLabel="Créer le groupe" />}
-      {duplicateTarget && <DuplicateModal source={duplicateTarget} onClose={() => setDuplicateTarget(null)} onConfirm={duplicateGroup} />}
-      {renameTarget && <GroupModal title={`Renommer "${renameTarget.name}"`} onClose={() => setRenameTarget(null)} onConfirm={(n, d) => renameGroup(renameTarget.id, n, d)} confirmLabel="Enregistrer" initialName={renameTarget.name} initialDesc={renameTarget.description ?? ''} />}
+      {showCreateModal && (
+        <GroupModal title="Nouveau groupe tarifaire" onClose={() => setShowCreateModal(false)} onConfirm={createGroup} confirmLabel="Créer le groupe" />
+      )}
+      {duplicateTarget && (
+        <DuplicateModal source={duplicateTarget} onClose={() => setDuplicateTarget(null)} onConfirm={duplicateGroup} />
+      )}
+      {renameTarget && (
+        <GroupModal title={`Renommer "${renameTarget.name}"`} onClose={() => setRenameTarget(null)} onConfirm={(n, d) => renameGroup(renameTarget.id, n, d)} confirmLabel="Enregistrer" initialName={renameTarget.name} initialDesc={renameTarget.description ?? ''} />
+      )}
     </div>
   )
 }
@@ -413,7 +739,7 @@ function GroupPanel() {
 
 export function TariffManager() {
   return (
-    <div style={{ flex: 1, display: 'flex', overflow: 'hidden', background: '#fff', borderRadius: '0 0 0 0' }}>
+    <div style={{ flex: 1, display: 'flex', overflow: 'hidden', background: '#fff' }}>
       <GroupPanel />
       <ItemsPanel />
     </div>

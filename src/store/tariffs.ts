@@ -7,6 +7,40 @@ export const CATEGORIES: TariffCategory[] = [
   { id: 'frais_activite', label: "Frais mensuels liés à l'activité", description: 'Facturés selon les volumes', sortOrder: 3 },
 ]
 
+// ── Options de duplication ────────────────────────────────────────────────────
+
+export interface DuplicateOptions {
+  adjustType: 'none' | 'global' | 'per_category'
+  modifierType: 'percent' | 'flat'
+  globalValue: number
+  perCategory: Record<string, number>
+  roundTo: number
+}
+
+// ── Helpers prix ─────────────────────────────────────────────────────────────
+
+function applyRounding(price: number, roundTo: number): number {
+  if (roundTo <= 0) return Math.round(price * 100) / 100
+  return Math.round(price / roundTo) * roundTo
+}
+
+function processPrice(
+  price: number | null,
+  type: 'percent' | 'flat',
+  value: number,
+  roundTo: number,
+): number | null {
+  if (price === null) return null
+  let adjusted = price
+  if (value !== 0) {
+    adjusted = type === 'percent' ? price * (1 + value / 100) : price + value
+  }
+  const result = applyRounding(Math.max(0, adjusted), roundTo)
+  return result
+}
+
+// ── Données de base ───────────────────────────────────────────────────────────
+
 type BaseItem = Omit<TariffItem, 'id' | 'groupId'>
 
 const BASE_ITEMS: BaseItem[] = [
@@ -61,22 +95,34 @@ const INITIAL_ITEMS: TariffItem[] = [
   ...createItems('on-se-fait-plaisir', 1.3),
 ]
 
+// ── Store ─────────────────────────────────────────────────────────────────────
+
 interface TariffStore {
   groups: TariffGroup[]
   items: TariffItem[]
   categories: TariffCategory[]
   selectedGroupId: string
-  // Actions
+  // Navigation
   selectGroup: (id: string) => void
+  // Groupes
   createGroup: (name: string, description?: string) => void
-  duplicateGroup: (sourceId: string, newName: string) => void
-  updateItemPrice: (itemId: string, price: number | null) => void
-  setItemPriceType: (itemId: string, priceType: TariffItem['priceType']) => void
-  toggleItemVisibility: (itemId: string) => void
+  duplicateGroup: (sourceId: string, newName: string, options?: DuplicateOptions) => void
   renameGroup: (id: string, name: string, description?: string) => void
   archiveGroup: (id: string) => void
   deleteGroup: (id: string) => void
   setDefaultGroup: (id: string) => void
+  // Items
+  updateItemPrice: (itemId: string, price: number | null) => void
+  setItemPriceType: (itemId: string, priceType: TariffItem['priceType']) => void
+  toggleItemVisibility: (itemId: string) => void
+  // Ajustements en masse
+  applyBulkAdjustment: (
+    groupId: string,
+    type: 'percent' | 'flat',
+    value: number,
+    roundTo: number,
+    categoryId?: string,
+  ) => void
 }
 
 export const useTariffStore = create<TariffStore>((set, get) => ({
@@ -90,18 +136,54 @@ export const useTariffStore = create<TariffStore>((set, get) => ({
   createGroup: (name, description) => {
     const id = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now()
     const newGroup: TariffGroup = {
-      id,
-      name,
-      description,
-      baseGroupId: null,
-      isDefault: false,
-      isArchived: false,
-      isLocked: false,
-      usedCount: 0,
+      id, name, description,
+      baseGroupId: null, isDefault: false, isArchived: false, isLocked: false, usedCount: 0,
       createdAt: new Date().toISOString().split('T')[0],
       updatedAt: new Date().toISOString().split('T')[0],
     }
-    const newItems = createItems(id, 1)
+    set((s) => ({
+      groups: [...s.groups, newGroup],
+      items: [...s.items, ...createItems(id, 1)],
+      selectedGroupId: id,
+    }))
+  },
+
+  duplicateGroup: (sourceId, newName, options) => {
+    const {
+      adjustType = 'none',
+      modifierType = 'percent',
+      globalValue = 0,
+      perCategory = {},
+      roundTo = 0,
+    } = options ?? {}
+
+    const id = newName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now()
+    const source = get().groups.find((g) => g.id === sourceId)
+    if (!source) return
+
+    const newGroup: TariffGroup = {
+      ...source, id, name: newName,
+      baseGroupId: sourceId, isDefault: false, isLocked: false, usedCount: 0,
+      createdAt: new Date().toISOString().split('T')[0],
+      updatedAt: new Date().toISOString().split('T')[0],
+    }
+
+    const sourceItems = get().items.filter((i) => i.groupId === sourceId)
+    const newItems: TariffItem[] = sourceItems.map((item, idx) => {
+      let newPrice = item.price
+      if (item.priceType === 'fixed') {
+        if (adjustType === 'global') {
+          newPrice = processPrice(item.price, modifierType, globalValue, roundTo)
+        } else if (adjustType === 'per_category') {
+          const catVal = perCategory[item.categoryId] ?? 0
+          newPrice = processPrice(item.price, modifierType, catVal, roundTo)
+        } else if (roundTo > 0 && item.price !== null) {
+          newPrice = applyRounding(item.price, roundTo)
+        }
+      }
+      return { ...item, id: `${id}-item-${idx}`, groupId: id, price: newPrice }
+    })
+
     set((s) => ({
       groups: [...s.groups, newGroup],
       items: [...s.items, ...newItems],
@@ -109,31 +191,18 @@ export const useTariffStore = create<TariffStore>((set, get) => ({
     }))
   },
 
-  duplicateGroup: (sourceId, newName) => {
-    const id = newName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now()
-    const source = get().groups.find((g) => g.id === sourceId)
-    if (!source) return
-    const newGroup: TariffGroup = {
-      ...source,
-      id,
-      name: newName,
-      baseGroupId: sourceId,
-      isDefault: false,
-      isLocked: false,
-      usedCount: 0,
-      createdAt: new Date().toISOString().split('T')[0],
-      updatedAt: new Date().toISOString().split('T')[0],
-    }
-    const sourceItems = get().items.filter((i) => i.groupId === sourceId)
-    const newItems: TariffItem[] = sourceItems.map((item, idx) => ({
-      ...item,
-      id: `${id}-item-${idx}`,
-      groupId: id,
-    }))
+  applyBulkAdjustment: (groupId, type, value, roundTo, categoryId) => {
+    const today = new Date().toISOString().split('T')[0]
     set((s) => ({
-      groups: [...s.groups, newGroup],
-      items: [...s.items, ...newItems],
-      selectedGroupId: id,
+      items: s.items.map((item) => {
+        if (item.groupId !== groupId) return item
+        if (categoryId && item.categoryId !== categoryId) return item
+        if (item.priceType !== 'fixed' || item.price === null) return item
+        return { ...item, price: processPrice(item.price, type, value, roundTo) }
+      }),
+      groups: s.groups.map((g) =>
+        g.id === groupId ? { ...g, updatedAt: today } : g
+      ),
     }))
   },
 
@@ -168,14 +237,18 @@ export const useTariffStore = create<TariffStore>((set, get) => ({
   archiveGroup: (id) =>
     set((s) => ({
       groups: s.groups.map((g) => (g.id === id ? { ...g, isArchived: !g.isArchived } : g)),
-      selectedGroupId: s.selectedGroupId === id ? s.groups.find((g) => !g.isArchived && g.id !== id)?.id ?? '' : s.selectedGroupId,
+      selectedGroupId: s.selectedGroupId === id
+        ? s.groups.find((g) => !g.isArchived && g.id !== id)?.id ?? ''
+        : s.selectedGroupId,
     })),
 
   deleteGroup: (id) =>
     set((s) => ({
       groups: s.groups.filter((g) => g.id !== id),
       items: s.items.filter((i) => i.groupId !== id),
-      selectedGroupId: s.selectedGroupId === id ? s.groups.find((g) => g.id !== id)?.id ?? '' : s.selectedGroupId,
+      selectedGroupId: s.selectedGroupId === id
+        ? s.groups.find((g) => g.id !== id)?.id ?? ''
+        : s.selectedGroupId,
     })),
 
   setDefaultGroup: (id) =>

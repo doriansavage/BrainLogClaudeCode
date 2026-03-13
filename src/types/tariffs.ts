@@ -24,6 +24,14 @@ export interface TariffCategory {
   sortOrder: number
 }
 
+export interface TariffSnapshot {
+  id: string
+  groupId: string
+  label: string
+  items: TariffItem[]
+  createdAt: string // ISO datetime
+}
+
 export interface TariffGroup {
   id: string
   name: string

@@ -1,391 +1,200 @@
-import {
-  Users,
-  FileText,
-  Clock,
-  CheckCircle2,
-  Plus,
-  Link2,
-  BarChart3,
-  ArrowRight,
-} from 'lucide-react'
+import { Users, FileText, Clock, CheckCircle2, Plus, Link2, BarChart3, ArrowRight, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 
 const kpis = [
-  {
-    label: 'Prospects actifs',
-    value: '12',
-    icon: Users,
-    color: 'var(--primary)',
-  },
-  {
-    label: 'Offres générées',
-    value: '34',
-    icon: FileText,
-    color: '#6366f1',
-  },
-  {
-    label: 'En attente',
-    value: '5',
-    icon: Clock,
-    color: '#f59e0b',
-  },
-  {
-    label: 'Acceptées',
-    value: '8',
-    icon: CheckCircle2,
-    color: '#10b981',
-  },
+  { label: 'Prospects actifs', value: '12', delta: '+3 ce mois', icon: Users, iconBg: '#EEF4FB', iconColor: '#094D80' },
+  { label: 'Offres générées', value: '34', delta: '+8 ce mois', icon: FileText, iconBg: '#F0FDF4', iconColor: '#16a34a' },
+  { label: 'En attente', value: '5', delta: '2 urgents', icon: Clock, iconBg: '#FFFBEB', iconColor: '#d97706' },
+  { label: 'Offres acceptées', value: '8', delta: '76% taux', icon: CheckCircle2, iconBg: '#FFF1F2', iconColor: '#e11d48' },
 ]
 
-const recentActivity = [
-  {
-    id: 1,
-    text: 'Acme SRL a rempli son questionnaire',
-    time: 'il y a 2h',
-    type: 'questionnaire',
-  },
-  {
-    id: 2,
-    text: 'Offre générée pour Shop BV',
-    time: 'il y a 5h',
-    type: 'offer',
-  },
-  {
-    id: 3,
-    text: 'Offre acceptée par Mode & Co',
-    time: 'hier',
-    type: 'accepted',
-  },
-  {
-    id: 4,
-    text: 'Lien envoyé à Luxe Retail',
-    time: 'hier',
-    type: 'link',
-  },
-  {
-    id: 5,
-    text: 'Nouveau prospect créé : BeautyBox',
-    time: 'il y a 2j',
-    type: 'new',
-  },
+const activity = [
+  { id: 1, text: 'Acme SRL a rempli son questionnaire', time: 'il y a 2h', dot: '#094D80' },
+  { id: 2, text: 'Offre générée pour Shop BV', time: 'il y a 5h', dot: '#16a34a' },
+  { id: 3, text: 'Offre acceptée par Mode & Co', time: 'hier', dot: '#16a34a' },
+  { id: 4, text: 'Lien questionnaire envoyé à Luxe Retail', time: 'hier', dot: '#d97706' },
+  { id: 5, text: 'Nouveau prospect créé : BeautyBox', time: 'il y a 2j', dot: '#94a3b8' },
 ]
 
-const recentProspects = [
-  {
-    id: 1,
-    name: 'Acme SRL',
-    sector: 'Mode',
-    date: '13/03',
-    status: 'Répondu',
-    group: 'Standard',
-    statusColor: '#6366f1',
-  },
-  {
-    id: 2,
-    name: 'Shop BV',
-    sector: 'Beauté',
-    date: '12/03',
-    status: 'Offre générée',
-    group: 'Pâquerettes',
-    statusColor: '#f59e0b',
-  },
-  {
-    id: 3,
-    name: 'Mode & Co',
-    sector: 'Mode',
-    date: '11/03',
-    status: 'Acceptée',
-    group: 'Standard',
-    statusColor: '#10b981',
-  },
-  {
-    id: 4,
-    name: 'Luxe Retail',
-    sector: 'Luxe',
-    date: '10/03',
-    status: 'Lien envoyé',
-    group: '—',
-    statusColor: 'var(--charcoal)',
-  },
-  {
-    id: 5,
-    name: 'BeautyBox',
-    sector: 'Beauté',
-    date: '09/03',
-    status: 'Nouveau',
-    group: '—',
-    statusColor: 'var(--charcoal)',
-  },
+const prospects = [
+  { id: 1, name: 'Acme SRL', sector: 'Mode', date: '13/03', status: 'Répondu', sBg: '#EEF4FB', sColor: '#094D80', group: 'Standard' },
+  { id: 2, name: 'Shop BV', sector: 'Beauté', date: '12/03', status: 'Offre générée', sBg: '#FFFBEB', sColor: '#b45309', group: 'Pâquerettes' },
+  { id: 3, name: 'Mode & Co', sector: 'Mode', date: '11/03', status: 'Acceptée', sBg: '#F0FDF4', sColor: '#15803d', group: 'Standard' },
+  { id: 4, name: 'Luxe Retail', sector: 'Luxe', date: '10/03', status: 'Lien envoyé', sBg: '#F8FAFC', sColor: '#475569', group: '—' },
+  { id: 5, name: 'BeautyBox', sector: 'Beauté', date: '09/03', status: 'Nouveau', sBg: '#F8FAFC', sColor: '#475569', group: '—' },
 ]
+
+const card: React.CSSProperties = {
+  background: '#fff',
+  border: '1px solid var(--border)',
+  borderRadius: 12,
+  boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+}
 
 export default function DashboardPage() {
   return (
-    <div className="flex flex-col h-full">
-      {/* Page header */}
-      <div
-        className="flex items-center justify-between px-8 py-5 border-b"
-        style={{ borderColor: 'var(--border)' }}
-      >
-        <div>
-          <h1
-            className="text-xl font-bold"
-            style={{ color: 'var(--dark-navy)' }}
-          >
-            Dashboard
-          </h1>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-            Vue d&apos;ensemble de l&apos;activité
-          </p>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'auto' }}>
+      {/* Header */}
+      <div style={{ padding: '24px 32px 0', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+          <div>
+            <h1 style={{ fontSize: 20, fontWeight: 700, color: 'var(--gray-900)', letterSpacing: '-0.02em' }}>
+              Bonjour, Mathieu 👋
+            </h1>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 3 }}>
+              Résumé de l&apos;activité Brain E-Log
+            </p>
+          </div>
+          <span style={{ fontSize: 12, color: 'var(--gray-400)', paddingTop: 4 }}>
+            Vendredi 13 mars 2026
+          </span>
         </div>
-        <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-          13 mars 2026
-        </span>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
+      {/* Content */}
+      <div style={{ flex: 1, padding: '20px 32px 32px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+
         {/* KPI Cards */}
-        <div className="grid grid-cols-4 gap-4">
-          {kpis.map((kpi) => {
-            const Icon = kpi.icon
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
+          {kpis.map((k) => {
+            const Icon = k.icon
             return (
-              <div
-                key={kpi.label}
-                className="rounded-lg border p-4 flex items-center gap-4"
-                style={{
-                  backgroundColor: 'var(--bg)',
-                  borderColor: 'var(--border)',
-                }}
-              >
-                <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: kpi.color + '15' }}
-                >
-                  <Icon size={20} style={{ color: kpi.color }} />
-                </div>
-                <div>
-                  <p
-                    className="text-2xl font-bold leading-none"
-                    style={{ color: 'var(--text)' }}
-                  >
-                    {kpi.value}
+              <div key={k.label} style={card}>
+                <div style={{ padding: '18px 20px' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 8, background: k.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Icon size={18} strokeWidth={1.75} style={{ color: k.iconColor }} />
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: 'var(--text-muted)' }}>
+                      <TrendingUp size={10} style={{ color: '#16a34a' }} />
+                      {k.delta}
+                    </div>
+                  </div>
+                  <p style={{ fontSize: 30, fontWeight: 700, color: 'var(--gray-900)', letterSpacing: '-0.03em', lineHeight: 1 }}>
+                    {k.value}
                   </p>
-                  <p
-                    className="text-xs mt-1"
-                    style={{ color: 'var(--text-muted)' }}
-                  >
-                    {kpi.label}
-                  </p>
+                  <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 5 }}>{k.label}</p>
                 </div>
               </div>
             )
           })}
         </div>
 
-        {/* Middle row: Activity + Quick actions */}
-        <div className="grid grid-cols-3 gap-4">
-          {/* Recent activity */}
-          <div
-            className="col-span-2 rounded-lg border"
-            style={{
-              backgroundColor: 'var(--bg)',
-              borderColor: 'var(--border)',
-            }}
-          >
-            <div
-              className="px-5 py-3.5 border-b flex items-center justify-between"
-              style={{ borderColor: 'var(--border)' }}
-            >
-              <h2
-                className="text-sm font-semibold"
-                style={{ color: 'var(--dark-navy)' }}
-              >
-                Activité récente
-              </h2>
+        {/* Middle row */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 272px', gap: 14 }}>
+          {/* Activity */}
+          <div style={card}>
+            <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--gray-900)' }}>Activité récente</h2>
             </div>
-            <ul className="divide-y" style={{ borderColor: 'var(--border)' }}>
-              {recentActivity.map((item) => (
-                <li
-                  key={item.id}
-                  className="flex items-center justify-between px-5 py-3"
-                >
-                  <span
-                    className="text-sm"
-                    style={{ color: 'var(--text)' }}
-                  >
-                    {item.text}
-                  </span>
-                  <span
-                    className="text-xs ml-4 flex-shrink-0"
-                    style={{ color: 'var(--text-muted)' }}
-                  >
-                    {item.time}
-                  </span>
-                </li>
+            <div>
+              {activity.map((a, i) => (
+                <div key={a.id} style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '12px 20px',
+                  borderBottom: i < activity.length - 1 ? '1px solid var(--gray-50)' : 'none',
+                }}>
+                  <div style={{ width: 8, height: 8, borderRadius: 99, background: a.dot, flexShrink: 0 }} />
+                  <span style={{ flex: 1, fontSize: 13, color: 'var(--gray-700)' }}>{a.text}</span>
+                  <span style={{ fontSize: 12, color: 'var(--gray-400)', flexShrink: 0 }}>{a.time}</span>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
 
           {/* Quick actions */}
-          <div
-            className="rounded-lg border"
-            style={{
-              backgroundColor: 'var(--bg)',
-              borderColor: 'var(--border)',
-            }}
-          >
-            <div
-              className="px-5 py-3.5 border-b"
-              style={{ borderColor: 'var(--border)' }}
-            >
-              <h2
-                className="text-sm font-semibold"
-                style={{ color: 'var(--dark-navy)' }}
-              >
-                Actions rapides
-              </h2>
+          <div style={card}>
+            <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)' }}>
+              <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--gray-900)' }}>Actions rapides</h2>
             </div>
-            <div className="p-4 space-y-2">
-              <Link
-                href="/prospects/nouveau"
-                className="flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium w-full text-left transition-colors hover:opacity-90"
-                style={{
-                  backgroundColor: 'var(--primary)',
-                  color: '#fff',
-                }}
-              >
-                <Plus size={15} />
-                <span>Nouveau prospect</span>
+            <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <Link href="/prospects/nouveau" style={{
+                display: 'flex', alignItems: 'center', gap: 9,
+                padding: '10px 14px', borderRadius: 8,
+                background: 'var(--primary)', color: '#fff',
+                fontSize: 13, fontWeight: 600, textDecoration: 'none',
+              }}>
+                <Plus size={15} /> Nouveau prospect
               </Link>
-              <button
-                className="flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium w-full text-left transition-colors border hover:bg-gray-50"
-                style={{
-                  borderColor: 'var(--border)',
-                  color: 'var(--text)',
-                }}
-              >
-                <Link2 size={15} style={{ color: 'var(--primary)' }} />
-                <span>Envoyer un lien</span>
+              <button style={{
+                display: 'flex', alignItems: 'center', gap: 9,
+                padding: '10px 14px', borderRadius: 8,
+                background: '#fff', color: 'var(--gray-700)',
+                border: '1px solid var(--border)', fontSize: 13, fontWeight: 500, cursor: 'pointer',
+              }}>
+                <Link2 size={15} style={{ color: 'var(--primary)' }} /> Envoyer un lien
               </button>
-              <Link
-                href="/tarifs"
-                className="flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium w-full text-left transition-colors border hover:bg-gray-50"
-                style={{
-                  borderColor: 'var(--border)',
-                  color: 'var(--text)',
-                }}
-              >
-                <BarChart3 size={15} style={{ color: 'var(--primary)' }} />
-                <span>Voir les tarifs</span>
+              <Link href="/tarifs" style={{
+                display: 'flex', alignItems: 'center', gap: 9,
+                padding: '10px 14px', borderRadius: 8,
+                background: '#fff', color: 'var(--gray-700)',
+                border: '1px solid var(--border)', fontSize: 13, fontWeight: 500, textDecoration: 'none',
+              }}>
+                <BarChart3 size={15} style={{ color: 'var(--primary)' }} /> Gérer les tarifs
               </Link>
+            </div>
+            <div style={{ margin: '0 16px 16px', padding: '12px 14px', borderRadius: 8, background: '#EEF4FB', border: '1px solid #d0e4f5' }}>
+              <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--primary)', marginBottom: 8 }}>Résumé du mois</p>
+              {[
+                { label: 'Questionnaires envoyés', val: '7' },
+                { label: 'Offres créées', val: '5' },
+                { label: 'Taux de conversion', val: '71%' },
+              ].map((r) => (
+                <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', marginTop: 5 }}>
+                  <span style={{ fontSize: 12, color: 'var(--gray-600)' }}>{r.label}</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-900)' }}>{r.val}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Prospects récents */}
-        <div
-          className="rounded-lg border"
-          style={{
-            backgroundColor: 'var(--bg)',
-            borderColor: 'var(--border)',
-          }}
-        >
-          <div
-            className="px-5 py-3.5 border-b flex items-center justify-between"
-            style={{ borderColor: 'var(--border)' }}
-          >
-            <h2
-              className="text-sm font-semibold"
-              style={{ color: 'var(--dark-navy)' }}
-            >
-              Prospects récents
-            </h2>
-            <Link
-              href="/prospects"
-              className="flex items-center gap-1 text-xs font-medium transition-colors hover:opacity-80"
-              style={{ color: 'var(--primary)' }}
-            >
-              Voir tout <ArrowRight size={12} />
+        {/* Prospects table */}
+        <div style={card}>
+          <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--gray-900)' }}>Prospects récents</h2>
+            <Link href="/prospects" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 500, color: 'var(--primary)', textDecoration: 'none' }}>
+              Voir tout <ArrowRight size={13} />
             </Link>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr
-                  style={{
-                    backgroundColor: 'var(--bg-alt)',
-                    borderBottom: `1px solid var(--border)`,
-                  }}
-                >
-                  {['Nom société', 'Secteur', 'Date', 'Statut', 'Groupe tarifaire', ''].map(
-                    (h) => (
-                      <th
-                        key={h}
-                        className="text-left px-5 py-2.5 text-xs font-semibold"
-                        style={{ color: 'var(--text-muted)' }}
-                      >
-                        {h}
-                      </th>
-                    )
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {recentProspects.map((p) => (
-                  <tr
-                    key={p.id}
-                    className="border-b transition-colors hover:bg-gray-50 cursor-pointer"
-                    style={{ borderColor: 'var(--border)' }}
-                  >
-                    <td
-                      className="px-5 py-3 font-semibold"
-                      style={{ color: 'var(--text)' }}
-                    >
-                      {p.name}
-                    </td>
-                    <td
-                      className="px-5 py-3"
-                      style={{ color: 'var(--text-muted)' }}
-                    >
-                      {p.sector}
-                    </td>
-                    <td
-                      className="px-5 py-3"
-                      style={{ color: 'var(--text-muted)' }}
-                    >
-                      {p.date}
-                    </td>
-                    <td className="px-5 py-3">
-                      <span
-                        className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
-                        style={{
-                          backgroundColor: p.statusColor + '18',
-                          color: p.statusColor,
-                        }}
-                      >
-                        {p.status}
-                      </span>
-                    </td>
-                    <td
-                      className="px-5 py-3"
-                      style={{ color: 'var(--text-muted)' }}
-                    >
-                      {p.group}
-                    </td>
-                    <td className="px-5 py-3">
-                      <Link
-                        href={`/prospects/${p.id}`}
-                        className="text-xs font-medium transition-colors hover:opacity-80"
-                        style={{ color: 'var(--primary)' }}
-                      >
-                        Voir
-                      </Link>
-                    </td>
-                  </tr>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ background: 'var(--gray-50)' }}>
+                {['Nom société', 'Secteur', 'Date', 'Statut', 'Groupe tarifaire', ''].map((h) => (
+                  <th key={h} style={{
+                    textAlign: 'left', padding: '9px 20px',
+                    fontSize: 11, fontWeight: 600, color: 'var(--gray-400)',
+                    textTransform: 'uppercase', letterSpacing: '0.05em',
+                    borderBottom: '1px solid var(--border)',
+                  }}>
+                    {h}
+                  </th>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </tr>
+            </thead>
+            <tbody>
+              {prospects.map((p, i) => (
+                <tr key={p.id} style={{ borderBottom: i < prospects.length - 1 ? '1px solid var(--gray-50)' : 'none', cursor: 'pointer' }}>
+                  <td style={{ padding: '13px 20px', fontSize: 13, fontWeight: 600, color: 'var(--gray-900)' }}>{p.name}</td>
+                  <td style={{ padding: '13px 20px', fontSize: 13, color: 'var(--text-muted)' }}>{p.sector}</td>
+                  <td style={{ padding: '13px 20px', fontSize: 13, color: 'var(--text-muted)' }}>{p.date}</td>
+                  <td style={{ padding: '13px 20px' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 10px', borderRadius: 99, fontSize: 12, fontWeight: 500, background: p.sBg, color: p.sColor }}>
+                      {p.status}
+                    </span>
+                  </td>
+                  <td style={{ padding: '13px 20px', fontSize: 13, color: 'var(--text-muted)' }}>{p.group}</td>
+                  <td style={{ padding: '13px 20px' }}>
+                    <Link href={`/prospects/${p.id}`} style={{ fontSize: 13, fontWeight: 500, color: 'var(--primary)', textDecoration: 'none' }}>
+                      Voir →
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
+
       </div>
     </div>
   )

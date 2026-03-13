@@ -1,49 +1,126 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
-:root {
-  /* Brain E-Log Design System */
-  --primary:        #094D80;
-  --primary-dark:   #0A3F6B;
-  --dark-navy:      #24487B;
-  --charcoal:       #4F4C4D;
-  --bg:             #FFFFFF;
-  --bg-alt:         #F5F7FA;
-  --border:         #E2E8F0;
-  --text:           #1A1A1A;
-  --text-muted:     #4F4C4D;
+/* ── Brain E-Log Design Tokens ───────────────────────────────────────────── */
 
-  --background: var(--bg);
-  --foreground: var(--text);
+:root {
+  --primary:        #094D80;
+  --primary-hover:  #0A3F6B;
+  --primary-light:  #EEF4FB;
+
+  --navy:           #24487B;
+
+  --gray-50:  #F8FAFC;
+  --gray-100: #F1F5F9;
+  --gray-200: #E2E8F0;
+  --gray-300: #CBD5E1;
+  --gray-400: #94A3B8;
+  --gray-500: #64748B;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1E293B;
+  --gray-900: #0F172A;
+
+  --bg:       #FFFFFF;
+  --bg-page:  #F8FAFC;
+  --border:   #E2E8F0;
+  --text:     #0F172A;
+  --text-muted: #64748B;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow:    0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+
+  --radius-sm: 6px;
+  --radius:    8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
 }
 
 @theme inline {
-  --color-primary:      #094D80;
-  --color-primary-dark: #0A3F6B;
-  --color-dark-navy:    #24487B;
-  --color-charcoal:     #4F4C4D;
-  --color-bg-alt:       #F5F7FA;
-  --color-border:       #E2E8F0;
-  --color-text-muted:   #4F4C4D;
-  --color-background:   var(--background);
-  --color-foreground:   var(--foreground);
-  --font-sans: 'Nunito', system-ui, sans-serif;
+  --color-primary:       #094D80;
+  --color-primary-hover: #0A3F6B;
+  --color-primary-light: #EEF4FB;
+  --color-navy:          #24487B;
+  --color-bg-page:       #F8FAFC;
+  --color-border:        #E2E8F0;
+  --color-text-muted:    #64748B;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* ── Base ─────────────────────────────────────────────────────────────────── */
 
-html {
-  font-size: 14px;
-}
+* { box-sizing: border-box; }
+
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 
 body {
-  background: var(--bg);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
   color: var(--text);
-  font-family: 'Nunito', system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  background: var(--bg-page);
+}
+
+/* ── Scrollbar ────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gray-300); }
+
+/* ── Focus ────────────────────────────────────────────────────────────────── */
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* ── Utilities ────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background 150ms;
+  white-space: nowrap;
+}
+.btn-primary:hover { background: var(--primary-hover); }
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: var(--bg);
+  color: var(--gray-700);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 150ms, border-color 150ms;
+  white-space: nowrap;
+}
+.btn-secondary:hover { background: var(--gray-50); border-color: var(--gray-300); }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
 }

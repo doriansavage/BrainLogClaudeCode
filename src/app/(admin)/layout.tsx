@@ -1,14 +1,10 @@
 import { Sidebar } from '@/components/layout/Sidebar'
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-page)' }}>
       <Sidebar />
-      <main className="flex-1 flex flex-col min-h-screen overflow-hidden">
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', overflow: 'hidden' }}>
         {children}
       </main>
     </div>

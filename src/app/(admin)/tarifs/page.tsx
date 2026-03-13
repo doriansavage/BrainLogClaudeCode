@@ -1,8 +1,10 @@
+import { TariffManager } from '@/components/tarifs/TariffManager'
+
 export default function TarifsPage() {
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full overflow-hidden">
       <div
-        className="flex items-center justify-between px-8 py-5 border-b"
+        className="flex items-center justify-between px-8 py-5 border-b flex-shrink-0"
         style={{ borderColor: 'var(--border)' }}
       >
         <div>
@@ -14,9 +16,7 @@ export default function TarifsPage() {
           </p>
         </div>
       </div>
-      <div className="flex-1 flex items-center justify-center" style={{ color: 'var(--text-muted)' }}>
-        <p className="text-sm">Module Tarifs — en cours de développement</p>
-      </div>
+      <TariffManager />
     </div>
   )
 }

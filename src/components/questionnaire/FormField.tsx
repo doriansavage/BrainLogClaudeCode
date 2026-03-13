@@ -25,7 +25,7 @@ export function FormField({ field, value, error, onChange }: FormFieldProps) {
         )}
       </label>
 
-      {field.type === 'dropdown' && field.options && (
+      {field.type === 'radio_cards' && field.options && (
         <select
           id={field.id}
           value={value ?? ''}

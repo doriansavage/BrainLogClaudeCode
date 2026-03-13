@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback, type KeyboardEvent } from 'react'
 import { Plus, MoreHorizontal, Eye, EyeOff, Lock, Star, Copy, Pencil, Archive, Trash2, Scale, ChevronDown, ChevronRight, Sliders, Rocket, Database, Briefcase, Server, Truck, Package2, Package, PackageCheck, Warehouse, LayoutGrid, ShoppingCart, List, Scan, Users, Tag, Printer, Gift, Globe, RotateCcw, Wrench, ClipboardList, Clock, Undo2, X } from 'lucide-react'
 import { useTariffStore, type DuplicateOptions } from '@/store/tariffs'
-import type { TariffGroup, TariffItem, TariffCategory, TariffSnapshot } from '@/types/tariffs'
+import type { TariffGroup, TariffItem, TariffCategory, TariffSnapshot, TariffItemFormula } from '@/types/tariffs'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -70,6 +70,44 @@ const ROUND_OPTIONS = [
   { value: 0.10, label: '0,10 €' },
   { value: 0.50, label: '0,50 €' },
   { value: 1.00, label: '1,00 €' },
+]
+
+// Champs questionnaire disponibles pour les formules
+const Q_FIELDS_FORMULA = [
+  { code: 'Q4.01', label: 'Volume B2C / mois', unit: 'colis' },
+  { code: 'Q4.02', label: 'Lignes / commande B2C', unit: 'lignes' },
+  { code: 'Q4.03', label: 'Articles / commande B2C', unit: 'articles' },
+  { code: 'Q4.04', label: 'Volume B2B / mois', unit: 'palettes' },
+  { code: 'Q5.01', label: 'Stock moyen', unit: 'palettes' },
+  { code: 'Q5.02', label: 'Bacs picking', unit: 'bacs' },
+  { code: 'Q6.07', label: 'Volume Suisse / mois', unit: 'colis' },
+  { code: 'Q3.03', label: 'Retours / mois', unit: 'colis' },
+]
+
+// Labels des 22 items de base (par index, correspond à BASE_ITEMS dans le store)
+const BASE_ITEM_LABELS: string[] = [
+  'Frais de mise en place — Brain E-Log',
+  'Frais de mise en place — WMS',
+  'Gestion mensuelle de compte',
+  'Abonnement WMS',
+  'Déchargement container 40 pieds (max 4h)',
+  'Déchargement container 20 pieds (max 2h)',
+  'Déchargement palette',
+  'Déchargement colis',
+  'Entrée en stock',
+  'Stockage palette',
+  'Stockage bac / étagère picking',
+  'Préparation commande B2C — par commande',
+  'Préparation commande B2C — par ligne',
+  'Préparation commande B2C — par article',
+  'Préparation commande B2B (régie)',
+  'Étiquette transporteur',
+  'Impression + insertion BL',
+  'Insertion document / flyer / goodies',
+  'Documents douaniers (hors UE)',
+  'Management des retours',
+  'Services additionnels — Manutention',
+  'Services additionnels — Administration',
 ]
 
 const modalOverlay: React.CSSProperties = {
@@ -687,8 +725,24 @@ const BILLING_CONFIG: Record<string, { label: string; color: string; bg: string 
 
 // ─── Item Row ─────────────────────────────────────────────────────────────────
 
+function formulaLabel(f: TariffItemFormula): string {
+  if (f.type === 'questionnaire') {
+    const q = Q_FIELDS_FORMULA.find((q) => q.code === f.questionCode)
+    const ql = q?.label ?? f.questionCode ?? '?'
+    return `${ql} × ${f.unitPrice ?? '?'} €/${q?.unit ?? 'unité'}`
+  }
+  if (f.type === 'item_ref') {
+    const ref = f.refItemIndex !== undefined ? BASE_ITEM_LABELS[f.refItemIndex] ?? `#${f.refItemIndex}` : '?'
+    const parts: string[] = []
+    if (f.percent !== undefined && f.percent !== 0) parts.push(`${f.percent > 0 ? '+' : ''}${f.percent}%`)
+    if (f.offset !== undefined && f.offset !== 0) parts.push(`${f.offset > 0 ? '+' : ''}${f.offset}€`)
+    return `Basé sur "${ref}"${parts.length ? ' ' + parts.join(' ') : ''}`
+  }
+  return 'Formule'
+}
+
 function ItemRow({ item, index }: { item: TariffItem; index: number }) {
-  const { toggleItemVisibility } = useTariffStore()
+  const { toggleItemVisibility, deleteCustomItem } = useTariffStore()
   const [hovered, setHovered] = useState(false)
   const [triggerEdit, setTriggerEdit] = useState(0)
 
@@ -720,14 +774,32 @@ function ItemRow({ item, index }: { item: TariffItem; index: number }) {
 
       {/* Icon + label + description */}
       <td style={{ padding: '7px 10px 7px 6px', verticalAlign: 'middle' }}>
-        <div style={{ display: 'flex', alignItems: item.description ? 'flex-start' : 'center', gap: 8 }}>
-          {(() => { const Icon = ITEM_ICONS[item.label]; return Icon ? <Icon size={13} style={{ color: '#94A3B8', flexShrink: 0, marginTop: item.description ? 2 : 0 }} /> : null })()}
-          <div>
-            <div style={{ fontSize: 13, fontWeight: 450, color: '#1E293B', lineHeight: '1.35' }}>{item.label}</div>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+          {(() => { const Icon = ITEM_ICONS[item.label]; return Icon ? <Icon size={13} style={{ color: '#94A3B8', flexShrink: 0, marginTop: 2 }} /> : null })()}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontSize: 13, fontWeight: 450, color: '#1E293B', lineHeight: '1.35' }}>{item.label}</span>
+              {item.isCustom && (
+                <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 4, background: '#EDE9FE', color: '#6D28D9', textTransform: 'uppercase', letterSpacing: '0.05em', flexShrink: 0 }}>
+                  custom
+                </span>
+              )}
+            </div>
             {item.description && (
               <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 1, lineHeight: '1.3' }}>{item.description}</div>
             )}
+            {item.formula && (
+              <div style={{ fontSize: 11, color: '#7C3AED', marginTop: 1, lineHeight: '1.3', fontStyle: 'italic' }}>
+                ƒ {formulaLabel(item.formula)}
+              </div>
+            )}
           </div>
+          {item.isCustom && hovered && (
+            <button onClick={(e) => { e.stopPropagation(); deleteCustomItem(item.id) }} title="Supprimer cet item"
+              style={{ flexShrink: 0, width: 20, height: 20, border: 'none', background: 'transparent', borderRadius: 4, cursor: 'pointer', color: '#EF4444', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}>
+              <X size={12} />
+            </button>
+          )}
         </div>
       </td>
 
@@ -816,6 +888,7 @@ function ItemsPanel() {
   const [showRenameModal, setShowRenameModal] = useState(false)
   const [showBulkModal, setShowBulkModal] = useState(false)
   const [showHistoryModal, setShowHistoryModal] = useState(false)
+  const [showAddItemModal, setShowAddItemModal] = useState(false)
   const [search, setSearch] = useState('')
   const [catFilter, setCatFilter] = useState('all')
 
@@ -885,7 +958,7 @@ function ItemsPanel() {
             style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 6, border: '1px solid #E2E8F0', background: '#fff', color: '#64748B', fontSize: 12, fontWeight: 500, cursor: 'pointer' }}>
             <Sliders size={13} /> Ajuster les prix
           </button>
-          <button style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 6, border: 'none', background: 'var(--primary)', color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+          <button onClick={() => setShowAddItemModal(true)} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 6, border: 'none', background: 'var(--primary)', color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
             <Plus size={13} /> Item
           </button>
         </div>
@@ -913,6 +986,9 @@ function ItemsPanel() {
       )}
       {showHistoryModal && (
         <HistoryModal group={group} onClose={() => setShowHistoryModal(false)} />
+      )}
+      {showAddItemModal && (
+        <AddItemModal groupId={group.id} onClose={() => setShowAddItemModal(false)} />
       )}
     </div>
   )
@@ -992,6 +1068,223 @@ function GroupPanel() {
       {renameTarget && (
         <GroupModal title={`Renommer "${renameTarget.name}"`} onClose={() => setRenameTarget(null)} onConfirm={(n, d) => renameGroup(renameTarget.id, n, d)} confirmLabel="Enregistrer" initialName={renameTarget.name} initialDesc={renameTarget.description ?? ''} />
       )}
+    </div>
+  )
+}
+
+// ─── Add Item Modal ───────────────────────────────────────────────────────────
+
+type PriceMode = 'fixed' | 'tbd' | 'quote' | 'questionnaire' | 'item_ref'
+
+function AddItemModal({ groupId, onClose }: { groupId: string; onClose: () => void }) {
+  const { addCustomItem, categories } = useTariffStore()
+
+  const [label, setLabel] = useState('')
+  const [description, setDescription] = useState('')
+  const [categoryId, setCategoryId] = useState(categories[0]?.id ?? 'frais_activite')
+  const [unit, setUnit] = useState('par unité')
+  const [billing, setBilling] = useState<TariffItem['billing']>('a_l_usage')
+  const [priceMode, setPriceMode] = useState<PriceMode>('fixed')
+  const [fixedPrice, setFixedPrice] = useState('')
+  // Questionnaire formula
+  const [questionCode, setQuestionCode] = useState(Q_FIELDS_FORMULA[0].code)
+  const [unitPrice, setUnitPrice] = useState('')
+  // Item ref formula
+  const [refItemIndex, setRefItemIndex] = useState(0)
+  const [refPercent, setRefPercent] = useState('')
+  const [refOffset, setRefOffset] = useState('')
+
+  function handleSubmit() {
+    if (!label.trim()) return
+
+    let priceType: TariffItem['priceType'] = 'fixed'
+    let price: number | null = null
+    let formula: TariffItemFormula | undefined
+
+    if (priceMode === 'fixed') {
+      priceType = 'fixed'
+      price = parseFloat(fixedPrice.replace(',', '.')) || 0
+    } else if (priceMode === 'tbd') {
+      priceType = 'tbd'
+    } else if (priceMode === 'quote') {
+      priceType = 'quote'
+    } else if (priceMode === 'questionnaire') {
+      priceType = 'formula'
+      const q = Q_FIELDS_FORMULA.find((q) => q.code === questionCode)
+      formula = {
+        type: 'questionnaire',
+        questionCode,
+        questionLabel: q?.label,
+        unitPrice: parseFloat(unitPrice.replace(',', '.')) || 0,
+      }
+    } else if (priceMode === 'item_ref') {
+      priceType = 'formula'
+      formula = {
+        type: 'item_ref',
+        refItemIndex,
+        percent: parseFloat(refPercent.replace(',', '.')) || undefined,
+        offset: parseFloat(refOffset.replace(',', '.')) || undefined,
+      }
+    }
+
+    addCustomItem(groupId, {
+      categoryId,
+      label: label.trim(),
+      description: description.trim() || undefined,
+      price,
+      priceType,
+      unit,
+      billing,
+      isVisible: true,
+      formula,
+    })
+    onClose()
+  }
+
+  const btnBase: React.CSSProperties = {
+    padding: '6px 14px', borderRadius: 7, fontSize: 13, fontWeight: 500, cursor: 'pointer', border: '1px solid var(--border)',
+  }
+
+  return (
+    <div style={modalOverlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div style={modalBox(500)}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: '#0F172A' }}>Ajouter un item personnalisé</h3>
+          <button onClick={onClose} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#94A3B8', display: 'flex', padding: 4 }}><X size={16} /></button>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {/* Label */}
+          <div>
+            <label style={labelSm}>Libellé *</label>
+            <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="ex : Picking spécial" style={inputBase} autoFocus />
+          </div>
+
+          {/* Description */}
+          <div>
+            <label style={labelSm}>Description (optionnel)</label>
+            <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="ex : Manutention hors-gabarit" style={inputBase} />
+          </div>
+
+          {/* Catégorie + Unité */}
+          <div style={{ display: 'flex', gap: 10 }}>
+            <div style={{ flex: 1 }}>
+              <label style={labelSm}>Catégorie</label>
+              <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} style={{ ...inputBase }}>
+                {[...categories].sort((a, b) => a.sortOrder - b.sortOrder).map((c) => (
+                  <option key={c.id} value={c.id}>{c.label}</option>
+                ))}
+              </select>
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={labelSm}>Unité</label>
+              <input value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="par colis" style={inputBase} />
+            </div>
+          </div>
+
+          {/* Facturation */}
+          <div>
+            <label style={labelSm}>Type de facturation</label>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {(['une_seule_fois', 'mensuel', 'a_l_usage'] as const).map((b) => {
+                const cfg = BILLING_CONFIG[b]
+                const active = billing === b
+                return (
+                  <button key={b} onClick={() => setBilling(b)}
+                    style={{ flex: 1, padding: '7px 8px', borderRadius: 7, border: `1px solid ${active ? cfg.color : '#E2E8F0'}`, background: active ? cfg.bg : '#fff', color: active ? cfg.color : '#64748B', fontSize: 12, fontWeight: active ? 600 : 400, cursor: 'pointer' }}>
+                    {cfg.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <div style={divider} />
+
+          {/* Prix */}
+          <div>
+            <label style={labelSm}>Type de prix</label>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {([
+                { value: 'fixed',          label: 'Prix fixe' },
+                { value: 'tbd',            label: 'À définir' },
+                { value: 'quote',          label: 'Sur devis' },
+                { value: 'questionnaire',  label: '× Variable' },
+                { value: 'item_ref',       label: 'Basé sur item' },
+              ] as { value: PriceMode; label: string }[]).map((opt) => (
+                <button key={opt.value} onClick={() => setPriceMode(opt.value)}
+                  style={{ padding: '5px 12px', borderRadius: 6, border: `1px solid ${priceMode === opt.value ? 'var(--primary)' : '#E2E8F0'}`, background: priceMode === opt.value ? 'var(--primary-light)' : '#fff', color: priceMode === opt.value ? 'var(--primary)' : '#64748B', fontSize: 12, fontWeight: priceMode === opt.value ? 600 : 400, cursor: 'pointer' }}>
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Prix fixe */}
+          {priceMode === 'fixed' && (
+            <div>
+              <label style={labelSm}>Prix (€)</label>
+              <input value={fixedPrice} onChange={(e) => setFixedPrice(e.target.value)} placeholder="ex : 1.50" style={{ ...inputBase, maxWidth: 160 }} type="number" min={0} step={0.01} />
+            </div>
+          )}
+
+          {/* Formule questionnaire */}
+          {priceMode === 'questionnaire' && (
+            <div style={{ background: '#F5F3FF', borderRadius: 8, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div>
+                <label style={{ ...labelSm, color: '#6D28D9' }}>Variable questionnaire</label>
+                <select value={questionCode} onChange={(e) => setQuestionCode(e.target.value)} style={{ ...inputBase }}>
+                  {Q_FIELDS_FORMULA.map((q) => (
+                    <option key={q.code} value={q.code}>{q.code} — {q.label} ({q.unit})</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label style={{ ...labelSm, color: '#6D28D9' }}>Prix unitaire (€ par {Q_FIELDS_FORMULA.find((q) => q.code === questionCode)?.unit ?? 'unité'})</label>
+                <input value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} placeholder="ex : 1" style={{ ...inputBase, maxWidth: 160 }} type="number" min={0} step={0.01} />
+              </div>
+              <div style={{ fontSize: 11, color: '#7C3AED', fontStyle: 'italic' }}>
+                Résultat = volume × {unitPrice || '?'} € — calculé au moment de la génération d&apos;offre
+              </div>
+            </div>
+          )}
+
+          {/* Formule item ref */}
+          {priceMode === 'item_ref' && (
+            <div style={{ background: '#F0FDF4', borderRadius: 8, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div>
+                <label style={{ ...labelSm, color: '#166534' }}>Item de référence</label>
+                <select value={refItemIndex} onChange={(e) => setRefItemIndex(parseInt(e.target.value))} style={{ ...inputBase }}>
+                  {BASE_ITEM_LABELS.map((label, idx) => (
+                    <option key={idx} value={idx}>{idx}. {label}</option>
+                  ))}
+                </select>
+              </div>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ ...labelSm, color: '#166534' }}>Ajustement %</label>
+                  <input value={refPercent} onChange={(e) => setRefPercent(e.target.value)} placeholder="ex : 10 ou -5" style={{ ...inputBase }} type="number" step={1} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ ...labelSm, color: '#166534' }}>Ajustement €</label>
+                  <input value={refOffset} onChange={(e) => setRefOffset(e.target.value)} placeholder="ex : 2 ou -1.5" style={{ ...inputBase }} type="number" step={0.01} />
+                </div>
+              </div>
+              <div style={{ fontSize: 11, color: '#16a34a', fontStyle: 'italic' }}>
+                Résultat = prix de &quot;{BASE_ITEM_LABELS[refItemIndex]}&quot;{refPercent ? ` ${parseFloat(refPercent) > 0 ? '+' : ''}${refPercent}%` : ''}{refOffset ? ` ${parseFloat(refOffset) > 0 ? '+' : ''}${refOffset}€` : ''}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div style={{ marginTop: 24, display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+          <button onClick={onClose} style={{ ...btnBase, background: '#fff', color: '#64748B' }}>Annuler</button>
+          <button onClick={handleSubmit} disabled={!label.trim()}
+            style={{ ...btnBase, background: label.trim() ? 'var(--primary)' : '#CBD5E1', color: '#fff', border: 'none', fontWeight: 600 }}>
+            Ajouter l&apos;item
+          </button>
+        </div>
+      </div>
     </div>
   )
 }

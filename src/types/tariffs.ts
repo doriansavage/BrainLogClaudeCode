@@ -1,5 +1,18 @@
 export type PriceType = 'fixed' | 'tbd' | 'quote' | 'formula'
 export type BillingType = 'une_seule_fois' | 'mensuel' | 'a_l_usage'
+export type FormulaType = 'questionnaire' | 'item_ref'
+
+export interface TariffItemFormula {
+  type: FormulaType
+  // Pour type = 'questionnaire'
+  questionCode?: string    // e.g. 'Q4.01'
+  questionLabel?: string   // e.g. 'Volume B2C / mois'
+  unitPrice?: number       // e.g. 1 (€ par unité)
+  // Pour type = 'item_ref'
+  refItemIndex?: number    // 0-21, index dans BASE_ITEMS
+  percent?: number         // ±% du prix de l'item référent
+  offset?: number          // ±€ en plus du prix référent
+}
 
 export interface TariffItem {
   id: string
@@ -15,6 +28,8 @@ export interface TariffItem {
   condition?: string
   sortOrder: number
   notes?: string
+  isCustom?: boolean
+  formula?: TariffItemFormula
 }
 
 export interface TariffCategory {

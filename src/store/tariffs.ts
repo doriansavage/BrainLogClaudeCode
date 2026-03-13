@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { TariffGroup, TariffItem, TariffCategory, TariffSnapshot } from '@/types/tariffs'
+import type { TariffGroup, TariffItem, TariffCategory, TariffSnapshot, TariffItemFormula } from '@/types/tariffs'
 
 const MAX_SNAPSHOTS_PER_GROUP = 15
 
@@ -116,6 +116,8 @@ interface TariffStore {
   updateItemPrice: (itemId: string, price: number | null) => void
   setItemPriceType: (itemId: string, priceType: TariffItem['priceType']) => void
   toggleItemVisibility: (itemId: string) => void
+  addCustomItem: (groupId: string, item: Omit<TariffItem, 'id' | 'groupId' | 'isCustom' | 'sortOrder'> & { formula?: TariffItemFormula }) => void
+  deleteCustomItem: (itemId: string) => void
   // Ajustements en masse
   applyBulkAdjustment: (groupId: string, type: 'percent' | 'flat', value: number, roundTo: number, categoryId?: string) => void
   // Historique
@@ -301,6 +303,24 @@ export const useTariffStore = create<TariffStore>((set, get) => {
       set((s) => ({
         items: s.items.map((i) => i.id === itemId ? { ...i, isVisible: !i.isVisible } : i),
       }))
+      save()
+    },
+
+    addCustomItem: (groupId, itemData) => {
+      const maxSort = Math.max(0, ...get().items.filter((i) => i.groupId === groupId).map((i) => i.sortOrder))
+      const newItem: TariffItem = {
+        ...itemData,
+        id: `${groupId}-custom-${Date.now()}`,
+        groupId,
+        isCustom: true,
+        sortOrder: maxSort + 1,
+      }
+      set((s) => ({ items: [...s.items, newItem] }))
+      save()
+    },
+
+    deleteCustomItem: (itemId) => {
+      set((s) => ({ items: s.items.filter((i) => i.id !== itemId) }))
       save()
     },
 

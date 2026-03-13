@@ -138,6 +138,26 @@ Lorsqu'on demande d'utiliser l'un des skills suivants, le charger via le Skill t
 
 ---
 
+## Scraping & Crawling
+
+**Outil utilisé : Crawlee + Playwright**
+Crawlee est le système utilisé dans ce projet pour scraper et crawler des pages web externes : récupérer du contenu, des tarifs, des formulaires, des textes marketing sur des sites tiers (concurrents, partenaires, portails logistiques, etc.).
+
+**Documentation complète → [`docs/crawlee.md`](docs/crawlee.md)**
+Toute la documentation Crawlee (crawlers disponibles, options, API `page`, `enqueueLinks`, `Dataset`, patterns, anti-détection, erreurs fréquentes) se trouve dans ce fichier. **Consulter `docs/crawlee.md` avant tout travail de scraping.**
+
+**Scripts disponibles :**
+| Fichier | Cible | Output |
+|---|---|---|
+| `scripts/scrape-brain-log.ts` | brain-log.com (8 pages FR) | `storage/brain-log-full.json` |
+
+**Lancer un scraper :**
+```bash
+npx tsx scripts/[nom-du-script].ts
+```
+
+---
+
 ## Notes & Décisions
 
 _Documenter ici les décisions importantes prises pendant le développement._

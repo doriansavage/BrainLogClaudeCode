@@ -1,6 +1,19 @@
 'use client'
 
 import type { FieldDefinition } from '@/types/questionnaire'
+import { FieldText }        from './fields/FieldText'
+import { FieldUrl }         from './fields/FieldUrl'
+import { FieldTextarea }    from './fields/FieldTextarea'
+import { FieldToggle }      from './fields/FieldToggle'
+import { FieldRadioCards }  from './fields/FieldRadioCards'
+import { FieldIconGrid }    from './fields/FieldIconGrid'
+import { FieldSlider }      from './fields/FieldSlider'
+import { FieldMultiSelect } from './fields/FieldMultiSelect'
+import { FieldPriceRange }  from './fields/FieldPriceRange'
+import { FieldScale3 }      from './fields/FieldScale3'
+import { FieldLogoPicker }  from './fields/FieldLogoPicker'
+import { FieldTimelineSel } from './fields/FieldTimelineSel'
+import { FieldGeoSplit }    from './fields/FieldGeoSplit'
 
 interface FormFieldProps {
   field: FieldDefinition
@@ -10,74 +23,50 @@ interface FormFieldProps {
 }
 
 export function FormField({ field, value, error, onChange }: FormFieldProps) {
-  const hasError = Boolean(error)
+  const props = { field, value, error, onChange }
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-2">
+
+      {/* Label */}
       <label
         htmlFor={field.id}
-        className="text-sm font-medium"
+        className="text-sm font-semibold"
         style={{ color: 'var(--text)' }}
       >
         {field.label}
         {field.required && (
-          <span className="ml-1" style={{ color: 'var(--primary)' }}>*</span>
+          <span className="ml-1 font-bold" style={{ color: 'var(--primary)' }}>*</span>
         )}
       </label>
 
-      {field.type === 'radio_cards' && field.options && (
-        <select
-          id={field.id}
-          value={value ?? ''}
-          onChange={(e) => onChange(field.id, e.target.value)}
-          className="w-full px-3 py-2 rounded-md text-sm border outline-none transition-colors"
-          style={{
-            backgroundColor: 'var(--bg)',
-            color: value ? 'var(--text)' : 'var(--text-muted)',
-            borderColor: hasError ? '#ef4444' : 'var(--border)',
-          }}
-        >
-          <option value="">— Sélectionner —</option>
-          {field.options.map((opt) => (
-            <option key={opt} value={opt}>{opt}</option>
-          ))}
-        </select>
+      {/* Composant UI selon le type */}
+      {field.type === 'text'         && <FieldText        {...props} />}
+      {field.type === 'url'          && <FieldUrl         {...props} />}
+      {field.type === 'textarea'     && <FieldTextarea    {...props} />}
+      {field.type === 'toggle'       && <FieldToggle      {...props} />}
+      {field.type === 'radio_cards'  && <FieldRadioCards  {...props} />}
+      {field.type === 'icon_grid'    && <FieldIconGrid    {...props} />}
+      {field.type === 'slider'       && <FieldSlider      {...props} />}
+      {field.type === 'multi_select' && <FieldMultiSelect {...props} />}
+      {field.type === 'price_range'  && <FieldPriceRange  {...props} />}
+      {field.type === 'scale_3'      && <FieldScale3      {...props} />}
+      {field.type === 'logo_picker'  && <FieldLogoPicker  {...props} />}
+      {field.type === 'timeline_sel' && <FieldTimelineSel {...props} />}
+      {field.type === 'geo_split'    && <FieldGeoSplit    {...props} />}
+
+      {/* Hint contextuel (masqué si erreur) */}
+      {field.hint && !error && (
+        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+          {field.hint}
+        </p>
       )}
 
-      {field.type === 'text' && (
-        <input
-          id={field.id}
-          type="text"
-          value={value ?? ''}
-          onChange={(e) => onChange(field.id, e.target.value)}
-          placeholder={`Votre réponse…`}
-          className="w-full px-3 py-2 rounded-md text-sm border outline-none transition-colors"
-          style={{
-            backgroundColor: 'var(--bg)',
-            color: 'var(--text)',
-            borderColor: hasError ? '#ef4444' : 'var(--border)',
-          }}
-        />
-      )}
-
-      {field.type === 'textarea' && (
-        <textarea
-          id={field.id}
-          value={value ?? ''}
-          onChange={(e) => onChange(field.id, e.target.value)}
-          placeholder="Votre réponse…"
-          rows={4}
-          className="w-full px-3 py-2 rounded-md text-sm border outline-none transition-colors resize-none"
-          style={{
-            backgroundColor: 'var(--bg)',
-            color: 'var(--text)',
-            borderColor: hasError ? '#ef4444' : 'var(--border)',
-          }}
-        />
-      )}
-
+      {/* Erreur de validation */}
       {error && (
-        <p className="text-xs" style={{ color: '#ef4444' }}>{error}</p>
+        <p className="text-xs font-medium" style={{ color: '#ef4444' }}>
+          ⚠ {error}
+        </p>
       )}
     </div>
   )

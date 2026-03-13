@@ -1,0 +1,49 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* Brain E-Log Design System */
+  --primary:        #094D80;
+  --primary-dark:   #0A3F6B;
+  --dark-navy:      #24487B;
+  --charcoal:       #4F4C4D;
+  --bg:             #FFFFFF;
+  --bg-alt:         #F5F7FA;
+  --border:         #E2E8F0;
+  --text:           #1A1A1A;
+  --text-muted:     #4F4C4D;
+
+  --background: var(--bg);
+  --foreground: var(--text);
+}
+
+@theme inline {
+  --color-primary:      #094D80;
+  --color-primary-dark: #0A3F6B;
+  --color-dark-navy:    #24487B;
+  --color-charcoal:     #4F4C4D;
+  --color-bg-alt:       #F5F7FA;
+  --color-border:       #E2E8F0;
+  --color-text-muted:   #4F4C4D;
+  --color-background:   var(--background);
+  --color-foreground:   var(--foreground);
+  --font-sans: 'Nunito', system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 14px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Nunito', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

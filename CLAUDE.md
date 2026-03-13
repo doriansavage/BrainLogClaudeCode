@@ -42,6 +42,10 @@ Types : `feat`, `fix`, `docs`, `refactor`, `chore`, `test`
 - **docs**: ADN graphique Brain e-Log → `adn-graphique-brain-log.md` (couleurs, logo, typo, UI, images)
 - **docs**: Plan complet Module 1 Tarifs → `docs/brain-elog-app-plan.md` (user stories, DB schema, UI, branches)
 - **docs**: Architecture globale 17 écrans → `docs/app-screens-architecture.md` (sitemap, flows UX)
+- **feat(tarifs)**: Abandon Supabase → stockage JSON local (`data/tariffs.json` via API route GET/POST)
+- **refactor(tarifs)**: Rewrite store Zustand sans Supabase, pattern `save()` optimiste après chaque mutation
+- **refactor(tarifs)**: TariffManager UI — rows denses (7px padding), accents couleur par catégorie, billing dots
+- **feat(regles)**: Page `/regles` — grille tarifaire + logique conditionnelle Q1-Q8 + conditions de vente + contact
 - **feat(app)**: Bootstrap Next.js 15 + Tailwind CSS + TypeScript dans le repo
 - **feat(app)**: Design system Brain E-Log (CSS vars, font Nunito, palette navy)
 - **feat(app)**: 17 routes App Router + layout admin avec sidebar Lucide + dashboard

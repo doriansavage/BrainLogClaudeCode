@@ -1,0 +1,967 @@
+{
+  "sections": [
+    {
+      "id": "Q1",
+      "label": "Identité & base article",
+      "fields": [
+        {
+          "id": "Q1.01",
+          "label": "Nom de l'entreprise",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "Q1.02",
+          "label": "Personne de contact (nom, fonction)",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "Q1.03",
+          "label": "Email / téléphone",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "Q1.04",
+          "label": "Site web / URL boutique",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "Q1.05",
+          "label": "Secteur d'activité",
+          "type": "dropdown",
+          "required": true,
+          "options": [
+            "Mode & Accessoires",
+            "Beauté & Cosmétiques",
+            "Santé & Bien-être",
+            "Alimentation & Boissons",
+            "Maison & Déco",
+            "Sport & Loisirs",
+            "High-Tech & Électronique",
+            "Jouets & Enfants",
+            "Animaux",
+            "Autre"
+          ]
+        },
+        {
+          "id": "Q1.06",
+          "label": "Numéro de TVA intracommunautaire",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "Q1.07",
+          "label": "Nombre total de SKU actives",
+          "type": "dropdown",
+          "required": true,
+          "options": ["0-5", "5-10", "10-20", "20-50", "50-100", ">100"]
+        },
+        {
+          "id": "Q1.08",
+          "label": "Code EAN / code-barres",
+          "type": "dropdown",
+          "required": true,
+          "options": ["Oui — tous", "Partiel", "Non — aucun"]
+        },
+        {
+          "id": "Q1.09",
+          "label": "Variantes par produit",
+          "type": "dropdown",
+          "required": true,
+          "options": ["Oui", "Non"]
+        },
+        {
+          "id": "Q1.10",
+          "label": "Fourchette dimensions produit",
+          "type": "dropdown",
+          "required": true,
+          "options": [
+            "Très petit <10×10×5",
+            "Petit <30×20×15",
+            "Moyen <50×40×30",
+            "Grand <80×60×40",
+            "Très grand >80cm",
+            "Variable"
+          ]
+        },
+        {
+          "id": "Q1.11",
+          "label": "Fourchette poids unitaire",
+          "type": "dropdown",
+          "required": true,
+          "options": ["<250g", "250g-1kg", "1-3kg", "3-5kg", "5-10kg", "10-30kg", ">30kg"]
+        },
+        {
+          "id": "Q1.12",
+          "label": "Stockage spécifique",
+          "type": "dropdown",
+          "required": true,
+          "options": [
+            "Aucun",
+            "Fragile",
+            "Volumineux",
+            "Température contrôlée",
+            "Dangereux ADR",
+            "Valeur élevée coffre",
+            "Plusieurs contraintes"
+          ]
+        },
+        {
+          "id": "Q1.13",
+          "label": "Gestion lots / péremption",
+          "type": "dropdown",
+          "required": true,
+          "options": [
+            "Aucune",
+            "Numéros de lot uniquement",
+            "Dates de péremption DLUO/DLC",
+            "Les deux"
+          ]
+        },
+        {
+          "id": "Q1.14",
+          "label": "Fréquence nouvelles références",
+          "type": "dropdown",
+          "required": false,
+          "options": [
+            "Rarement <1×/trimestre",
+            "Trimestrielle",
+            "Mensuelle",
+            "Hebdomadaire"
+          ]
+        },
+        {
+          "id": "Q1.15",
+          "label": "Export base article disponible",
+          "type": "dropdown",
+          "required": false,
+          "options": ["Oui CSV/Excel", "Non — à créer", "Via API plateforme"]
+        }
+      ]
+    },
+    {
+      "id": "Q2",
+      "label": "Réception & approvisionnement",
+      "fields": [
+        {
+          "id": "Q2.01",
+          "label": "Mode livraison fournisseur",
+          "type": "dropdown",
+          "required": true,
+          "options": ["Conteneur FCL", "Conteneur LCL", "Palettes", "Colis", "Vrac"]
+        },
+        {
+          "id": "Q2.02",
+          "label": "Palettes / colis mono ou multi-SKU",
+          "type": "dropdown",
+          "required": true,
+          "options": ["Mono-SKU", "Multi-SKU", "Les deux"]
+        },
+        {
+          "id": "Q2.03",
+          "label": "Fréquence approvisionnement",
+          "type": "dropdown",
+          "required": true,
+          "options": [
+            "Hebdomadaire",
+            "Bimensuelle",
+            "Mensuelle",
+            "Trimestrielle",
+            "Ponctuelle/variable"
+          ]
+        },
+        {
+          "id": "Q2.04",
+          "label": "Nb moyen palettes par réception",
+          "type": "dropdown",
+          "required": true,
+          "options": ["0", "1-2", "3-5", "5-10", "10-20", ">20"]
+        },
+        {
+          "id": "Q2.05",
+          "label": "Nb moyen colis par réception",
+          "type": "dropdown",
+          "required": true,
+          "options": ["0", "1-10", "10-30", "30-50", "50-100", ">100"]
+        },
+        {
+          "id": "Q2.06",
+          "label": "Nb fournisseurs différents",
+          "type": "dropdown",
+          "required": false,
+          "options": ["1", "2-3", "4-5", ">5"]
+        },
+        {
+          "id": "Q2.07",
+          "label": "Origine principale marchandises",
+          "type": "dropdown",
+          "required": true,
+          "options": [
+            "Belgique",
+            "France",
+            "Europe UE",
+            "Europe hors UE",
+            "Chine",
+            "Asie hors Chine",
+            "USA/Canada",
+            "Afrique",
+            "Autre"
+          ]
+        },
+        {
+          "id": "Q2.08",
+          "label": "Marchandises dédouanées à l'arrivée",
+          "type": "dropdown",
+          "required": true,
+          "options": ["Oui DDP", "Non — à dédouaner", "Variable"]
+        },
+        {
+          "id": "Q2.09",
+          "label": "Gestion douanière assurée par",
+          "type": "dropdown",
+          "required": false,
+          "options": [
+            "Le prospect",
+            "Son transitaire",
+            "À définir avec Brain E-Log",
+            "Non applicable UE"
+          ]
+        },
+        {
+          "id": "Q2.10",
+          "label": "Contrôle qualité à la réception",
+          "type": "dropdown",
+          "required": true,
+          "options": [
+            "Quantitatif uniquement",
+            "Quantitatif + qualitatif",
+            "Avec prise de photos",
+            "Contrôle complet + rapport",
+            "Aucun"
+          ]
+        },
+        {
+          "id": "Q2.11",
+          "label": "Produits étiquetés EAN à l'arrivée",
+          "type": "dropdown",
+          "required": true,
+          "options": ["Oui — tous", "Partiel", "Non — étiquetage nécessaire"]
+        },
+        {
+          "id": "Q2.12",
+          "label": "Kitting / assemblage à la réception",
+          "type": "dropdown",
+          "required": true,
+          "options": ["Oui", "Non"]
+        },
+        {
+          "id": "Q2.13",
+          "label": "Bon de livraison / packing list fourni",
+          "type": "dropdown",
+          "required": false,
+          "options": ["Oui — systématiquement", "Parfois", "Non"]
+        }
+      ]
+    },
+    {
+      "id": "Q3",
+      "label": "Stockage",
+      "fields": [
+        {
+          "id": "Q3.01",
+          "label": "Volume stockage estimé (en palettes)",
+          "type": "dropdown",
+          "required": true,
+          "options": ["<5", "5-15", "15-30", "30-50", "50-100", ">100"]
+        },
+        {
+          "id": "Q3.02",
+          "label": "Type d'emplacement majoritaire",
+          "type": "dropdown",
+          "required": true,
+          "options": [
+            "Palette sol",
+            "Palette rack",
+            "Bac/étagère picking",
+            "Mixte palette + bac"
+          ]
+        },
+        {
+          "id": "Q3.03",
+          "label": "Valeur estimée du stock moyen",
+          "type": "dropdown",
+          "required": false,
+          "options": ["<10k€", "10-50k€", "50-100k€", "100-250k€", ">250k€"]
+        },
+        {
+          "id": "Q3.04",
+          "label": "Assurance stock souhaitée via Brain E-Log",
+          "type": "dropdown",
+          "required": false,
+          "options": ["Oui", "Non — assuré par nos soins", "À discuter"]
+        },
+        {
+          "id": "Q3.05",
+          "label": "Saisonnalité de l'activité",
+          "type": "dropdown",
+          "required": true,
+          "options": ["Stable", "Pics modérés ±30%", "Forte saisonnalité ×2+"]
+        },
+        {
+          "id": "Q3.06",
+          "label": "Mois de pic",
+          "type": "dropdown",
+          "required": false,
+          "options": [
+            "Jan-Mars",
+            "Avr-Juin",
+            "Juil-Sept",
+            "Oct-Déc",
+            "Black Friday/Noël",
+            "Été",
+            "Plusieurs"
+          ]
+        },
+        {
+          "id": "Q3.07",
+          "label": "Rotation des stocks",
+          "type": "dropdown",
+          "required": true,
+          "options": ["Rapide <30j", "Moyenne 30-90j", "Lente >90j", "Variable"]
+        },
+        {
+          "id": "Q3.08",
+          "label": "Méthode de gestion des stocks",
+          "type": "dropdown",
+          "required": false,
+          "options": ["FIFO", "FEFO", "LIFO", "Pas de préférence"]
+        },
+        {
+          "id": "Q3.09",
+          "label": "Stock de sécurité",
+          "type": "dropdown",
+          "required": false,
+          "options": ["Oui", "Non", "À définir"]
+        },
+        {
+          "id": "Q3.10",
+          "label": "Fréquence d'inventaire souhaitée",
+          "type": "dropdown",
+          "required": false,
+          "options": ["Annuel", "Semestriel", "Trimestriel", "Mensuel", "Pas nécessaire"]
+        }
+      ]
+    },
+    {
+      "id": "Q4",
+      "label": "Préparation de commandes",
+      "fields": [
+        {
+          "id": "Q4.01",
+          "label": "Nb commandes B2C / mois",
+          "type": "dropdown",
+          "required": true,
+          "options": ["<50", "50-200", "200-500", "500-1000", "1000-5000", ">5000"]
+        },
+        {
+          "id": "Q4.02",
+          "label": "Nb moyen de SKU par commande B2C",
+          "type": "dropdown",
+          "required": true,
+          "options": ["1", "1-2", "2-3", "3-5", ">5"]
+        },
+        {
+          "id": "Q4.03",
+          "label": "Nb moyen d'unités par commande B2C",
+          "type": "dropdown",
+          "required": true,
+          "options": ["1", "1-2", "2-3", "3-5", ">5"]
+        },
+        {
+          "id": "Q4.04",
+          "label": "Valeur moyenne commande B2C",
+          "type": "dropdown",
+          "required": false,
+          "options": ["<30€", "30-60€", "60-100€", "100-200€", ">200€"]
+        },
+        {
+          "id": "Q4.05",
+          "label": "Activité B2B",
+          "type": "dropdown",
+          "required": true,
+          "options": ["Oui", "Non", "En projet"]
+        },
+        {
+          "id": "Q4.06",
+          "label": "Nb commandes B2B / mois",
+          "type": "dropdown",
+          "required": false,
+          "options": ["<10", "10-50", "50-100", ">100", "Non applicable"]
+        },
+        {
+          "id": "Q4.07",
+          "label": "Nb moyen d'unités par commande B2B",
+          "type": "dropdown",
+          "required": false,
+          "options": ["1-10", "10-50", "50-100", ">100", "Non applicable"]
+        },
+        {
+          "id": "Q4.08",
+          "label": "Valeur moyenne commande B2B",
+          "type": "dropdown",
+          "required": false,
+          "options": ["<200€", "200-500€", "500-1000€", ">1000€", "Non applicable"]
+        },
+        {
+          "id": "Q4.09",
+          "label": "Format d'expédition B2B",
+          "type": "dropdown",
+          "required": false,
+          "options": [
+            "Colis",
+            "Demi-palette",
+            "Palette complète",
+            "Variable",
+            "Non applicable"
+          ]
+        },
+        {
+          "id": "Q4.10",
+          "label": "Plateforme e-commerce",
+          "type": "dropdown",
+          "required": true,
+          "options": [
+            "Shopify",
+            "WooCommerce",
+            "PrestaShop",
+            "Magento",
+            "Wix",
+            "Webflow",
+            "Sur mesure",
+            "Autre"
+          ]
+        },
+        {
+          "id": "Q4.11",
+          "label": "Marketplaces",
+          "type": "dropdown",
+          "required": false,
+          "options": [
+            "Aucune",
+            "Amazon",
+            "Bol.com",
+            "Cdiscount",
+            "Zalando",
+            "eBay",
+            "Plusieurs",
+            "Autre"
+          ]
+        },
+        {
+          "id": "Q4.12",
+          "label": "Commandes récurrentes (abonnements / box)",
+          "type": "dropdown",
+          "required": false,
+          "options": ["Oui", "Non", "En projet"]
+        },
+        {
+          "id": "Q4.13",
+          "label": "Pic de commandes quotidien",
+          "type": "dropdown",
+          "required": false,
+          "options": [
+            "Réparti uniformément",
+            "Pic en soirée",
+            "Pic le week-end",
+            "Pics post-campagnes",
+            "Variable"
+          ]
+        },
+        {
+          "id": "Q4.14",
+          "label": "Délai de préparation souhaité",
+          "type": "dropdown",
+          "required": true,
+          "options": [
+            "Jour même cut-off 12h",
+            "Jour même cut-off 16h",
+            "J+1",
+            "J+2",
+            "Pas de contrainte"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Q5",
+      "label": "Packaging & colisage",
+      "fields": [
+        {
+          "id": "Q5.01",
+          "label": "Type d'emballage B2C",
+          "type": "dropdown",
+          "required": true,
+          "options": [
+            "Carton standard brun",
+            "Carton renforcé",
+            "Carton personnalisé imprimé",
+            "Pochette/enveloppe",
+            "Mixte",
+            "À définir"
+          ]
+        },
+        {
+          "id": "Q5.02",
+          "label": "Calage / protection",
+          "type": "dropdown",
+          "required": false,
+          "options": [
+            "Papier kraft",
+            "Film bulles",
+            "Mousse",
+            "Chips de calage",
+            "Aucun",
+            "Mixte",
+            "À définir"
+          ]
+        },
+        {
+          "id": "Q5.03",
+          "label": "Inserts marketing",
+          "type": "dropdown",
+          "required": false,
+          "options": ["Oui — flyer/carte", "Oui — échantillon", "Oui — multiple", "Non"]
+        },
+        {
+          "id": "Q5.04",
+          "label": "Fournitures fournies par",
+          "type": "dropdown",
+          "required": true,
+          "options": ["Le prospect", "Brain E-Log à facturer", "À définir"]
+        },
+        {
+          "id": "Q5.05",
+          "label": "Unboxing experience",
+          "type": "dropdown",
+          "required": false,
+          "options": ["Oui — important", "Souhaitable", "Non"]
+        },
+        {
+          "id": "Q5.06",
+          "label": "Cahier des charges palettisation B2B",
+          "type": "dropdown",
+          "required": false,
+          "options": [
+            "Filmage seul",
+            "Filmage + cerclage",
+            "Filmage + intercalaires",
+            "Pas de B2B",
+            "À définir"
+          ]
+        },
+        {
+          "id": "Q5.07",
+          "label": "Étiquetage spécifique B2B",
+          "type": "dropdown",
+          "required": false,
+          "options": [
+            "Étiquette palette",
+            "BL sur colis",
+            "Les deux",
+            "Non",
+            "Pas de B2B"
+          ]
+        },
+        {
+          "id": "Q5.08",
+          "label": "Exigences distributeurs B2B",
+          "type": "dropdown",
+          "required": false,
+          "options": [
+            "Aucune",
+            "Cahier charges GMS",
+            "Normes EDI",
+            "Étiquetage enseigne",
+            "Plusieurs",
+            "Pas de B2B",
+            "Autre"
+          ]
+        },
+        {
+          "id": "Q5.09",
+          "label": "Personnalisation produit",
+          "type": "dropdown",
+          "required": false,
+          "options": [
+            "Gravure/flocage",
+            "Marquage client/événement",
+            "Assemblage coffrets",
+            "Aucune",
+            "Autre"
+          ]
+        },
+        {
+          "id": "Q5.10",
+          "label": "Co-branding / packaging événementiel",
+          "type": "dropdown",
+          "required": false,
+          "options": ["Oui — régulier", "Oui — ponctuel", "Non"]
+        }
+      ]
+    },
+    {
+      "id": "Q6",
+      "label": "Expédition",
+      "fields": [
+        {
+          "id": "Q6.01",
+          "label": "Transporteurs actuels",
+          "type": "dropdown",
+          "required": false,
+          "options": [
+            "Aucun",
+            "Bpost",
+            "PostNL",
+            "DHL",
+            "DPD",
+            "GLS",
+            "Mondial Relay",
+            "Colissimo",
+            "UPS",
+            "FedEx",
+            "Plusieurs",
+            "Autre"
+          ]
+        },
+        {
+          "id": "Q6.02",
+          "label": "Part des expéditions multi-colis",
+          "type": "dropdown",
+          "required": false,
+          "options": [
+            "Jamais",
+            "Rarement <5%",
+            "Régulièrement 5-20%",
+            "Fréquent >20%"
+          ]
+        },
+        {
+          "id": "Q6.03",
+          "label": "France — % du volume expédié",
+          "type": "dropdown",
+          "required": true,
+          "options": ["0%", "<5%", "5-15%", "15-30%", "30-50%", ">50%"]
+        },
+        {
+          "id": "Q6.04",
+          "label": "Belgique — % du volume expédié",
+          "type": "dropdown",
+          "required": true,
+          "options": ["0%", "<5%", "5-15%", "15-30%", "30-50%", ">50%"]
+        },
+        {
+          "id": "Q6.05",
+          "label": "Pays-Bas — % du volume expédié",
+          "type": "dropdown",
+          "required": false,
+          "options": ["0%", "<5%", "5-15%", "15-30%", "30-50%", ">50%"]
+        },
+        {
+          "id": "Q6.06",
+          "label": "Allemagne — % du volume expédié",
+          "type": "dropdown",
+          "required": false,
+          "options": ["0%", "<5%", "5-15%", "15-30%", "30-50%", ">50%"]
+        },
+        {
+          "id": "Q6.07",
+          "label": "Suisse — % du volume expédié",
+          "type": "dropdown",
+          "required": false,
+          "options": ["0%", "<5%", "5-15%", "15-30%", "30-50%", ">50%"]
+        },
+        {
+          "id": "Q6.08",
+          "label": "Autres pays — % du volume expédié",
+          "type": "dropdown",
+          "required": false,
+          "options": ["0%", "<5%", "5-15%", "15-30%", "30-50%", ">50%"]
+        },
+        {
+          "id": "Q6.09",
+          "label": "Tranche de poids majoritaire",
+          "type": "dropdown",
+          "required": true,
+          "options": [
+            "0-500g",
+            "500g-1kg",
+            "1-3kg",
+            "3-5kg",
+            "5-10kg",
+            "10-30kg",
+            ">30kg"
+          ]
+        },
+        {
+          "id": "Q6.10",
+          "label": "Poids moyen colis B2C",
+          "type": "dropdown",
+          "required": true,
+          "options": [
+            "<0.5kg",
+            "0.5-1kg",
+            "1-2kg",
+            "2-3kg",
+            "3-5kg",
+            "5-10kg",
+            ">10kg"
+          ]
+        },
+        {
+          "id": "Q6.11",
+          "label": "Poids moyen colis B2B",
+          "type": "dropdown",
+          "required": false,
+          "options": [
+            "<2kg",
+            "2-5kg",
+            "5-10kg",
+            "10-20kg",
+            "20-30kg",
+            ">30kg",
+            "Non applicable"
+          ]
+        },
+        {
+          "id": "Q6.12",
+          "label": "Dimensions max des colis",
+          "type": "dropdown",
+          "required": false,
+          "options": [
+            "<30×20×15",
+            "<50×40×30",
+            "<80×60×40",
+            "<100×80×60",
+            ">100cm hors gabarit"
+          ]
+        },
+        {
+          "id": "Q6.13",
+          "label": "Livraison à domicile",
+          "type": "dropdown",
+          "required": true,
+          "options": ["Oui — tous pays", "Oui — certains pays", "Non"]
+        },
+        {
+          "id": "Q6.14",
+          "label": "Livraison en point relais",
+          "type": "dropdown",
+          "required": false,
+          "options": ["Oui — tous pays", "Oui — certains pays", "Non"]
+        },
+        {
+          "id": "Q6.15",
+          "label": "Livraison express",
+          "type": "dropdown",
+          "required": false,
+          "options": ["Oui — tous pays", "Oui — certains pays", "Non"]
+        }
+      ]
+    },
+    {
+      "id": "Q7",
+      "label": "Gestion des retours",
+      "fields": [
+        {
+          "id": "Q7.01",
+          "label": "Taux de retour B2C estimé",
+          "type": "dropdown",
+          "required": true,
+          "options": ["<2%", "2-5%", "5-10%", "10-20%", ">20%"]
+        },
+        {
+          "id": "Q7.02",
+          "label": "Taux de retour B2B estimé",
+          "type": "dropdown",
+          "required": false,
+          "options": ["<1%", "1-3%", "3-5%", ">5%", "Pas de B2B"]
+        },
+        {
+          "id": "Q7.03",
+          "label": "Motifs de retour principaux",
+          "type": "dropdown",
+          "required": false,
+          "options": [
+            "Rétractation",
+            "Taille/mauvais choix",
+            "Produit défectueux",
+            "Erreur livraison",
+            "Mixte/variable"
+          ]
+        },
+        {
+          "id": "Q7.04",
+          "label": "Traitement des retours",
+          "type": "dropdown",
+          "required": true,
+          "options": [
+            "Contrôle qualité + remise en stock",
+            "Remise en stock directe",
+            "Reconditionnement",
+            "Destruction",
+            "À définir selon état"
+          ]
+        },
+        {
+          "id": "Q7.05",
+          "label": "Gestion des échanges",
+          "type": "dropdown",
+          "required": false,
+          "options": ["Oui", "Non", "À définir"]
+        },
+        {
+          "id": "Q7.06",
+          "label": "Étiquette retour",
+          "type": "dropdown",
+          "required": false,
+          "options": [
+            "Pré-imprimée dans le colis",
+            "Générée à la demande via portail",
+            "Fournie par le prospect",
+            "Pas d'étiquette retour"
+          ]
+        },
+        {
+          "id": "Q7.07",
+          "label": "Portail retour existant",
+          "type": "dropdown",
+          "required": false,
+          "options": [
+            "Oui — déjà en place",
+            "Non — à créer",
+            "Non — pas nécessaire"
+          ]
+        },
+        {
+          "id": "Q7.08",
+          "label": "Délai de traitement retour souhaité",
+          "type": "dropdown",
+          "required": false,
+          "options": ["24h", "48h", "5 jours ouvrés", "Pas de contrainte"]
+        },
+        {
+          "id": "Q7.09",
+          "label": "Photo des retours requise",
+          "type": "dropdown",
+          "required": false,
+          "options": ["Oui — systématiquement", "Oui — si défaut", "Non"]
+        }
+      ]
+    },
+    {
+      "id": "Q8",
+      "label": "Informations complémentaires",
+      "fields": [
+        {
+          "id": "Q8.01",
+          "label": "Intégration WMS souhaitée",
+          "type": "dropdown",
+          "required": true,
+          "options": [
+            "API directe",
+            "Plugin natif",
+            "Fichier CSV/SFTP",
+            "Marketplace connector",
+            "Pas nécessaire",
+            "À définir"
+          ]
+        },
+        {
+          "id": "Q8.02",
+          "label": "ERP / outil de gestion utilisé",
+          "type": "dropdown",
+          "required": false,
+          "options": ["Aucun", "Odoo", "SAP", "Exact Online", "Sage", "Autre"]
+        },
+        {
+          "id": "Q8.03",
+          "label": "Synchronisation stocks en temps réel",
+          "type": "dropdown",
+          "required": true,
+          "options": ["Oui — indispensable", "Souhaitable", "Non"]
+        },
+        {
+          "id": "Q8.04",
+          "label": "Date de lancement souhaitée",
+          "type": "dropdown",
+          "required": true,
+          "options": ["<1 mois", "1-3 mois", "3-6 mois", ">6 mois"]
+        },
+        {
+          "id": "Q8.05",
+          "label": "Volume de stock initial",
+          "type": "dropdown",
+          "required": true,
+          "options": ["<5 palettes", "5-15 palettes", "15-30 palettes", ">30 palettes"]
+        },
+        {
+          "id": "Q8.06",
+          "label": "Volume cible à 6 mois (commandes/mois)",
+          "type": "dropdown",
+          "required": false,
+          "options": ["<100", "100-500", "500-1000", "1000-5000", ">5000"]
+        },
+        {
+          "id": "Q8.07",
+          "label": "Volume cible à 12 mois (commandes/mois)",
+          "type": "dropdown",
+          "required": false,
+          "options": ["<100", "100-500", "500-1000", "1000-5000", ">5000"]
+        },
+        {
+          "id": "Q8.08",
+          "label": "Croissance annuelle estimée",
+          "type": "dropdown",
+          "required": false,
+          "options": ["Stable", "10-25%", "25-50%", "50-100%", ">100%"]
+        },
+        {
+          "id": "Q8.09",
+          "label": "Prestataire logistique actuel",
+          "type": "dropdown",
+          "required": false,
+          "options": [
+            "Aucun — gestion interne",
+            "Aucun — lancement",
+            "Oui — changement souhaité"
+          ]
+        },
+        {
+          "id": "Q8.10",
+          "label": "Raison du changement de prestataire",
+          "type": "dropdown",
+          "required": false,
+          "options": [
+            "Prix trop élevé",
+            "Qualité insuffisante",
+            "Manque de flexibilité",
+            "Problèmes IT/intégration",
+            "Capacité insuffisante",
+            "Autre",
+            "Non applicable"
+          ]
+        },
+        {
+          "id": "Q8.11",
+          "label": "Autres besoins ou informations complémentaires",
+          "type": "textarea",
+          "required": false,
+          "options": []
+        }
+      ]
+    }
+  ]
+}

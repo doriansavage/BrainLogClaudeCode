@@ -1,0 +1,238 @@
+{
+  "group": {
+    "id": "standard",
+    "name": "Standard",
+    "description": "Grille tarifaire Brain E-Log — tarifs de référence",
+    "createdAt": "2026-03-13"
+  },
+  "categories": [
+    {
+      "id": "frais_demarrage",
+      "label": "Frais de démarrage",
+      "description": "Facturés une seule fois à l'ouverture du compte",
+      "items": [
+        {
+          "id": "mise_en_place_brain_elog",
+          "label": "Frais de mise en place — Brain E-Log",
+          "description": "Étude et organisation des flux logistiques / Formation des équipes et mise en place opérationnelle / Ouverture du compte client et du dossier de facturation",
+          "price": null,
+          "priceType": "tbd",
+          "unit": "forfait",
+          "billing": "une_seule_fois"
+        },
+        {
+          "id": "mise_en_place_wms",
+          "label": "Frais de mise en place — WMS",
+          "description": "Intégration du WMS avec CMS/ERP / Création de flux EDI ou API personnalisés / Paramétrage des règles de gestion (réception, stockage, préparation, retours) et de transport",
+          "price": null,
+          "priceType": "tbd",
+          "unit": "forfait",
+          "billing": "une_seule_fois"
+        }
+      ]
+    },
+    {
+      "id": "frais_recurrents",
+      "label": "Frais récurrents mensuels",
+      "description": "Facturés chaque mois indépendamment de l'activité",
+      "items": [
+        {
+          "id": "gestion_mensuelle_compte",
+          "label": "Gestion mensuelle de compte",
+          "description": "Frais de dossiers administratifs et facturation",
+          "price": 150.00,
+          "priceType": "fixed",
+          "unit": "par mois",
+          "billing": "mensuel"
+        },
+        {
+          "id": "abonnement_wms",
+          "label": "Abonnement WMS",
+          "description": "Licence mensuelle WMS : suivi en temps réel des réceptions, du stock, des préparations de commandes, des retours / synchronisation automatique des commandes, stocks et statuts / profils utilisateurs illimités, traçabilité des actions et sécurisation des accès",
+          "price": 100.00,
+          "priceType": "fixed",
+          "unit": "par mois",
+          "billing": "mensuel"
+        }
+      ]
+    },
+    {
+      "id": "frais_activite",
+      "label": "Frais mensuels liés à l'activité",
+      "description": "Facturés selon les volumes réels traités",
+      "items": [
+        {
+          "id": "dechargement_container_40",
+          "label": "Déchargement container 40 pieds (max 4h)",
+          "description": "Déchargement et mise à quai des marchandises — conteneur 40 pieds",
+          "price": 330.00,
+          "priceType": "fixed",
+          "unit": "par conteneur",
+          "billing": "a_l_usage",
+          "condition": "Q2.01 IN ['Conteneur FCL', 'Conteneur LCL']"
+        },
+        {
+          "id": "dechargement_container_20",
+          "label": "Déchargement container 20 pieds (max 2h)",
+          "description": "Déchargement et mise à quai des marchandises — conteneur 20 pieds",
+          "price": 210.00,
+          "priceType": "fixed",
+          "unit": "par conteneur",
+          "billing": "a_l_usage",
+          "condition": "Q2.01 IN ['Conteneur FCL', 'Conteneur LCL']"
+        },
+        {
+          "id": "dechargement_palette",
+          "label": "Déchargement palette",
+          "description": "Déchargement et mise à quai — palette monoréférence ou multiréférence",
+          "price": 6.50,
+          "priceType": "fixed",
+          "unit": "par palette",
+          "billing": "a_l_usage",
+          "condition": "Q2.01 = 'Palettes' OR Q2.04 != '0'"
+        },
+        {
+          "id": "dechargement_colis",
+          "label": "Déchargement colis",
+          "description": "Déchargement et mise à quai — colis monoréférence ou multiréférence",
+          "price": 1.20,
+          "priceType": "fixed",
+          "unit": "par colis",
+          "billing": "a_l_usage",
+          "condition": "Q2.01 = 'Colis' OR Q2.05 != '0'"
+        },
+        {
+          "id": "entree_en_stock",
+          "label": "Entrée en stock",
+          "description": "Identification des livraisons / Contrôle quantitatif / Mise en stock physique et informatique / Clôture de la réception",
+          "price": 0.10,
+          "priceType": "fixed",
+          "unit": "par article (UVC)",
+          "billing": "a_l_usage"
+        },
+        {
+          "id": "stockage_palette",
+          "label": "Stockage palette",
+          "description": "Dimensions palette : l=80 × L=120 × h=180 cm",
+          "price": 10.50,
+          "priceType": "fixed",
+          "unit": "par palette / par mois",
+          "billing": "mensuel"
+        },
+        {
+          "id": "stockage_bac",
+          "label": "Stockage bac / étagère picking",
+          "description": "Emplacement bac ou étagère dédié picking",
+          "price": null,
+          "priceType": "quote",
+          "unit": "par emplacement / par mois",
+          "billing": "mensuel",
+          "condition": "Q3.02 IN ['Bac/étagère picking', 'Mixte palette + bac']"
+        },
+        {
+          "id": "preparation_b2c_commande",
+          "label": "Préparation commande B2C — par commande",
+          "description": "Récupération des ordres, lancement des vagues, prélèvement, montage carton, packing, impression et pose étiquette transporteur, chargement",
+          "price": 1.50,
+          "priceType": "fixed",
+          "unit": "par commande",
+          "billing": "a_l_usage"
+        },
+        {
+          "id": "preparation_b2c_ligne",
+          "label": "Préparation commande B2C — par ligne",
+          "description": "Supplément par ligne de commande",
+          "price": 0.25,
+          "priceType": "fixed",
+          "unit": "par ligne de commande",
+          "billing": "a_l_usage"
+        },
+        {
+          "id": "preparation_b2c_article",
+          "label": "Préparation commande B2C — par article",
+          "description": "Supplément par unité préparée",
+          "price": 0.50,
+          "priceType": "fixed",
+          "unit": "par article (UVC)",
+          "billing": "a_l_usage"
+        },
+        {
+          "id": "preparation_b2b",
+          "label": "Préparation commande B2B (régie)",
+          "description": "Préparation des commandes B2B selon cahier des charges",
+          "price": 39.50,
+          "priceType": "fixed",
+          "unit": "par heure",
+          "billing": "a_l_usage",
+          "condition": "Q4.05 IN ['Oui', 'En projet']"
+        },
+        {
+          "id": "etiquette_transporteur",
+          "label": "Étiquette transporteur",
+          "description": "Impression et fourniture de l'étiquette transporteur",
+          "price": 0.06,
+          "priceType": "fixed",
+          "unit": "par colis",
+          "billing": "a_l_usage"
+        },
+        {
+          "id": "insertion_bl",
+          "label": "Impression + insertion BL",
+          "description": "Impression et insertion du bon de livraison dans le colis",
+          "price": 0.15,
+          "priceType": "fixed",
+          "unit": "par document",
+          "billing": "a_l_usage",
+          "condition": "Q5.03 != 'Non'"
+        },
+        {
+          "id": "insertion_document",
+          "label": "Insertion document / flyer / goodies",
+          "description": "Insertion d'un élément marketing ou publicitaire dans le colis",
+          "price": 0.09,
+          "priceType": "fixed",
+          "unit": "par pièce",
+          "billing": "a_l_usage",
+          "condition": "Q5.03 != 'Non'"
+        },
+        {
+          "id": "documents_douaniers",
+          "label": "Documents douaniers (hors UE)",
+          "description": "Impression et insertion des documents douaniers pour commandes hors Union Européenne",
+          "price": 2.75,
+          "priceType": "fixed",
+          "unit": "par commande",
+          "billing": "a_l_usage",
+          "condition": "Q6.07 != '0%' OR Q6.08 != '0%'"
+        },
+        {
+          "id": "management_retours",
+          "label": "Management des retours",
+          "description": "Identification & reporting client (hors déchargement, réception et mise en stock)",
+          "price": 0.80,
+          "priceType": "fixed",
+          "unit": "par retour",
+          "billing": "a_l_usage"
+        },
+        {
+          "id": "services_additionnels_manutention",
+          "label": "Services additionnels — Manutention",
+          "description": "Sur demande : inventaire, reconditionnement produits, re-étiquetage, réemballage, kitting, personnalisation, etc.",
+          "price": 39.50,
+          "priceType": "fixed",
+          "unit": "par heure",
+          "billing": "a_l_usage"
+        },
+        {
+          "id": "services_additionnels_admin",
+          "label": "Services additionnels — Administration",
+          "description": "Sur demande : travaux spécifiques non liés à la manutention",
+          "price": 65.00,
+          "priceType": "fixed",
+          "unit": "par heure",
+          "billing": "a_l_usage"
+        }
+      ]
+    }
+  ]
+}

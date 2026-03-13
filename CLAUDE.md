@@ -34,12 +34,28 @@ Types : `feat`, `fix`, `docs`, `refactor`, `chore`, `test`
 - **init**: Initialisation du projet BrainLogClaudeCode
 - **chore**: Création du CLAUDE.md avec règles de workflow
 - **chore**: Configuration des settings Claude (toutes permissions autorisées)
+- **docs**: Ajout section "Skills à charger" avec 8 skills logistique/ecommerce
 
 ---
 
 ## Architecture
 
 _À documenter au fur et à mesure des développements._
+
+---
+
+## Skills à charger
+
+Lorsqu'on demande d'utiliser l'un des skills suivants, le charger via le Skill tool :
+
+- `shopify-automation`
+- `data-engineering-data-pipeline`
+- `kpi-dashboard-design`
+- `dbt-transformation-patterns`
+- `billing-automation`
+- `docusign-automation`
+- `microservices-patterns`
+- `event-sourcing-architect`
 
 ---
 

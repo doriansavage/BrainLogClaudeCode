@@ -40,6 +40,7 @@ Types : `feat`, `fix`, `docs`, `refactor`, `chore`, `test`
 - **feat**: Création dossier prompts/ + prompt générateur offre partenariat logistique Brain E-Log
 - **feat**: Extraction données → `data/questionnaire-fields.json` (97 champs, 8 sections) + `data/tariffs-standard.json` (21 postes tarifaires, 3 catégories)
 - **docs**: ADN graphique Brain e-Log → `adn-graphique-brain-log.md` (couleurs, logo, typo, UI, images)
+- **docs**: Plan complet Module 1 Tarifs → `docs/brain-elog-app-plan.md` (user stories, DB schema, UI, branches)
 
 ---
 

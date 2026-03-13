@@ -37,6 +37,7 @@ Types : `feat`, `fix`, `docs`, `refactor`, `chore`, `test`
 - **docs**: Ajout section "Skills à charger" avec 8 skills logistique/ecommerce
 - **docs**: Ajout skills Webdesign (9) et Frontend Dev (9)
 - **docs**: Ajout skills Brainstorming & Planning (8)
+- **feat**: Création dossier prompts/ + prompt générateur offre partenariat logistique Brain E-Log
 
 ---
 

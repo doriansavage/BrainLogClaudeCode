@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback, type KeyboardEvent } from 'react'
-import { Plus, MoreHorizontal, Eye, EyeOff, Lock, Star, Copy, Pencil, Archive, Trash2, Scale, ChevronDown, ChevronRight, Sliders } from 'lucide-react'
+import { Plus, MoreHorizontal, Eye, EyeOff, Lock, Star, Copy, Pencil, Archive, Trash2, Scale, ChevronDown, ChevronRight, Sliders, Rocket, Database, Briefcase, Server, Truck, Package2, Package, PackageCheck, Warehouse, LayoutGrid, ShoppingCart, List, Scan, Users, Tag, Printer, Gift, Globe, RotateCcw, Wrench, ClipboardList, Clock, Undo2, X } from 'lucide-react'
 import { useTariffStore, type DuplicateOptions } from '@/store/tariffs'
-import type { TariffGroup, TariffItem, TariffCategory } from '@/types/tariffs'
+import type { TariffGroup, TariffItem, TariffCategory, TariffSnapshot } from '@/types/tariffs'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -35,6 +35,33 @@ function useOutsideClick(handler: () => void) {
     return () => document.removeEventListener('mousedown', listener)
   }, [handler])
   return ref
+}
+
+// ─── Icônes par item ──────────────────────────────────────────────────────────
+
+const ITEM_ICONS: Record<string, React.ComponentType<{ size: number; style?: React.CSSProperties }>> = {
+  'Frais de mise en place — Brain E-Log':       Rocket,
+  'Frais de mise en place — WMS':               Database,
+  'Gestion mensuelle de compte':                Briefcase,
+  'Abonnement WMS':                             Server,
+  'Déchargement container 40 pieds (max 4h)':  Truck,
+  'Déchargement container 20 pieds (max 2h)':  Truck,
+  'Déchargement palette':                       Package2,
+  'Déchargement colis':                         Package,
+  'Entrée en stock':                            PackageCheck,
+  'Stockage palette':                           Warehouse,
+  'Stockage bac / étagère picking':             LayoutGrid,
+  'Préparation commande B2C — par commande':    ShoppingCart,
+  'Préparation commande B2C — par ligne':       List,
+  'Préparation commande B2C — par article':     Scan,
+  'Préparation commande B2B (régie)':           Users,
+  'Étiquette transporteur':                     Tag,
+  'Impression + insertion BL':                  Printer,
+  'Insertion document / flyer / goodies':       Gift,
+  'Documents douaniers (hors UE)':              Globe,
+  'Management des retours':                     RotateCcw,
+  'Services additionnels — Manutention':        Wrench,
+  'Services additionnels — Administration':     ClipboardList,
 }
 
 const ROUND_OPTIONS = [
@@ -318,11 +345,22 @@ function BulkAdjustModal({ group, onClose }: { group: TariffGroup; onClose: () =
     return i.priceType === 'fixed' && i.price !== null
   })
 
-  // Aperçu sur le premier item éligible
-  const firstItem = targetItems[0]
+  // Aperçu : préfère un item où l'arrondi a un effet visible
+  const previewItem = (() => {
+    if (roundTo <= 0) return targetItems[0]
+    return targetItems.find((item) => {
+      if (item.price == null) return false
+      let adj = item.price
+      if (value !== 0) adj = modType === 'percent' ? adj * (1 + value / 100) : adj + value
+      adj = Math.max(0, adj)
+      const rounded = Math.round(adj / roundTo) * roundTo
+      return Math.abs(rounded - adj) > 0.001
+    }) ?? targetItems[0]
+  })()
+
   let previewAfter: number | null = null
-  if (firstItem?.price != null && hasAction) {
-    let adj = firstItem.price
+  if (previewItem?.price != null && hasAction) {
+    let adj = previewItem.price
     if (value !== 0) adj = modType === 'percent' ? adj * (1 + value / 100) : adj + value
     if (roundTo > 0) adj = Math.round(adj / roundTo) * roundTo
     previewAfter = Math.max(0, Math.round(adj * 100) / 100)
@@ -389,9 +427,9 @@ function BulkAdjustModal({ group, onClose }: { group: TariffGroup; onClose: () =
           {hasAction ? (
             <p style={{ fontSize: 13, color: 'var(--gray-700)' }}>
               <strong>{targetItems.length}</strong> prix fixes seront modifiés
-              {firstItem?.price != null && previewAfter !== null && (
+              {previewItem?.price != null && previewAfter !== null && (
                 <> · ex:{' '}
-                  <span style={{ fontFamily: 'monospace' }}>{formatPrice(firstItem.price, 'fixed')}</span>
+                  <span style={{ fontFamily: 'monospace' }}>{formatPrice(previewItem.price, 'fixed')}</span>
                   {' → '}
                   <strong style={{ color: 'var(--primary)', fontFamily: 'monospace' }}>{formatPrice(previewAfter, 'fixed')}</strong>
                 </>
@@ -409,6 +447,121 @@ function BulkAdjustModal({ group, onClose }: { group: TariffGroup; onClose: () =
           </button>
           <button onClick={apply} disabled={!hasAction} style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: hasAction ? 'var(--primary)' : 'var(--gray-200)', fontSize: 13, fontWeight: 600, color: hasAction ? '#fff' : 'var(--gray-400)', cursor: hasAction ? 'pointer' : 'default' }}>
             Appliquer
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Modal Historique ─────────────────────────────────────────────────────────
+
+function formatRelativeDate(iso: string): string {
+  const d = new Date(iso)
+  const now = new Date()
+  const diffMs = now.getTime() - d.getTime()
+  const diffMin = Math.floor(diffMs / 60000)
+  if (diffMin < 1) return "À l'instant"
+  if (diffMin < 60) return `Il y a ${diffMin} min`
+  const diffH = Math.floor(diffMin / 60)
+  if (diffH < 24) return `Il y a ${diffH}h`
+  return d.toLocaleDateString('fr-BE', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+}
+
+function HistoryModal({ group, onClose }: { group: TariffGroup; onClose: () => void }) {
+  const { snapshots, revertToSnapshot, deleteSnapshot, saveSnapshot } = useTariffStore()
+  const [confirmId, setConfirmId] = useState<string | null>(null)
+
+  const groupSnaps = [...snapshots.filter((s) => s.groupId === group.id)].reverse()
+
+  function handleRevert(snap: TariffSnapshot) {
+    // Sauvegarde l'état actuel avant de revenir en arrière
+    saveSnapshot(group.id, `Avant restauration "${snap.label}"`)
+    revertToSnapshot(snap.id)
+    onClose()
+  }
+
+  return (
+    <div onClick={onClose} style={modalOverlay}>
+      <div onClick={(e) => e.stopPropagation()} style={{ ...modalBox(500), maxHeight: '80vh' }}>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+          <Clock size={16} style={{ color: 'var(--primary)' }} />
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--gray-900)', flex: 1 }}>
+            Historique — {group.name}
+          </h2>
+          <button onClick={onClose} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--gray-400)', display: 'flex', padding: 4 }}>
+            <X size={16} />
+          </button>
+        </div>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>
+          Un snapshot est créé automatiquement avant chaque ajustement en masse.
+        </p>
+
+        {groupSnaps.length === 0 ? (
+          <div style={{ padding: '32px 0', textAlign: 'center' }}>
+            <Clock size={32} style={{ color: 'var(--gray-300)', marginBottom: 10 }} />
+            <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+              Aucun snapshot pour ce groupe.<br />
+              Ils apparaîtront automatiquement avant les prochains ajustements.
+            </p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, overflowY: 'auto', maxHeight: 400 }}>
+            {groupSnaps.map((snap) => (
+              <div key={snap.id} style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: '10px 12px', borderRadius: 8,
+                border: `1px solid ${confirmId === snap.id ? 'var(--primary)' : 'var(--border)'}`,
+                background: confirmId === snap.id ? 'var(--primary-light)' : '#fff',
+              }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--gray-800)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {snap.label}
+                  </p>
+                  <p style={{ fontSize: 11, color: 'var(--gray-400)', marginTop: 2 }}>
+                    {formatRelativeDate(snap.createdAt)} · {snap.items.filter(i => i.priceType === 'fixed').length} prix fixes
+                  </p>
+                </div>
+
+                {confirmId === snap.id ? (
+                  <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                    <button onClick={() => setConfirmId(null)}
+                      style={{ padding: '5px 10px', borderRadius: 6, border: '1px solid var(--border)', background: '#fff', fontSize: 12, fontWeight: 500, color: 'var(--gray-600)', cursor: 'pointer' }}>
+                      Annuler
+                    </button>
+                    <button onClick={() => handleRevert(snap)}
+                      style={{ padding: '5px 10px', borderRadius: 6, border: 'none', background: 'var(--primary)', fontSize: 12, fontWeight: 600, color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <Undo2 size={11} /> Confirmer
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+                    <button onClick={() => setConfirmId(snap.id)}
+                      style={{ padding: '5px 10px', borderRadius: 6, border: '1px solid var(--border)', background: '#fff', fontSize: 12, fontWeight: 500, color: 'var(--gray-600)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <Undo2 size={11} /> Restaurer
+                    </button>
+                    <button onClick={() => deleteSnapshot(snap.id)}
+                      style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid var(--border)', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--gray-400)' }}>
+                      <Trash2 size={11} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div style={{ ...divider, marginTop: 20 }} />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <button
+            onClick={() => { saveSnapshot(group.id, 'Checkpoint manuel'); }}
+            style={{ padding: '7px 13px', borderRadius: 7, border: '1px solid var(--border)', background: '#fff', fontSize: 12, fontWeight: 500, color: 'var(--gray-600)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Clock size={12} /> Sauvegarder maintenant
+          </button>
+          <button onClick={onClose}
+            style={{ padding: '7px 14px', borderRadius: 7, border: 'none', background: 'var(--primary)', fontSize: 12, fontWeight: 600, color: '#fff', cursor: 'pointer' }}>
+            Fermer
           </button>
         </div>
       </div>
@@ -524,6 +677,14 @@ function PriceCell({ item, trigger = 0 }: { item: TariffItem; trigger?: number }
   )
 }
 
+// ─── Billing config ───────────────────────────────────────────────────────────
+
+const BILLING_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+  mensuel:        { label: 'mensuel',  color: '#3b82f6', bg: '#EFF6FF' },
+  a_l_usage:      { label: 'usage',    color: '#16a34a', bg: '#F0FDF4' },
+  une_seule_fois: { label: 'unique',   color: '#d97706', bg: '#FFFBEB' },
+}
+
 // ─── Item Row ─────────────────────────────────────────────────────────────────
 
 function ItemRow({ item, index }: { item: TariffItem; index: number }) {
@@ -532,12 +693,12 @@ function ItemRow({ item, index }: { item: TariffItem; index: number }) {
   const [triggerEdit, setTriggerEdit] = useState(0)
 
   function handleRowClick(e: React.MouseEvent) {
-    // Ne pas déclencher si clic sur le bouton œil
     if ((e.target as HTMLElement).closest('button')) return
     setTriggerEdit((t) => t + 1)
   }
 
-  const baseBg = index % 2 === 0 ? '#fff' : '#F8FAFC'
+  const billing = BILLING_CONFIG[item.billing] ?? { label: item.billing, color: '#94a3b8', bg: '#f8fafc' }
+  const baseBg = index % 2 === 0 ? '#fff' : '#FAFBFD'
 
   return (
     <tr
@@ -545,27 +706,51 @@ function ItemRow({ item, index }: { item: TariffItem; index: number }) {
       onMouseLeave={() => setHovered(false)}
       onClick={handleRowClick}
       style={{
-        borderBottom: '1px solid var(--gray-100)',
-        background: hovered ? 'var(--primary-light)' : baseBg,
+        borderBottom: '1px solid #F1F5F9',
+        background: hovered ? '#EFF6FF' : baseBg,
         transition: 'background 100ms',
-        opacity: item.isVisible ? 1 : 0.4,
+        opacity: item.isVisible ? 1 : 0.38,
         cursor: 'pointer',
       }}>
-      <td style={{ paddingLeft: 20, paddingRight: 8, paddingTop: 10, paddingBottom: 10, width: 24 }}>
-        <span style={{ fontSize: 14, color: 'var(--gray-300)', opacity: hovered ? 1 : 0, cursor: 'grab', userSelect: 'none', display: 'block', textAlign: 'center' }}>⠿</span>
+
+      {/* Drag handle */}
+      <td style={{ paddingLeft: 16, paddingRight: 4, paddingTop: 8, paddingBottom: 8, width: 20, verticalAlign: 'middle' }}>
+        <span style={{ fontSize: 13, color: '#CBD5E1', opacity: hovered ? 1 : 0, cursor: 'grab', userSelect: 'none', display: 'block', textAlign: 'center' }}>⠿</span>
       </td>
-      <td style={{ padding: '10px 8px', flex: 1 }}>
-        <span style={{ fontSize: 13, color: 'var(--gray-800)', fontWeight: 400 }}>{item.label}</span>
+
+      {/* Icon + label + description */}
+      <td style={{ padding: '7px 10px 7px 6px', verticalAlign: 'middle' }}>
+        <div style={{ display: 'flex', alignItems: item.description ? 'flex-start' : 'center', gap: 8 }}>
+          {(() => { const Icon = ITEM_ICONS[item.label]; return Icon ? <Icon size={13} style={{ color: '#94A3B8', flexShrink: 0, marginTop: item.description ? 2 : 0 }} /> : null })()}
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 450, color: '#1E293B', lineHeight: '1.35' }}>{item.label}</div>
+            {item.description && (
+              <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 1, lineHeight: '1.3' }}>{item.description}</div>
+            )}
+          </div>
+        </div>
       </td>
-      <td style={{ padding: '10px 12px', textAlign: 'right', whiteSpace: 'nowrap' }}>
+
+      {/* Price */}
+      <td style={{ padding: '7px 8px', textAlign: 'right', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
         <PriceCell item={item} trigger={triggerEdit} />
       </td>
-      <td style={{ padding: '10px 12px', paddingRight: 20, width: 110 }}>
-        <span style={{ fontSize: 12, color: 'var(--gray-400)' }}>{shortUnit(item.unit)}</span>
+
+      {/* Unit + billing */}
+      <td style={{ padding: '7px 8px 7px 4px', width: 120, verticalAlign: 'middle' }}>
+        <div style={{ fontSize: 12, color: '#64748B', lineHeight: '1.3' }}>{shortUnit(item.unit)}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginTop: 2 }}>
+          <span style={{ width: 5, height: 5, borderRadius: '50%', background: billing.color, display: 'inline-block', flexShrink: 0 }} />
+          <span style={{ fontSize: 10, fontWeight: 600, color: billing.color, textTransform: 'uppercase' as const, letterSpacing: '0.04em' }}>
+            {billing.label}
+          </span>
+        </div>
       </td>
-      <td style={{ padding: '10px 16px 10px 4px', width: 36 }}>
+
+      {/* Visibility toggle */}
+      <td style={{ padding: '7px 16px 7px 4px', width: 36, verticalAlign: 'middle' }}>
         <button onClick={() => toggleItemVisibility(item.id)} title={item.isVisible ? 'Masquer' : 'Afficher'}
-          style={{ width: 28, height: 28, border: 'none', background: 'transparent', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: item.isVisible ? 'var(--primary)' : 'var(--gray-300)', opacity: hovered || !item.isVisible ? 1 : 0, transition: 'opacity 150ms' }}>
+          style={{ width: 28, height: 28, border: 'none', background: 'transparent', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: item.isVisible ? 'var(--primary)' : '#CBD5E1', opacity: hovered || !item.isVisible ? 1 : 0, transition: 'opacity 150ms' }}>
           {item.isVisible ? <Eye size={14} /> : <EyeOff size={14} />}
         </button>
       </td>
@@ -575,22 +760,45 @@ function ItemRow({ item, index }: { item: TariffItem; index: number }) {
 
 // ─── Category Section ─────────────────────────────────────────────────────────
 
-function CategorySection({ label, items }: { categoryId: string; label: string; items: TariffItem[] }) {
+const CATEGORY_ACCENT: Record<string, string> = {
+  frais_demarrage:  '#f59e0b',
+  frais_recurrents: '#3b82f6',
+  frais_activite:   '#8b5cf6',
+}
+
+function CategorySection({ categoryId, label, description, items }: { categoryId: string; label: string; description?: string; items: TariffItem[] }) {
   const [collapsed, setCollapsed] = useState(false)
+  const accent = CATEGORY_ACCENT[categoryId] ?? '#64748b'
+
+  // Stats rapides par billing
+  const fixedCount = items.filter((i) => i.priceType === 'fixed').length
+
   return (
     <tbody>
-      <tr onClick={() => setCollapsed((v) => !v)} style={{ cursor: 'pointer', background: 'var(--gray-50)' }}>
-        <td colSpan={5} style={{ padding: '8px 20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ color: 'var(--gray-400)', display: 'flex', alignItems: 'center' }}>
-              {collapsed ? <ChevronRight size={13} /> : <ChevronDown size={13} />}
+      <tr onClick={() => setCollapsed((v) => !v)} style={{ cursor: 'pointer', background: '#F8FAFC', borderTop: '1px solid #E2E8F0' }}>
+        <td colSpan={5} style={{ padding: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '8px 16px 8px 0', borderLeft: `3px solid ${accent}`, paddingLeft: 14 }}>
+            <span style={{ color: '#94A3B8', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+              {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
             </span>
-            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--gray-500)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
-              {label}
-            </span>
-            <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 600, padding: '1px 7px', borderRadius: 99, background: 'var(--gray-200)', color: 'var(--gray-500)' }}>
-              {items.length}
-            </span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#334155', textTransform: 'uppercase' as const, letterSpacing: '0.07em' }}>
+                {label}
+              </span>
+              {description && (
+                <span style={{ fontSize: 11, color: '#94A3B8', marginLeft: 8, fontWeight: 400 }}>{description}</span>
+              )}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+              {fixedCount < items.length && (
+                <span style={{ fontSize: 10, fontWeight: 600, color: '#f59e0b', background: '#FFFBEB', padding: '1px 6px', borderRadius: 99 }}>
+                  {items.length - fixedCount} à définir
+                </span>
+              )}
+              <span style={{ fontSize: 11, fontWeight: 600, padding: '1px 8px', borderRadius: 99, background: '#E2E8F0', color: '#475569' }}>
+                {items.length}
+              </span>
+            </div>
           </div>
         </td>
       </tr>
@@ -603,10 +811,11 @@ function CategorySection({ label, items }: { categoryId: string; label: string; 
 // ─── Items Panel ──────────────────────────────────────────────────────────────
 
 function ItemsPanel() {
-  const { groups, items, categories, selectedGroupId, duplicateGroup, renameGroup, archiveGroup, deleteGroup, setDefaultGroup } = useTariffStore()
+  const { groups, items, categories, snapshots, selectedGroupId, duplicateGroup, renameGroup, archiveGroup, deleteGroup, setDefaultGroup } = useTariffStore()
   const [showDuplicateModal, setShowDuplicateModal] = useState(false)
   const [showRenameModal, setShowRenameModal] = useState(false)
   const [showBulkModal, setShowBulkModal] = useState(false)
+  const [showHistoryModal, setShowHistoryModal] = useState(false)
   const [search, setSearch] = useState('')
   const [catFilter, setCatFilter] = useState('all')
 
@@ -624,25 +833,25 @@ function ItemsPanel() {
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#fff' }}>
       {/* Group header */}
-      <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+      <div style={{ padding: '14px 20px', borderBottom: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--gray-900)', letterSpacing: '-0.01em' }}>{group.name}</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
+            <h2 style={{ fontSize: 15, fontWeight: 700, color: '#0F172A', letterSpacing: '-0.01em' }}>{group.name}</h2>
             {group.isDefault && (
-              <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 99, background: 'var(--primary)', color: '#fff' }}>défaut</span>
+              <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 99, background: 'var(--primary)', color: '#fff', textTransform: 'uppercase' as const, letterSpacing: '0.04em' }}>défaut</span>
             )}
             {group.isLocked && (
-              <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 99, background: '#FFFBEB', color: '#b45309' }}>
-                <Lock size={10} /> verrouillé
+              <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 99, background: '#FFFBEB', color: '#b45309', textTransform: 'uppercase' as const, letterSpacing: '0.04em' }}>
+                <Lock size={9} /> verrouillé
               </span>
             )}
             {group.isArchived && (
-              <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 99, background: 'var(--gray-100)', color: 'var(--gray-500)' }}>archivé</span>
+              <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 99, background: '#F1F5F9', color: '#64748B' }}>archivé</span>
             )}
           </div>
-          {group.description && <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{group.description}</p>}
+          {group.description && <p style={{ fontSize: 12, color: '#94A3B8', marginTop: 2 }}>{group.description}</p>}
         </div>
-        <span style={{ fontSize: 12, color: 'var(--gray-400)', flexShrink: 0 }}>{visibleCount}/{groupItems.length} actifs · {group.usedCount}× utilisé</span>
+        <span style={{ fontSize: 11, color: '#94A3B8', flexShrink: 0 }}>{visibleCount}/{groupItems.length} actifs · {group.usedCount}× utilisé</span>
         <GroupDropdown group={group}
           onRename={() => setShowRenameModal(true)}
           onDuplicate={() => setShowDuplicateModal(true)}
@@ -652,22 +861,31 @@ function ItemsPanel() {
       </div>
 
       {/* Toolbar */}
-      <div style={{ padding: '10px 24px', borderBottom: '1px solid var(--border)', background: 'var(--gray-50)', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+      <div style={{ padding: '8px 20px', borderBottom: '1px solid #E2E8F0', background: '#F8FAFC', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
         <select value={catFilter} onChange={(e) => setCatFilter(e.target.value)}
-          style={{ padding: '6px 10px', borderRadius: 7, border: '1px solid var(--border)', fontSize: 12, fontWeight: 500, color: 'var(--gray-700)', background: '#fff', cursor: 'pointer', outline: 'none' }}>
+          style={{ padding: '5px 10px', borderRadius: 6, border: '1px solid #E2E8F0', fontSize: 12, fontWeight: 500, color: '#475569', background: '#fff', cursor: 'pointer', outline: 'none' }}>
           <option value="all">Toutes catégories</option>
           {[...categories].sort((a, b) => a.sortOrder - b.sortOrder).map((c) => (
             <option key={c.id} value={c.id}>{c.label}</option>
           ))}
         </select>
         <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher un item…"
-          style={{ flex: 1, maxWidth: 280, padding: '6px 10px', borderRadius: 7, border: '1px solid var(--border)', fontSize: 12, color: 'var(--gray-700)', background: '#fff', outline: 'none' }} />
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+          style={{ flex: 1, maxWidth: 260, padding: '5px 10px', borderRadius: 6, border: '1px solid #E2E8F0', fontSize: 12, color: '#475569', background: '#fff', outline: 'none' }} />
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
+          <button onClick={() => setShowHistoryModal(true)}
+            style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 6, border: '1px solid #E2E8F0', background: '#fff', color: '#64748B', fontSize: 12, fontWeight: 500, cursor: 'pointer' }}>
+            <Clock size={13} /> Historique
+            {snapshots.filter(s => s.groupId === selectedGroupId).length > 0 && (
+              <span style={{ position: 'absolute', top: -5, right: -5, minWidth: 16, height: 16, borderRadius: 99, background: 'var(--primary)', color: '#fff', fontSize: 10, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 3px' }}>
+                {snapshots.filter(s => s.groupId === selectedGroupId).length}
+              </span>
+            )}
+          </button>
           <button onClick={() => setShowBulkModal(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 13px', borderRadius: 7, border: '1px solid var(--border)', background: '#fff', color: 'var(--gray-600)', fontSize: 12, fontWeight: 500, cursor: 'pointer' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 6, border: '1px solid #E2E8F0', background: '#fff', color: '#64748B', fontSize: 12, fontWeight: 500, cursor: 'pointer' }}>
             <Sliders size={13} /> Ajuster les prix
           </button>
-          <button style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 13px', borderRadius: 7, border: 'none', background: 'var(--primary)', color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+          <button style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 6, border: 'none', background: 'var(--primary)', color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
             <Plus size={13} /> Item
           </button>
         </div>
@@ -679,7 +897,7 @@ function ItemsPanel() {
           {[...categories].sort((a, b) => a.sortOrder - b.sortOrder).map((cat) => {
             const catItems = filteredItems.filter((i) => i.categoryId === cat.id)
             if (catItems.length === 0) return null
-            return <CategorySection key={cat.id} categoryId={cat.id} label={cat.label} items={catItems} />
+            return <CategorySection key={cat.id} categoryId={cat.id} label={cat.label} description={cat.description} items={catItems} />
           })}
         </table>
       </div>
@@ -692,6 +910,9 @@ function ItemsPanel() {
       )}
       {showBulkModal && (
         <BulkAdjustModal group={group} onClose={() => setShowBulkModal(false)} />
+      )}
+      {showHistoryModal && (
+        <HistoryModal group={group} onClose={() => setShowHistoryModal(false)} />
       )}
     </div>
   )
@@ -778,6 +999,25 @@ function GroupPanel() {
 // ─── Export ───────────────────────────────────────────────────────────────────
 
 export function TariffManager() {
+  const { initialize, isLoading } = useTariffStore()
+
+  useEffect(() => {
+    initialize()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
+        <div style={{ textAlign: 'center', color: 'var(--gray-400)' }}>
+          <div style={{ width: 32, height: 32, borderRadius: '50%', border: '3px solid var(--gray-200)', borderTopColor: 'var(--primary)', animation: 'spin 0.7s linear infinite', margin: '0 auto 12px' }} />
+          <p style={{ fontSize: 13 }}>Chargement des tarifs…</p>
+        </div>
+        <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+      </div>
+    )
+  }
+
   return (
     <div style={{ flex: 1, display: 'flex', overflow: 'hidden', background: '#fff' }}>
       <GroupPanel />

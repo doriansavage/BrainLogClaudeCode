@@ -6,6 +6,7 @@ import {
   Building2, UserCheck, FileText, ShieldCheck, Folder, ClipboardList, Bell, Plug,
   Save, Check, CheckCircle2, Mail, Phone, CreditCard, Hash,
   Upload, Archive, Plus, ChevronDown, ChevronRight, RotateCcw, Paperclip,
+  BarChart3, Truck, Zap,
 } from 'lucide-react'
 
 /* ═══════════════════════════════════════════════════════
@@ -79,7 +80,8 @@ const DEFAULTS: S = {
 /* ═══════════════════════════════════════════════════════
    DOCUMENTS — types & données initiales
 ═══════════════════════════════════════════════════════ */
-type DocCategory = 'cgv' | 'transporteur' | 'regles' | 'tarifs' | 'template' | 'autre'
+type DocType = 'grille' | 'contrat' | 'annexe' | 'regles' | 'autre'
+type ServiceType = 'transport' | 'surcharge' | 'assurance' | 'douane' | 'autre'
 
 interface DocVersion {
   id: string
@@ -93,66 +95,102 @@ interface DocVersion {
 interface Doc {
   id: string
   name: string
-  category: DocCategory
+  docType: DocType
+  carrier?: string        // si docType === 'grille' : 'DHL' | 'Bpost' | 'GLS' | ...
+  serviceType?: ServiceType
   description: string
-  isAttached: boolean   // annexé automatiquement aux offres
+  isAttached: boolean     // fichier brut annexé aux offres
+  usedInPricing: boolean  // valeurs utilisées dans le moteur de pricing
   isArchived: boolean
   currentVersionId: string
   versions: DocVersion[]
 }
 
-const CAT: Record<DocCategory, { label: string; bg: string; color: string }> = {
-  cgv:          { label: 'CGV',          bg: '#EEF4FB', color: '#094D80' },
-  transporteur: { label: 'Transporteur', bg: '#F5F3FF', color: '#6d28d9' },
-  regles:       { label: 'Règles',       bg: '#FFFBEB', color: '#b45309' },
-  tarifs:       { label: 'Tarifs',       bg: '#F0FDF4', color: '#15803d' },
-  template:     { label: 'Template',     bg: '#F8FAFC', color: '#475569' },
-  autre:        { label: 'Autre',        bg: '#F1F5F9', color: '#64748b' },
+const DOCTYPE: Record<DocType, { label: string; bg: string; color: string }> = {
+  grille:  { label: 'Grille tarifaire', bg: '#F0FDF4', color: '#15803d' },
+  contrat: { label: 'Contrat',          bg: '#EEF4FB', color: '#094D80' },
+  annexe:  { label: 'Annexe',           bg: '#F5F3FF', color: '#6d28d9' },
+  regles:  { label: 'Règles ops',       bg: '#FFFBEB', color: '#b45309' },
+  autre:   { label: 'Autre',            bg: '#F1F5F9', color: '#64748b' },
+}
+
+const CARRIER_COLORS: Record<string, { bg: string; color: string }> = {
+  DHL:             { bg: '#FFFBEB', color: '#b45309' },
+  Bpost:           { bg: '#EEF4FB', color: '#094D80' },
+  GLS:             { bg: '#F0FDF4', color: '#15803d' },
+  DPD:             { bg: '#FEE2E2', color: '#dc2626' },
+  PostNL:          { bg: '#FFF1F2', color: '#e11d48' },
+  'Mondial Relay': { bg: '#F5F3FF', color: '#6d28d9' },
+  UPS:             { bg: '#FFFBEB', color: '#92400e' },
+  Multi:           { bg: '#F1F5F9', color: '#64748b' },
 }
 
 const INITIAL_DOCS: Doc[] = [
   {
-    id: 'd1', name: 'Conditions Générales de Vente', category: 'cgv',
+    id: 'd1', name: 'DHL Express — Grille tarifaire 2026',
+    docType: 'grille', carrier: 'DHL', serviceType: 'transport',
+    description: 'Tarifs DHL Express Europe & International — zones, poids, surcharges',
+    isAttached: false, usedInPricing: true, isArchived: false, currentVersionId: 'v1b',
+    versions: [
+      { id: 'v1b', vNum: 2, filename: 'DHL_Express_Tarifs_2026_v2.xlsx', size: '1,4 Mo', date: '2026-02-15', note: 'Mise à jour surcharges carburant Q1 2026' },
+      { id: 'v1a', vNum: 1, filename: 'DHL_Express_Tarifs_2026_v1.xlsx', size: '1,2 Mo', date: '2026-01-01', note: 'Grille initiale 2026' },
+    ],
+  },
+  {
+    id: 'd2', name: 'Bpost Parcel — Grille tarifaire 2026',
+    docType: 'grille', carrier: 'Bpost', serviceType: 'transport',
+    description: 'Tarifs Bpost Parcel — Belgique, France, Pays-Bas, zones de livraison',
+    isAttached: false, usedInPricing: true, isArchived: false, currentVersionId: 'v2a',
+    versions: [
+      { id: 'v2a', vNum: 1, filename: 'Bpost_Parcel_Tarifs_2026.xlsx', size: '890 Ko', date: '2026-01-15', note: 'Grille initiale 2026' },
+    ],
+  },
+  {
+    id: 'd3', name: 'GLS France — Grille tarifaire 2026',
+    docType: 'grille', carrier: 'GLS', serviceType: 'transport',
+    description: 'Tarifs GLS France — dépôts directs et express, zones domestiques',
+    isAttached: false, usedInPricing: true, isArchived: false, currentVersionId: 'v3a',
+    versions: [
+      { id: 'v3a', vNum: 1, filename: 'GLS_France_Tarifs_2026.xlsx', size: '720 Ko', date: '2026-01-20', note: 'Grille initiale 2026' },
+    ],
+  },
+  {
+    id: 'd4', name: 'Surcharges carburant Q2 2026',
+    docType: 'grille', carrier: 'Multi', serviceType: 'surcharge',
+    description: 'Indices de surcharges carburant tous transporteurs — actualisés chaque trimestre',
+    isAttached: false, usedInPricing: true, isArchived: false, currentVersionId: 'v4a',
+    versions: [
+      { id: 'v4a', vNum: 1, filename: 'Surcharges_Carburant_Q2_2026.xlsx', size: '210 Ko', date: '2026-03-01', note: 'Indices Q2 2026 — DHL, Bpost, GLS, DPD' },
+    ],
+  },
+  {
+    id: 'd5', name: 'Conditions Générales de Vente',
+    docType: 'contrat',
     description: 'Document légal Brain E-Log SRL — joint à toutes les offres commerciales',
-    isAttached: true, isArchived: false, currentVersionId: 'v1c',
+    isAttached: true, usedInPricing: false, isArchived: false, currentVersionId: 'v5c',
     versions: [
-      { id: 'v1c', vNum: 3, filename: 'CGV_BrainELog_2026_v3.pdf', size: '245 Ko', date: '2026-03-14', note: 'Mise à jour de la clause de responsabilité transport' },
-      { id: 'v1b', vNum: 2, filename: 'CGV_BrainELog_2026_v2.pdf', size: '238 Ko', date: '2026-02-01', note: 'Révision des conditions TVA intracommunautaire' },
-      { id: 'v1a', vNum: 1, filename: 'CGV_BrainELog_2025.pdf',    size: '220 Ko', date: '2025-03-13', note: 'Version initiale' },
+      { id: 'v5c', vNum: 3, filename: 'CGV_BrainELog_2026_v3.pdf', size: '245 Ko', date: '2026-03-14', note: 'Mise à jour de la clause de responsabilité transport' },
+      { id: 'v5b', vNum: 2, filename: 'CGV_BrainELog_2026_v2.pdf', size: '238 Ko', date: '2026-02-01', note: 'Révision des conditions TVA intracommunautaire' },
+      { id: 'v5a', vNum: 1, filename: 'CGV_BrainELog_2025.pdf',    size: '220 Ko', date: '2025-03-13', note: 'Version initiale' },
     ],
   },
   {
-    id: 'd2', name: 'Tarifs DHL Express 2026', category: 'transporteur',
-    description: 'Grille tarifaire DHL Express — Europe et International',
-    isAttached: true, isArchived: false, currentVersionId: 'v2b',
-    versions: [
-      { id: 'v2b', vNum: 2, filename: 'DHL_Tarifs_2026_v2.pdf', size: '1,4 Mo', date: '2026-02-15', note: 'Mise à jour surcharge carburant Q1 2026' },
-      { id: 'v2a', vNum: 1, filename: 'DHL_Tarifs_2026_v1.pdf', size: '1,2 Mo', date: '2026-01-01', note: 'Grille tarifaire initiale 2026' },
-    ],
-  },
-  {
-    id: 'd3', name: 'Conditions Bpost Parcel', category: 'transporteur',
-    description: 'Conditions générales de livraison Bpost — Belgique, France, Pays-Bas',
-    isAttached: true, isArchived: false, currentVersionId: 'v3a',
-    versions: [
-      { id: 'v3a', vNum: 1, filename: 'Bpost_Conditions_2026.pdf', size: '890 Ko', date: '2026-01-15', note: 'Conditions initiales 2026' },
-    ],
-  },
-  {
-    id: 'd4', name: 'Règles opérationnelles entrepôt', category: 'regles',
+    id: 'd6', name: 'Règles opérationnelles entrepôt',
+    docType: 'regles',
     description: 'Procédures Brain E-Log — réception, stockage, expédition, retours',
-    isAttached: false, isArchived: false, currentVersionId: 'v4b',
+    isAttached: false, usedInPricing: false, isArchived: false, currentVersionId: 'v6b',
     versions: [
-      { id: 'v4b', vNum: 2, filename: 'Regles_Ops_BrainELog_v2.pdf', size: '340 Ko', date: '2026-03-01', note: 'Ajout procédures retours et reconditionnement' },
-      { id: 'v4a', vNum: 1, filename: 'Regles_Ops_BrainELog_v1.pdf', size: '290 Ko', date: '2025-06-01', note: 'Version initiale' },
+      { id: 'v6b', vNum: 2, filename: 'Regles_Ops_BrainELog_v2.pdf', size: '340 Ko', date: '2026-03-01', note: 'Ajout procédures retours et reconditionnement' },
+      { id: 'v6a', vNum: 1, filename: 'Regles_Ops_BrainELog_v1.pdf', size: '290 Ko', date: '2025-06-01', note: 'Version initiale' },
     ],
   },
   {
-    id: 'd5', name: 'Template offre Excel', category: 'template',
-    description: 'Modèle Excel de base pour la génération des offres',
-    isAttached: false, isArchived: true, currentVersionId: 'v5a',
+    id: 'd7', name: 'Contrat partenariat DHL 2025-2026',
+    docType: 'contrat', carrier: 'DHL',
+    description: 'Accord-cadre Brain E-Log × DHL — volumes, remises, conditions de service',
+    isAttached: false, usedInPricing: false, isArchived: false, currentVersionId: 'v7a',
     versions: [
-      { id: 'v5a', vNum: 1, filename: 'Template_Offre_BrainELog.xlsx', size: '78 Ko', date: '2025-12-01', note: 'Template initial' },
+      { id: 'v7a', vNum: 1, filename: 'Contrat_BrainELog_DHL_2025.pdf', size: '1,1 Mo', date: '2025-04-01', note: 'Contrat signé 2025-2026' },
     ],
   },
 ]
@@ -305,11 +343,15 @@ export default function ParametresPage() {
 
   // Documents state
   const [docs, setDocs] = useState<Doc[]>(INITIAL_DOCS)
-  const [expandedDocs, setExpandedDocs] = useState<Set<string>>(new Set(['d1']))
+  const [expandedDocs, setExpandedDocs] = useState<Set<string>>(new Set(['d5']))
   const [uploadTarget, setUploadTarget] = useState<string | null>(null)
   const [pendingNote, setPendingNote] = useState('')
   const [addingDoc, setAddingDoc] = useState(false)
-  const [newDocForm, setNewDocForm] = useState({ name: '', category: 'cgv' as DocCategory, description: '', note: '' })
+  const [newDocForm, setNewDocForm] = useState({
+    name: '', docType: 'grille' as DocType,
+    carrier: '', serviceType: 'transport' as ServiceType,
+    description: '', note: '',
+  })
   const [newDocFile, setNewDocFile] = useState<File | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const newDocFileRef = useRef<HTMLInputElement>(null)
@@ -335,6 +377,11 @@ export default function ParametresPage() {
 
   function toggleAttach(id: string) {
     setDocs(prev => prev.map(d => d.id === id ? { ...d, isAttached: !d.isAttached } : d))
+    setSaved(false)
+  }
+
+  function togglePricing(id: string) {
+    setDocs(prev => prev.map(d => d.id === id ? { ...d, usedInPricing: !d.usedInPricing } : d))
     setSaved(false)
   }
 
@@ -388,21 +435,23 @@ export default function ParametresPage() {
     const d: Doc = {
       id: uid(),
       name: newDocForm.name,
-      category: newDocForm.category,
+      docType: newDocForm.docType,
+      ...(newDocForm.docType === 'grille' && newDocForm.carrier ? { carrier: newDocForm.carrier } : {}),
+      ...(newDocForm.docType === 'grille' ? { serviceType: newDocForm.serviceType } : {}),
       description: newDocForm.description,
-      isAttached: false, isArchived: false,
+      isAttached: false, usedInPricing: newDocForm.docType === 'grille', isArchived: false,
       currentVersionId: v1.id, versions: [v1],
     }
     setDocs(prev => [d, ...prev])
     setAddingDoc(false)
-    setNewDocForm({ name: '', category: 'cgv', description: '', note: '' })
+    setNewDocForm({ name: '', docType: 'grille', carrier: '', serviceType: 'transport', description: '', note: '' })
     setNewDocFile(null)
     setSaved(false)
   }
 
   const initials = `${s.contactPrenom[0] ?? ''}${s.contactNom[0] ?? ''}`.toUpperCase()
-  const attachedDocs = docs.filter(d => !d.isArchived && d.isAttached)
-  const otherDocs    = docs.filter(d => !d.isArchived && !d.isAttached)
+  const grillesDocs  = docs.filter(d => !d.isArchived && d.docType === 'grille')
+  const contratsDocs = docs.filter(d => !d.isArchived && d.docType !== 'grille')
   const archivedDocs = docs.filter(d => d.isArchived)
 
   return (
@@ -704,7 +753,9 @@ export default function ParametresPage() {
               <div>
                 <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--gray-900)' }}>Bibliothèque de documents</p>
                 <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-                  {attachedDocs.length} annexé{attachedDocs.length > 1 ? 's' : ''} aux offres · {docs.filter(d => !d.isArchived).length} actif{docs.filter(d => !d.isArchived).length > 1 ? 's' : ''} au total
+                  {grillesDocs.filter(d => d.usedInPricing).length} grille{grillesDocs.filter(d => d.usedInPricing).length > 1 ? 's' : ''} en pricing ·{' '}
+                  {docs.filter(d => !d.isArchived && d.isAttached).length} annexé{docs.filter(d => !d.isArchived && d.isAttached).length > 1 ? 's' : ''} aux offres ·{' '}
+                  {docs.filter(d => !d.isArchived).length} actifs au total
                 </p>
               </div>
               {!addingDoc && (
@@ -729,14 +780,31 @@ export default function ParametresPage() {
                     <F label="Nom du document" span2>
                       <input style={inp} value={newDocForm.name} onChange={e => setNewDocForm(p => ({ ...p, name: e.target.value }))} placeholder="ex : CGV 2027, Tarifs GLS, Règlement intérieur…" autoFocus />
                     </F>
-                    <F label="Catégorie">
-                      <select style={sel} value={newDocForm.category} onChange={e => setNewDocForm(p => ({ ...p, category: e.target.value as DocCategory }))}>
-                        {(Object.keys(CAT) as DocCategory[]).map(k => <option key={k} value={k}>{CAT[k].label}</option>)}
+                    <F label="Type de document">
+                      <select style={sel} value={newDocForm.docType} onChange={e => setNewDocForm(p => ({ ...p, docType: e.target.value as DocType }))}>
+                        {(Object.keys(DOCTYPE) as DocType[]).map(k => <option key={k} value={k}>{DOCTYPE[k].label}</option>)}
                       </select>
                     </F>
                     <F label="Note de version v1" hint="Décrit le contenu de cette première version">
                       <input style={inp} value={newDocForm.note} onChange={e => setNewDocForm(p => ({ ...p, note: e.target.value }))} placeholder="Version initiale" />
                     </F>
+                    {newDocForm.docType === 'grille' && <>
+                      <F label="Transporteur">
+                        <select style={sel} value={newDocForm.carrier} onChange={e => setNewDocForm(p => ({ ...p, carrier: e.target.value }))}>
+                          <option value="">— Sélectionner —</option>
+                          {['DHL', 'Bpost', 'GLS', 'DPD', 'PostNL', 'Mondial Relay', 'UPS', 'Multi'].map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                      </F>
+                      <F label="Type de service">
+                        <select style={sel} value={newDocForm.serviceType} onChange={e => setNewDocForm(p => ({ ...p, serviceType: e.target.value as ServiceType }))}>
+                          <option value="transport">Transport</option>
+                          <option value="surcharge">Surcharge carburant</option>
+                          <option value="assurance">Assurance</option>
+                          <option value="douane">Douane</option>
+                          <option value="autre">Autre</option>
+                        </select>
+                      </F>
+                    </>}
                     <F label="Description" span2>
                       <input style={inp} value={newDocForm.description} onChange={e => setNewDocForm(p => ({ ...p, description: e.target.value }))} placeholder="À quoi sert ce document ?" />
                     </F>
@@ -772,42 +840,50 @@ export default function ParametresPage() {
               </div>
             )}
 
-            {/* ── Annexés aux offres ── */}
-            {attachedDocs.length > 0 && (
+            {/* ── Grilles tarifaires transporteurs ── */}
+            {grillesDocs.length > 0 && (
               <>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                  <Paperclip size={13} style={{ color: 'var(--primary)' }} />
-                  <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--gray-500)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
-                    Annexés automatiquement aux offres ({attachedDocs.length})
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <Truck size={13} style={{ color: '#15803d' }} />
+                  <p style={{ fontSize: 11, fontWeight: 700, color: '#15803d', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+                    Grilles tarifaires transporteurs ({grillesDocs.length})
                   </p>
                 </div>
-                {attachedDocs.map(doc => <DocCard key={doc.id} doc={doc} expanded={expandedDocs.has(doc.id)} onToggleExpand={() => toggleExpand(doc.id)} onToggleAttach={() => toggleAttach(doc.id)} onArchive={() => archiveDoc(doc.id)} onSetVersion={vId => setCurrentVersion(doc.id, vId)} onNewVersion={() => openUpload(doc.id)} />)}
+                <div style={{ padding: '8px 12px', borderRadius: 8, background: '#F0FDF4', border: '1px solid #bbf7d0', marginBottom: 12, display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                  <Zap size={13} style={{ color: '#15803d', flexShrink: 0, marginTop: 1 }} />
+                  <p style={{ fontSize: 12, color: '#15803d', lineHeight: 1.5 }}>
+                    Ces grilles (Excel) alimentent les calculs de pricing lors de la génération d&apos;offres.
+                    Les tarifs transporteurs s&apos;ajoutent <strong>au-dessus</strong> des tarifs Brain E-Log (handling, stockage).
+                    Activez <strong>Utilisé en pricing</strong> pour qu&apos;une grille soit intégrée au moteur de calcul.
+                  </p>
+                </div>
+                {grillesDocs.map(doc => <DocCard key={doc.id} doc={doc} expanded={expandedDocs.has(doc.id)} onToggleExpand={() => toggleExpand(doc.id)} onToggleAttach={() => toggleAttach(doc.id)} onTogglePricing={() => togglePricing(doc.id)} onArchive={() => archiveDoc(doc.id)} onSetVersion={vId => setCurrentVersion(doc.id, vId)} onNewVersion={() => openUpload(doc.id)} />)}
               </>
             )}
 
-            {/* ── Autres documents actifs ── */}
-            {otherDocs.length > 0 && (
+            {/* ── Contrats, annexes, règles ── */}
+            {contratsDocs.length > 0 && (
               <>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: attachedDocs.length > 0 ? 8 : 0, marginBottom: 10 }}>
-                  <Folder size={13} style={{ color: 'var(--gray-400)' }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: grillesDocs.length > 0 ? 16 : 0, marginBottom: 10 }}>
+                  <Paperclip size={13} style={{ color: 'var(--primary)' }} />
                   <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--gray-500)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
-                    Bibliothèque — non annexés ({otherDocs.length})
+                    Contrats, annexes & règles ({contratsDocs.length})
                   </p>
                 </div>
-                {otherDocs.map(doc => <DocCard key={doc.id} doc={doc} expanded={expandedDocs.has(doc.id)} onToggleExpand={() => toggleExpand(doc.id)} onToggleAttach={() => toggleAttach(doc.id)} onArchive={() => archiveDoc(doc.id)} onSetVersion={vId => setCurrentVersion(doc.id, vId)} onNewVersion={() => openUpload(doc.id)} />)}
+                {contratsDocs.map(doc => <DocCard key={doc.id} doc={doc} expanded={expandedDocs.has(doc.id)} onToggleExpand={() => toggleExpand(doc.id)} onToggleAttach={() => toggleAttach(doc.id)} onTogglePricing={() => togglePricing(doc.id)} onArchive={() => archiveDoc(doc.id)} onSetVersion={vId => setCurrentVersion(doc.id, vId)} onNewVersion={() => openUpload(doc.id)} />)}
               </>
             )}
 
             {/* ── Archivés ── */}
             {archivedDocs.length > 0 && (
               <>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, marginBottom: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 16, marginBottom: 10 }}>
                   <Archive size={13} style={{ color: 'var(--gray-400)' }} />
                   <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--gray-400)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
                     Archivés ({archivedDocs.length})
                   </p>
                 </div>
-                {archivedDocs.map(doc => <DocCard key={doc.id} doc={doc} expanded={expandedDocs.has(doc.id)} onToggleExpand={() => toggleExpand(doc.id)} onToggleAttach={() => toggleAttach(doc.id)} onArchive={() => archiveDoc(doc.id)} onSetVersion={vId => setCurrentVersion(doc.id, vId)} onNewVersion={() => openUpload(doc.id)} />)}
+                {archivedDocs.map(doc => <DocCard key={doc.id} doc={doc} expanded={expandedDocs.has(doc.id)} onToggleExpand={() => toggleExpand(doc.id)} onToggleAttach={() => toggleAttach(doc.id)} onTogglePricing={() => togglePricing(doc.id)} onArchive={() => archiveDoc(doc.id)} onSetVersion={vId => setCurrentVersion(doc.id, vId)} onNewVersion={() => openUpload(doc.id)} />)}
               </>
             )}
           </>}
@@ -952,19 +1028,22 @@ export default function ParametresPage() {
 /* ═══════════════════════════════════════════════════════
    DOCUMENT CARD — composant autonome
 ═══════════════════════════════════════════════════════ */
-function DocCard({ doc, expanded, onToggleExpand, onToggleAttach, onArchive, onSetVersion, onNewVersion }: {
+function DocCard({ doc, expanded, onToggleExpand, onToggleAttach, onTogglePricing, onArchive, onSetVersion, onNewVersion }: {
   doc: Doc
   expanded: boolean
   onToggleExpand: () => void
   onToggleAttach: () => void
+  onTogglePricing: () => void
   onArchive: () => void
   onSetVersion: (id: string) => void
   onNewVersion: () => void
 }) {
-  const cat = CAT[doc.category]
+  const dtype = DOCTYPE[doc.docType]
+  const carrierStyle = doc.carrier ? (CARRIER_COLORS[doc.carrier] ?? CARRIER_COLORS['Multi']) : null
   const currentV = doc.versions.find(v => v.id === doc.currentVersionId) ?? doc.versions[0]
   const ext = fileExt(currentV?.filename ?? '')
   const iconS = fileIconStyle(currentV?.filename ?? '')
+  const isGrille = doc.docType === 'grille'
 
   return (
     <div style={{
@@ -982,13 +1061,28 @@ function DocCard({ doc, expanded, onToggleExpand, onToggleAttach, onArchive, onS
 
           {/* Info */}
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
               <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--gray-900)' }}>{doc.name}</p>
-              <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 99, background: cat.bg, color: cat.color }}>
-                {cat.label}
+              <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 99, background: dtype.bg, color: dtype.color }}>
+                {dtype.label}
               </span>
+              {carrierStyle && (
+                <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 99, background: carrierStyle.bg, color: carrierStyle.color }}>
+                  {doc.carrier}
+                </span>
+              )}
+              {doc.serviceType && doc.serviceType !== 'transport' && (
+                <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 99, background: 'var(--gray-100)', color: 'var(--gray-600)' }}>
+                  {doc.serviceType}
+                </span>
+              )}
+              {doc.usedInPricing && !doc.isArchived && (
+                <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 99, background: '#F0FDF4', color: '#15803d', display: 'flex', alignItems: 'center', gap: 3 }}>
+                  <Zap size={9} /> Pricing actif
+                </span>
+              )}
               {doc.isAttached && !doc.isArchived && (
-                <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 99, background: '#F0FDF4', color: '#15803d' }}>
+                <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 99, background: '#EEF4FB', color: '#094D80' }}>
                   ● Annexé aux offres
                 </span>
               )}
@@ -1008,11 +1102,19 @@ function DocCard({ doc, expanded, onToggleExpand, onToggleAttach, onArchive, onS
             )}
           </div>
 
-          {/* Attach toggle */}
+          {/* Toggles */}
           {!doc.isArchived && (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
-              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Annexé aux offres</span>
-              <Toggle checked={doc.isAttached} onChange={onToggleAttach} />
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
+              {isGrille && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Utilisé en pricing</span>
+                  <Toggle checked={doc.usedInPricing} onChange={onTogglePricing} />
+                </div>
+              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Annexé aux offres</span>
+                <Toggle checked={doc.isAttached} onChange={onToggleAttach} />
+              </div>
             </div>
           )}
         </div>
@@ -1084,7 +1186,7 @@ function DocCard({ doc, expanded, onToggleExpand, onToggleAttach, onArchive, onS
 
           {/* Footer actions */}
           {!doc.isArchived && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', borderTop: '1px solid var(--gray-50)', background: 'var(--gray-50)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', borderTop: '1px solid var(--gray-50)', background: 'var(--gray-50)', flexWrap: 'wrap' }}>
               <button onClick={onNewVersion} style={{
                 display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px',
                 borderRadius: 7, border: 'none', background: 'var(--primary)', color: '#fff',
@@ -1092,12 +1194,21 @@ function DocCard({ doc, expanded, onToggleExpand, onToggleAttach, onArchive, onS
               }}>
                 <Upload size={12} /> Nouvelle version
               </button>
+              {isGrille && (
+                <button onClick={onTogglePricing} style={{
+                  display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px',
+                  borderRadius: 7, border: '1px solid var(--border)', background: doc.usedInPricing ? '#F0FDF4' : '#fff',
+                  fontSize: 12, color: doc.usedInPricing ? '#15803d' : 'var(--gray-700)', cursor: 'pointer', fontWeight: doc.usedInPricing ? 600 : 400,
+                }}>
+                  <BarChart3 size={12} /> {doc.usedInPricing ? 'Retirer du pricing' : 'Activer en pricing'}
+                </button>
+              )}
               <button onClick={onToggleAttach} style={{
                 display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px',
                 borderRadius: 7, border: '1px solid var(--border)', background: '#fff',
                 fontSize: 12, color: 'var(--gray-700)', cursor: 'pointer',
               }}>
-                {doc.isAttached ? 'Retirer des offres' : 'Annexer aux offres'}
+                <Paperclip size={12} /> {doc.isAttached ? 'Retirer des offres' : 'Annexer aux offres'}
               </button>
               <button onClick={onArchive} style={{
                 display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', marginLeft: 'auto',

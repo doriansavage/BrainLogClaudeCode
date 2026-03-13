@@ -32,6 +32,23 @@ Types : `feat`, `fix`, `docs`, `refactor`, `chore`, `test`
 
 ### 2026-03-14
 - **feat(regles)**: Ajout opérateurs de comparaison — `lt` (<), `lte` (≤), `gt` (>), `gte` (≥), `contains` (⊃), `not_contains` (⊅) — select groupé, input number pour numériques, input texte pour contains
+- **feat(parametres)**: Page Paramètres — v1 (6 onglets) → v2 (7 onglets, valeurs business extraites du prompt) → v3 (onglet Documents avec versioning) → v4 (grilles tarifaires comme sources de pricing)
+  - `src/app/(admin)/parametres/page.tsx` — ~1240 lignes, 8 onglets
+  - **Entreprise** : raison sociale, légal, adresse, contact
+  - **Commercial** : profil Mathieu Pichelin (prénom/nom/fonction/email/tél) — card aperçu live
+  - **Offres** : format export, validité, TVA, arrondi, logo, clause confidentialité
+  - **CGV** : 5 clauses éditables (Cadre, Validité, Prix, Paiements+IBAN BE84..., Responsabilité)
+  - **Documents** : bibliothèque avec versioning, deux usages distincts par doc :
+    - `usedInPricing` — grille Excel alimentant le moteur de calcul transport
+    - `isAttached` — fichier brut annexé aux offres
+    - Types : `grille | contrat | annexe | regles | autre`
+    - Champs `carrier` (DHL, Bpost, GLS, DPD…) + `serviceType` (transport, surcharge…)
+    - 7 docs initiaux : 4 grilles transporteurs + CGV v3 + Règles Ops + Contrat DHL
+    - Grouping : Grilles tarifaires / Contrats & Annexes / Archivés
+    - Formulaire ajout : champs carrier+serviceType conditionnels si docType=grille
+  - **Questionnaire** : validité lien, rappel, messages accueil/confirmation, expéditeur SMTP
+  - **Notifications** : toggles par événement + emails de réception
+  - **Intégrations** : Supabase, SMTP, WMS webhook, CRM
 
 ### 2026-03-13
 - **init**: Initialisation du projet BrainLogClaudeCode

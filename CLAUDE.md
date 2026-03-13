@@ -35,6 +35,7 @@ Types : `feat`, `fix`, `docs`, `refactor`, `chore`, `test`
 - **chore**: Création du CLAUDE.md avec règles de workflow
 - **chore**: Configuration des settings Claude (toutes permissions autorisées)
 - **docs**: Ajout section "Skills à charger" avec 8 skills logistique/ecommerce
+- **docs**: Ajout skills Webdesign (9) et Frontend Dev (9)
 
 ---
 
@@ -48,6 +49,7 @@ _À documenter au fur et à mesure des développements._
 
 Lorsqu'on demande d'utiliser l'un des skills suivants, le charger via le Skill tool :
 
+### Logistique / E-commerce
 - `shopify-automation`
 - `data-engineering-data-pipeline`
 - `kpi-dashboard-design`
@@ -56,6 +58,28 @@ Lorsqu'on demande d'utiliser l'un des skills suivants, le charger via le Skill t
 - `docusign-automation`
 - `microservices-patterns`
 - `event-sourcing-architect`
+
+### Webdesign
+- `ui-ux-pro-max`
+- `ui-skills`
+- `web-design-guidelines`
+- `frontend-design`
+- `canvas-design`
+- `mobile-design`
+- `tailwind-design-system`
+- `theme-factory`
+- `stitch-ui-design`
+
+### Frontend Dev
+- `frontend-dev-guidelines`
+- `react-best-practices`
+- `react-patterns`
+- `react-ui-patterns`
+- `nextjs-best-practices`
+- `nextjs-app-router-patterns`
+- `tailwind-patterns`
+- `web-performance-optimization`
+- `frontend-mobile-development-component-scaffold`
 
 ---
 

@@ -458,43 +458,54 @@ function GroupDropdown({ group, onRename, onDuplicate, onArchive, onDelete, onSe
 // ─── Price Cell ────────────────────────────────────────────────────────────────
 
 function PriceCell({ item }: { item: TariffItem }) {
-  const { updateItemPrice } = useTariffStore()
+  const { updateItemPrice, setItemPriceType } = useTariffStore()
   const [editing, setEditing] = useState(false)
   const [raw, setRaw] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
+  // tbd et fixed sont éditables ; quote reste "Sur devis" (choix métier)
+  const isEditable = item.priceType === 'fixed' || item.priceType === 'tbd'
+
   function startEdit() {
-    if (item.priceType !== 'fixed') return
+    if (!isEditable) return
     setRaw(item.price !== null ? String(item.price) : '')
     setEditing(true)
-    setTimeout(() => inputRef.current?.select(), 0)
+    setTimeout(() => { inputRef.current?.focus(); inputRef.current?.select() }, 0)
   }
 
   function commit() {
     const parsed = parseFloat(raw.replace(',', '.'))
-    if (!isNaN(parsed) && parsed >= 0) updateItemPrice(item.id, Math.round(parsed * 10000) / 10000)
+    if (!isNaN(parsed) && parsed >= 0) {
+      updateItemPrice(item.id, Math.round(parsed * 10000) / 10000)
+    } else {
+      // Champ vide → repasse en "À définir"
+      setItemPriceType(item.id, 'tbd')
+    }
     setEditing(false)
   }
 
-  const isSpecial = item.priceType === 'tbd' || item.priceType === 'quote'
+  const isTbd = item.priceType === 'tbd'
+  const isSpecial = isTbd || item.priceType === 'quote'
 
   if (editing) {
     return (
       <input ref={inputRef} value={raw} onChange={(e) => setRaw(e.target.value)}
-        onBlur={commit} onKeyDown={(e: KeyboardEvent) => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') setEditing(false) }}
-        autoFocus
-        style={{ width: 90, padding: '3px 6px', fontSize: 13, fontFamily: 'monospace', textAlign: 'right', border: 'none', borderBottom: '2px solid var(--primary)', background: 'transparent', outline: 'none', color: 'var(--gray-900)' }} />
+        onBlur={commit}
+        onKeyDown={(e: KeyboardEvent) => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') setEditing(false) }}
+        autoFocus placeholder="ex: 500"
+        style={{ width: 100, padding: '3px 6px', fontSize: 13, fontFamily: 'monospace', textAlign: 'right', border: 'none', borderBottom: '2px solid var(--primary)', background: 'transparent', outline: 'none', color: 'var(--gray-900)' }} />
     )
   }
 
   return (
-    <span onClick={startEdit} title={!isSpecial ? 'Cliquer pour modifier' : undefined}
+    <span onClick={startEdit}
+      title={isEditable ? 'Cliquer pour saisir un prix' : undefined}
       style={{
         fontSize: 13, fontFamily: 'ui-monospace, monospace',
-        color: isSpecial ? 'var(--gray-400)' : 'var(--gray-800)',
+        color: isSpecial ? (isTbd ? '#b45309' : 'var(--gray-400)') : 'var(--gray-800)',
         fontStyle: isSpecial ? 'italic' : 'normal',
         fontWeight: isSpecial ? 400 : 500,
-        cursor: isSpecial ? 'default' : 'pointer',
+        cursor: isEditable ? 'pointer' : 'default',
         padding: '2px 4px', borderRadius: 4,
         transition: 'background 150ms',
       }}>

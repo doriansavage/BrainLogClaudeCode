@@ -1,48 +1,84 @@
-export default function ProspectPortalPage({
-  params,
-}: {
-  params: { token: string }
-}) {
+import { notFound } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import { QuestionnaireShell } from '@/components/questionnaire/QuestionnaireShell'
+import { autoSaveAnswers, submitQuestionnaire } from '@/app/actions/questionnaire'
+import type { AnswersBySection, QuestionnaireAnswers } from '@/types/questionnaire'
+
+interface PageProps {
+  params: Promise<{ token: string }>
+}
+
+export default async function ProspectPortalPage({ params }: PageProps) {
+  const { token } = await params
+  const supabase = await createClient()
+
+  // Vérifier que le token est valide
+  const { data: prospect } = await supabase
+    .from('prospects')
+    .select('id, company_name, status')
+    .eq('token', token)
+    .maybeSingle()
+
+  if (!prospect || prospect.status === 'expired') {
+    notFound()
+  }
+
+  // Récupérer les réponses déjà sauvegardées
+  const { data: response } = await supabase
+    .from('questionnaire_responses')
+    .select('answers, current_section_index')
+    .eq('prospect_id', prospect.id)
+    .maybeSingle()
+
+  const savedAnswers = (response?.answers ?? {}) as AnswersBySection
+
+  // Wrappers server actions (ajoutent le token)
+  async function handleAutoSave(
+    sectionId: string,
+    answers: QuestionnaireAnswers,
+    sectionIndex: number,
+  ) {
+    'use server'
+    await autoSaveAnswers(token, sectionId, answers, sectionIndex)
+  }
+
+  async function handleSubmit(answers: AnswersBySection) {
+    'use server'
+    await submitQuestionnaire(token, answers)
+  }
+
   return (
     <div
-      className="min-h-screen flex items-center justify-center"
+      className="min-h-screen flex items-center justify-center px-4 py-10"
       style={{ backgroundColor: 'var(--bg-alt)' }}
     >
       <div
-        className="w-full max-w-2xl rounded-xl border p-10 shadow-sm"
+        className="w-full max-w-2xl rounded-xl border shadow-sm overflow-hidden"
         style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--border)' }}
       >
-        <div className="text-center mb-8">
-          <span
-            className="text-2xl font-bold"
-            style={{ color: 'var(--dark-navy)' }}
-          >
-            Brain E-Log
+        {/* Header */}
+        <div
+          className="px-8 py-5 border-b flex items-center gap-3"
+          style={{ borderColor: 'var(--border)' }}
+        >
+          <span className="text-sm font-bold tracking-wide" style={{ color: 'var(--primary)' }}>
+            Brain e-Log
           </span>
-          <h1
-            className="text-xl font-bold mt-4"
-            style={{ color: 'var(--text)' }}
-          >
-            Bienvenue
-          </h1>
-          <p className="text-sm mt-2" style={{ color: 'var(--text-muted)' }}>
-            Remplissez ce questionnaire pour recevoir votre offre logistique personnalisée.
-          </p>
-          <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
-            Durée estimée : ~8 min
-          </p>
+          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+            · Questionnaire logistique
+          </span>
         </div>
-        <div className="flex justify-center">
-          <button
-            className="px-8 py-3 rounded-md text-sm font-semibold text-white transition-colors hover:opacity-90"
-            style={{ backgroundColor: 'var(--primary)' }}
-          >
-            Commencer →
-          </button>
+
+        {/* Questionnaire */}
+        <div className="px-8 py-8">
+          <QuestionnaireShell
+            token={token}
+            companyName={prospect.company_name ?? undefined}
+            savedAnswers={savedAnswers}
+            onAutoSave={handleAutoSave}
+            onSubmit={handleSubmit}
+          />
         </div>
-        <p className="text-xs text-center mt-4" style={{ color: 'var(--text-muted)' }}>
-          Token: {params.token}
-        </p>
       </div>
     </div>
   )

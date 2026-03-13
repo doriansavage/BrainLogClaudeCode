@@ -8,14 +8,16 @@ import type { TariffGroup } from '@/types/tariffs'
 
 // ─── Référentiel des champs questionnaire (Q1-Q8) ────────────────────────────
 
-const Q_FIELDS = [
+const Q_FIELDS: { code: string; label: string; options: string[]; isNumeric?: boolean; unit?: string }[] = [
   { code: 'Q1.05', label: "Secteur d'activité", options: ['Mode & Accessoires', 'Beauté & Cosmétiques', 'Santé & Bien-être', 'Alimentation & Boissons', 'Maison & Déco', 'Sport & Loisirs', 'High-Tech & Électronique', 'Jouets & Enfants', 'Animaux', 'Autre'] },
   { code: 'Q1.12', label: 'Stockage spécifique', options: ['Aucun', 'Fragile', 'Volumineux', 'Température contrôlée', 'Dangereux ADR', 'Valeur élevée coffre', 'Plusieurs contraintes'] },
   { code: 'Q2.01', label: 'Mode livraison fournisseur', options: ['Conteneur FCL', 'Conteneur LCL', 'Palettes', 'Colis', 'Vrac'] },
   { code: 'Q2.02', label: 'Palettes mono/multi-SKU', options: ['Mono-SKU', 'Multi-SKU', 'Les deux'] },
   { code: 'Q3.05', label: 'Saisonnalité', options: ['Stable', 'Pics modérés ±30%', 'Forte saisonnalité ×2+'] },
-  { code: 'Q4.01', label: 'Volume B2C / mois', options: ['<50', '50-200', '200-500', '500-1000', '1000-5000', '>5000'] },
+  { code: 'Q4.01', label: 'Volume B2C / mois', options: ['<50', '50-200', '200-500', '500-1000', '1000-5000', '>5000'], isNumeric: true, unit: 'colis' },
+  { code: 'Q4.04', label: 'Volume B2B / mois', options: [], isNumeric: true, unit: 'palettes' },
   { code: 'Q4.05', label: 'Activité B2B', options: ['Oui', 'Non', 'En projet'] },
+  { code: 'Q5.01', label: 'Stock moyen', options: [], isNumeric: true, unit: 'palettes' },
   { code: 'Q5.03', label: 'Inserts marketing', options: ['Oui — flyer/carte', 'Oui — échantillon', 'Oui — multiple', 'Non'] },
   { code: 'Q6.03', label: 'France — % volume', options: ['0%', '<5%', '5-15%', '15-30%', '30-50%', '>50%'] },
   { code: 'Q6.04', label: 'Belgique — % volume', options: ['0%', '<5%', '5-15%', '15-30%', '30-50%', '>50%'] },
@@ -58,10 +60,11 @@ const ITEM_LABELS = [
 // ─── Tabs ────────────────────────────────────────────────────────────────────
 
 const TABS = [
-  { id: 'regles', label: 'Règles' },
-  { id: 'reference', label: 'Grille tarifaire' },
-  { id: 'conditions', label: 'Conditions de vente' },
-  { id: 'contact', label: 'Contact' },
+  { id: 'regles',      label: 'Règles' },
+  { id: 'simulateur',  label: '⚡ Simulateur' },
+  { id: 'reference',   label: 'Grille tarifaire' },
+  { id: 'conditions',  label: 'Conditions de vente' },
+  { id: 'contact',     label: 'Contact' },
 ]
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -100,10 +103,11 @@ export default function ReglesPage() {
 
       {/* Content */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '28px 32px' }}>
-        {tab === 'regles'     && <TabRules />}
-        {tab === 'reference'  && <TabReference />}
-        {tab === 'conditions' && <TabConditions />}
-        {tab === 'contact'    && <TabContact />}
+        {tab === 'regles'      && <TabRules />}
+        {tab === 'simulateur'  && <TabSimulateur />}
+        {tab === 'reference'   && <TabReference />}
+        {tab === 'conditions'  && <TabConditions />}
+        {tab === 'contact'     && <TabContact />}
       </div>
     </div>
   )
@@ -581,6 +585,307 @@ function Btn({ onClick, title, danger, children }: { onClick: () => void; title:
     <button onClick={onClick} title={title} style={{ width: 28, height: 28, borderRadius: 5, border: '1px solid #E2E8F0', background: 'none', cursor: 'pointer', fontSize: 12, color: danger ? '#ef4444' : '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       {children}
     </button>
+  )
+}
+
+// ─── ENGINE DE SIMULATION ─────────────────────────────────────────────────────
+
+import type { TariffItem } from '@/types/tariffs'
+
+function conditionMatches(c: RuleCondition, value: string): boolean {
+  const numVal = parseFloat(value)
+  const condNum = parseFloat(c.value)
+  switch (c.operator) {
+    case 'eq':           return value === c.value
+    case 'neq':          return value !== c.value
+    case 'in':           return c.value.split(',').map((v) => v.trim()).includes(value)
+    case 'not_in':       return !c.value.split(',').map((v) => v.trim()).includes(value)
+    case 'lt':           return !isNaN(numVal) && !isNaN(condNum) && numVal < condNum
+    case 'lte':          return !isNaN(numVal) && !isNaN(condNum) && numVal <= condNum
+    case 'gt':           return !isNaN(numVal) && !isNaN(condNum) && numVal > condNum
+    case 'gte':          return !isNaN(numVal) && !isNaN(condNum) && numVal >= condNum
+    case 'contains':     return value.toLowerCase().includes(c.value.toLowerCase())
+    case 'not_contains': return !value.toLowerCase().includes(c.value.toLowerCase())
+    default:             return false
+  }
+}
+
+function ruleMatches(rule: PricingRule, answers: Record<string, string>): boolean {
+  if (rule.conditions.length === 0) return true
+  const results = rule.conditions.map((c) => conditionMatches(c, answers[c.questionCode] ?? ''))
+  return rule.conditionLogic === 'AND' ? results.every(Boolean) : results.some(Boolean)
+}
+
+interface ComputedItem {
+  item: TariffItem
+  finalPrice: number | null
+  finalPriceType: TariffItem['priceType']
+  adjustments: string[]
+}
+
+interface SimResult {
+  firedRules: PricingRule[]
+  selectedGroupId: string
+  selectedGroupName: string
+  computedItems: ComputedItem[]
+}
+
+function runSimulation(
+  rules: PricingRule[],
+  answers: Record<string, string>,
+  items: TariffItem[],
+  groups: TariffGroup[],
+): SimResult {
+  const sorted = [...rules].filter((r) => r.enabled).sort((a, b) => a.priority - b.priority)
+  const firedRules = sorted.filter((rule) => ruleMatches(rule, answers))
+
+  // Première règle qui a select_group → base du preset
+  const defaultGroup = groups.find((g) => g.isDefault) ?? groups[0]
+  let selectedGroupId = defaultGroup?.id ?? ''
+  for (const rule of firedRules) {
+    const sel = rule.actions.find((a) => a.type === 'select_group')
+    if (sel?.groupId) { selectedGroupId = sel.groupId; break }
+  }
+  const selectedGroupName = groups.find((g) => g.id === selectedGroupId)?.name ?? selectedGroupId
+
+  // Items du groupe sélectionné (non-custom, triés par ordre)
+  const baseItems = items
+    .filter((i) => i.groupId === selectedGroupId && !i.isCustom)
+    .sort((a, b) => {
+      // Tri par categoryId order, puis sortOrder
+      const catOrder: Record<string, number> = { frais_demarrage: 0, frais_recurrents: 1, frais_activite: 2 }
+      const catDiff = (catOrder[a.categoryId] ?? 9) - (catOrder[b.categoryId] ?? 9)
+      return catDiff !== 0 ? catDiff : a.sortOrder - b.sortOrder
+    })
+
+  // Appliquer les ajustements (toutes les règles qui ont matché)
+  const computedItems: ComputedItem[] = baseItems.map((item, idx) => {
+    // Trouver l'index BASE_ITEM depuis l'ID: "${groupId}-item-${N}"
+    const idxMatch = item.id.match(/-item-(\d+)$/)
+    const baseIdx = idxMatch ? parseInt(idxMatch[1]) : idx
+
+    let price = item.price
+    let priceType = item.priceType
+    const adjustments: string[] = []
+
+    for (const rule of firedRules) {
+      for (const action of rule.actions) {
+        if (action.type === 'select_group') continue
+        if (action.itemIndex !== baseIdx) continue
+
+        if (action.type === 'adjust_percent' && price !== null && priceType === 'fixed') {
+          price = Math.round(price * (1 + (action.percent ?? 0) / 100) * 100) / 100
+          adjustments.push(`${(action.percent ?? 0) > 0 ? '+' : ''}${action.percent}% — ${rule.name}`)
+        } else if (action.type === 'adjust_flat' && price !== null && priceType === 'fixed') {
+          price = Math.round((price + (action.amount ?? 0)) * 100) / 100
+          adjustments.push(`${(action.amount ?? 0) > 0 ? '+' : ''}${action.amount}€ — ${rule.name}`)
+        } else if (action.type === 'set_price') {
+          price = action.price ?? null
+          priceType = 'fixed'
+          adjustments.push(`= ${action.price}€ — ${rule.name}`)
+        } else if (action.type === 'set_tbd') {
+          price = null
+          priceType = 'tbd'
+          adjustments.push(`→ À définir — ${rule.name}`)
+        }
+      }
+    }
+    return { item, finalPrice: price, finalPriceType: priceType, adjustments }
+  })
+
+  return { firedRules, selectedGroupId, selectedGroupName, computedItems }
+}
+
+// ─── TAB: SIMULATEUR ─────────────────────────────────────────────────────────
+
+function TabSimulateur() {
+  const rules    = useRulesStore((s) => s.rules)
+  const groups   = useTariffStore((s) => s.groups)
+  const items    = useTariffStore((s) => s.items)
+
+  // Initialiser les réponses avec la première option de chaque champ
+  const [answers, setAnswers] = useState<Record<string, string>>(() => {
+    const init: Record<string, string> = {}
+    Q_FIELDS.forEach((f) => { init[f.code] = f.isNumeric ? '0' : (f.options[0] ?? '') })
+    return init
+  })
+  const [result, setResult] = useState<SimResult | null>(null)
+
+  function simulate() {
+    setResult(runSimulation(rules, answers, items, groups))
+  }
+
+  function reset() {
+    const init: Record<string, string> = {}
+    Q_FIELDS.forEach((f) => { init[f.code] = f.isNumeric ? '0' : (f.options[0] ?? '') })
+    setAnswers(init)
+    setResult(null)
+  }
+
+  const fmtPrice = (price: number | null, type: string) => {
+    if (type === 'tbd') return 'À définir'
+    if (type === 'quote') return 'Sur devis'
+    if (price === null) return '—'
+    return new Intl.NumberFormat('fr-BE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(price)
+  }
+
+  return (
+    <div style={{ display: 'flex', gap: 28, maxWidth: 1100 }}>
+
+      {/* ── Panneau gauche : inputs ── */}
+      <div style={{ width: 300, flexShrink: 0 }}>
+        <div style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: 10, overflow: 'hidden' }}>
+          <div style={{ padding: '12px 16px', background: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
+            <p style={{ fontSize: 12, fontWeight: 700, color: '#334155', margin: 0 }}>Profil prospect simulé</p>
+            <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>Renseignez les réponses questionnaire</p>
+          </div>
+          <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 520, overflowY: 'auto' }}>
+            {Q_FIELDS.map((f) => (
+              <div key={f.code}>
+                <label style={{ display: 'block', fontSize: 10, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>
+                  {f.code} — {f.label}
+                </label>
+                {f.isNumeric ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <input
+                      type="number" min={0} value={answers[f.code] ?? '0'}
+                      onChange={(e) => setAnswers((a) => ({ ...a, [f.code]: e.target.value }))}
+                      style={{ ...inputSt, flex: 1, textAlign: 'right' }}
+                    />
+                    {f.unit && <span style={{ fontSize: 11, color: '#94a3b8', whiteSpace: 'nowrap' }}>{f.unit}</span>}
+                  </div>
+                ) : f.options.length > 0 ? (
+                  <select value={answers[f.code] ?? ''} onChange={(e) => setAnswers((a) => ({ ...a, [f.code]: e.target.value }))} style={selectSt}>
+                    {f.options.map((o) => <option key={o}>{o}</option>)}
+                  </select>
+                ) : (
+                  <input value={answers[f.code] ?? ''} onChange={(e) => setAnswers((a) => ({ ...a, [f.code]: e.target.value }))} style={inputSt} />
+                )}
+              </div>
+            ))}
+          </div>
+          <div style={{ padding: '12px 16px', borderTop: '1px solid #E2E8F0', display: 'flex', gap: 8 }}>
+            <button onClick={simulate} style={{ flex: 1, padding: '8px', borderRadius: 7, background: 'var(--primary)', color: '#fff', border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+              ▶ Simuler
+            </button>
+            <button onClick={reset} style={{ padding: '8px 12px', borderRadius: 7, background: '#F1F5F9', color: '#64748b', border: 'none', fontSize: 12, cursor: 'pointer' }}>
+              Reset
+            </button>
+          </div>
+        </div>
+
+        {/* Règles actives */}
+        <div style={{ marginTop: 14, padding: '10px 14px', background: '#F8FAFC', borderRadius: 8, border: '1px solid #E2E8F0' }}>
+          <p style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Règles activées</p>
+          {rules.filter((r) => r.enabled).length === 0 && (
+            <p style={{ fontSize: 11, color: '#94a3b8' }}>Aucune règle active</p>
+          )}
+          {[...rules].filter((r) => r.enabled).sort((a, b) => a.priority - b.priority).map((r) => (
+            <div key={r.id} style={{ fontSize: 11, color: '#475569', marginBottom: 3, display: 'flex', alignItems: 'center', gap: 5 }}>
+              <span style={{ width: 16, height: 16, borderRadius: 4, background: '#E2E8F0', color: '#64748b', fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{r.priority}</span>
+              {r.name}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Panneau droit : résultats ── */}
+      <div style={{ flex: 1 }}>
+        {!result && (
+          <div style={{ textAlign: 'center', padding: '80px 20px', color: '#94a3b8', border: '2px dashed #E2E8F0', borderRadius: 12 }}>
+            <div style={{ fontSize: 36, marginBottom: 12 }}>⚡</div>
+            <p style={{ fontSize: 14, fontWeight: 500, marginBottom: 6 }}>Aucune simulation lancée</p>
+            <p style={{ fontSize: 12 }}>Renseignez le profil prospect et cliquez sur Simuler</p>
+          </div>
+        )}
+
+        {result && (
+          <>
+            {/* Header résultat */}
+            <div style={{ padding: '14px 18px', borderRadius: 10, marginBottom: 16, background: result.firedRules.length > 0 ? '#F0FDF4' : '#FEF9C3', border: `1px solid ${result.firedRules.length > 0 ? '#bbf7d0' : '#fde68a'}` }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                <div>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Grille sélectionnée</p>
+                  <p style={{ fontSize: 16, fontWeight: 700, color: '#0F172A', marginTop: 2 }}>{result.selectedGroupName}</p>
+                </div>
+                <div style={{ width: 1, height: 36, background: '#E2E8F0', margin: '0 6px' }} />
+                <div>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Règles déclenchées</p>
+                  <p style={{ fontSize: 16, fontWeight: 700, color: result.firedRules.length > 0 ? '#16a34a' : '#94a3b8', marginTop: 2 }}>
+                    {result.firedRules.length} / {rules.filter((r) => r.enabled).length}
+                  </p>
+                </div>
+                {result.firedRules.length > 0 && (
+                  <>
+                    <div style={{ width: 1, height: 36, background: '#E2E8F0', margin: '0 6px' }} />
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                      {result.firedRules.map((r) => (
+                        <span key={r.id} style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 99, background: '#DCFCE7', color: '#16a34a' }}>
+                          ✓ {r.name}
+                        </span>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Tableau de prix */}
+            <div style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: 10, overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                <thead>
+                  <tr style={{ background: '#F8FAFC' }}>
+                    <th style={{ ...th, width: '40%' }}>Service</th>
+                    <th style={{ ...th, textAlign: 'right', width: '15%' }}>Prix base</th>
+                    <th style={{ ...th, textAlign: 'right', width: '15%' }}>Prix final</th>
+                    <th style={{ ...th }}>Ajustements</th>
+                  </tr>
+                </thead>
+                {(['frais_demarrage', 'frais_recurrents', 'frais_activite'] as const).map((catId) => {
+                  const catItems = result.computedItems.filter((ci) => ci.item.categoryId === catId)
+                  if (catItems.length === 0) return null
+                  const catLabel = catId === 'frais_demarrage' ? 'Frais de démarrage' : catId === 'frais_recurrents' ? 'Frais récurrents' : "Frais liés à l'activité"
+                  const catColor = catId === 'frais_demarrage' ? '#f59e0b' : catId === 'frais_recurrents' ? '#3b82f6' : '#8b5cf6'
+                  return (
+                    <tbody key={catId}>
+                      <tr>
+                        <td colSpan={4} style={{ padding: '6px 12px', borderLeft: `3px solid ${catColor}`, background: '#F8FAFC', fontSize: 10, fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid #E2E8F0', borderTop: '1px solid #E2E8F0' }}>
+                          {catLabel}
+                        </td>
+                      </tr>
+                      {catItems.map((ci, i) => {
+                        const changed = ci.adjustments.length > 0
+                        return (
+                          <tr key={ci.item.id} style={{ background: changed ? '#FFFBEB' : i % 2 ? '#FAFAFA' : '#fff', borderBottom: '1px solid #F1F5F9' }}>
+                            <td style={{ padding: '6px 12px', color: '#1E293B', fontWeight: 450 }}>{ci.item.label}</td>
+                            <td style={{ padding: '6px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: changed ? '#94a3b8' : '#334155', textDecoration: changed ? 'line-through' : 'none' }}>
+                              {fmtPrice(ci.item.price, ci.item.priceType)}
+                            </td>
+                            <td style={{ padding: '6px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontWeight: changed ? 700 : 500, color: changed ? '#b45309' : '#334155' }}>
+                              {fmtPrice(ci.finalPrice, ci.finalPriceType)}
+                            </td>
+                            <td style={{ padding: '6px 12px' }}>
+                              {ci.adjustments.map((adj, ai) => (
+                                <span key={ai} style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, background: '#FEF3C7', color: '#92400e', marginRight: 4, display: 'inline-block' }}>{adj}</span>
+                              ))}
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  )
+                })}
+              </table>
+            </div>
+
+            {/* Items modifiés */}
+            {result.computedItems.filter((ci) => ci.adjustments.length > 0).length === 0 && result.firedRules.length > 0 && (
+              <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 12, textAlign: 'center' }}>Les règles déclenchées ont sélectionné le preset mais n&apos;ont pas modifié de prix individuels.</p>
+            )}
+          </>
+        )}
+      </div>
+    </div>
   )
 }
 

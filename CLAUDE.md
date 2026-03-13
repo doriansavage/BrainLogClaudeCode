@@ -36,6 +36,7 @@ Types : `feat`, `fix`, `docs`, `refactor`, `chore`, `test`
 - **chore**: Configuration des settings Claude (toutes permissions autorisées)
 - **docs**: Ajout section "Skills à charger" avec 8 skills logistique/ecommerce
 - **docs**: Ajout skills Webdesign (9) et Frontend Dev (9)
+- **docs**: Ajout skills Brainstorming & Planning (8)
 
 ---
 
@@ -80,6 +81,16 @@ Lorsqu'on demande d'utiliser l'un des skills suivants, le charger via le Skill t
 - `tailwind-patterns`
 - `web-performance-optimization`
 - `frontend-mobile-development-component-scaffold`
+
+### Brainstorming & Planning
+- `brainstorming`
+- `multi-agent-brainstorming`
+- `plan-writing`
+- `writing-plans`
+- `concise-planning`
+- `planning-with-files`
+- `architecture-decision-records`
+- `deep-research`
 
 ---
 

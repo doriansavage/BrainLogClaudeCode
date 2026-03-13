@@ -38,6 +38,7 @@ Types : `feat`, `fix`, `docs`, `refactor`, `chore`, `test`
 - **docs**: Ajout skills Webdesign (9) et Frontend Dev (9)
 - **docs**: Ajout skills Brainstorming & Planning (8)
 - **feat**: Création dossier prompts/ + prompt générateur offre partenariat logistique Brain E-Log
+- **docs**: ADN graphique Brain e-Log → `adn-graphique-brain-log.md` (couleurs, logo, typo, UI, images)
 
 ---
 

@@ -457,7 +457,7 @@ function GroupDropdown({ group, onRename, onDuplicate, onArchive, onDelete, onSe
 
 // ─── Price Cell ────────────────────────────────────────────────────────────────
 
-function PriceCell({ item }: { item: TariffItem }) {
+function PriceCell({ item, trigger = 0 }: { item: TariffItem; trigger?: number }) {
   const { updateItemPrice, setItemPriceType } = useTariffStore()
   const [editing, setEditing] = useState(false)
   const [raw, setRaw] = useState('')
@@ -465,6 +465,16 @@ function PriceCell({ item }: { item: TariffItem }) {
 
   // tbd et fixed sont éditables ; quote reste "Sur devis" (choix métier)
   const isEditable = item.priceType === 'fixed' || item.priceType === 'tbd'
+
+  // Déclenchement externe (clic sur la ligne)
+  useEffect(() => {
+    if (trigger > 0 && isEditable && !editing) {
+      setRaw(item.price !== null ? String(item.price) : '')
+      setEditing(true)
+      setTimeout(() => { inputRef.current?.focus(); inputRef.current?.select() }, 0)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trigger])
 
   function startEdit() {
     if (!isEditable) return
@@ -516,12 +526,31 @@ function PriceCell({ item }: { item: TariffItem }) {
 
 // ─── Item Row ─────────────────────────────────────────────────────────────────
 
-function ItemRow({ item }: { item: TariffItem }) {
+function ItemRow({ item, index }: { item: TariffItem; index: number }) {
   const { toggleItemVisibility } = useTariffStore()
   const [hovered, setHovered] = useState(false)
+  const [triggerEdit, setTriggerEdit] = useState(0)
+
+  function handleRowClick(e: React.MouseEvent) {
+    // Ne pas déclencher si clic sur le bouton œil
+    if ((e.target as HTMLElement).closest('button')) return
+    setTriggerEdit((t) => t + 1)
+  }
+
+  const baseBg = index % 2 === 0 ? '#fff' : '#F8FAFC'
+
   return (
-    <tr onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
-      style={{ borderBottom: '1px solid var(--gray-50)', background: hovered ? '#FAFBFC' : '#fff', transition: 'background 100ms', opacity: item.isVisible ? 1 : 0.4 }}>
+    <tr
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onClick={handleRowClick}
+      style={{
+        borderBottom: '1px solid var(--gray-100)',
+        background: hovered ? 'var(--primary-light)' : baseBg,
+        transition: 'background 100ms',
+        opacity: item.isVisible ? 1 : 0.4,
+        cursor: 'pointer',
+      }}>
       <td style={{ paddingLeft: 20, paddingRight: 8, paddingTop: 10, paddingBottom: 10, width: 24 }}>
         <span style={{ fontSize: 14, color: 'var(--gray-300)', opacity: hovered ? 1 : 0, cursor: 'grab', userSelect: 'none', display: 'block', textAlign: 'center' }}>⠿</span>
       </td>
@@ -529,7 +558,7 @@ function ItemRow({ item }: { item: TariffItem }) {
         <span style={{ fontSize: 13, color: 'var(--gray-800)', fontWeight: 400 }}>{item.label}</span>
       </td>
       <td style={{ padding: '10px 12px', textAlign: 'right', whiteSpace: 'nowrap' }}>
-        <PriceCell item={item} />
+        <PriceCell item={item} trigger={triggerEdit} />
       </td>
       <td style={{ padding: '10px 12px', paddingRight: 20, width: 110 }}>
         <span style={{ fontSize: 12, color: 'var(--gray-400)' }}>{shortUnit(item.unit)}</span>
@@ -565,7 +594,7 @@ function CategorySection({ label, items }: { categoryId: string; label: string; 
           </div>
         </td>
       </tr>
-      {!collapsed && items.sort((a, b) => a.sortOrder - b.sortOrder).map((item) => <ItemRow key={item.id} item={item} />)}
+      {!collapsed && items.sort((a, b) => a.sortOrder - b.sortOrder).map((item, idx) => <ItemRow key={item.id} item={item} index={idx} />)}
       <tr><td colSpan={5} style={{ height: 4, background: '#fff' }} /></tr>
     </tbody>
   )

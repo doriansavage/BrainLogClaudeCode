@@ -8,6 +8,7 @@ import type { Prospect } from '@/types/prospect'
 import type { QuestionnaireResponse } from '@/types/prospect'
 import { STATUS_CONFIG, SECTORS } from '@/types/prospect'
 import { QUESTIONNAIRE_SCHEMA } from '@/lib/questionnaire'
+import { ProspectIntelligence } from './ProspectIntelligence'
 
 interface ProspectDetailProps {
   id: string
@@ -287,6 +288,9 @@ export function ProspectDetail({ id }: ProspectDetailProps) {
                 : 'Le prospect n\'a pas encore commencé.'}
             </p>
           </div>
+
+          {/* Intelligence panel */}
+          <ProspectIntelligence prospect={prospect} />
 
           {/* Réponses par section */}
           {responses && Object.keys(responses.answers).length > 0 && (

@@ -30,6 +30,9 @@ Types : `feat`, `fix`, `docs`, `refactor`, `chore`, `test`
 
 ## Changelog
 
+### 2026-03-14
+- **feat(regles)**: Ajout opérateurs de comparaison — `lt` (<), `lte` (≤), `gt` (>), `gte` (≥), `contains` (⊃), `not_contains` (⊅) — select groupé, input number pour numériques, input texte pour contains
+
 ### 2026-03-13
 - **init**: Initialisation du projet BrainLogClaudeCode
 - **chore**: Création du CLAUDE.md avec règles de workflow

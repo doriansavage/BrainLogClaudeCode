@@ -114,13 +114,43 @@ Types : `feat`, `fix`, `docs`, `refactor`, `chore`, `test`
 
 ### Stack
 - **Framework**: Next.js 15 (App Router)
-- **CSS**: Tailwind CSS 4 + CSS variables Brain E-Log
+- **CSS**: Tailwind CSS 4 + CSS variables Brain E-Log (`src/app/globals.css`)
 - **Font**: Inter (Google Fonts via CSS @import)
 - **Icons**: Lucide React
 - **State**: Zustand
 - **Forms**: React Hook Form + Zod
 - **Persistence**: JSON local (`data/`) via API routes Next.js (pas de Supabase — abandonné)
 - **Hosting**: Vercel (à configurer)
+
+### Design System — conventions CSS (`globals.css`)
+
+**Philosophie** : Material Design (Google-style) — contraste élevé, animations hover, sémantique couleur forte.
+
+**Classes à utiliser en priorité (ne pas dupliquer en inline) :**
+
+| Classe | Usage |
+|---|---|
+| `.card` | Toute card blanche avec shadow + transition |
+| `.card-interactive` | Card cliquable — hover lift `translateY(-2px)` |
+| `.btn-primary` | Bouton action principale — shadow + lift hover |
+| `.btn-secondary` | Bouton secondaire — border 1.5px + hover → primary color |
+| `.btn-ghost` | Lien-bouton sans border |
+| `.badge-{color}` | Chips statut — `blue/green/amber/red/orange/violet/teal/gray` |
+| `.badge-solid-{color}` | Chips fond plein blanc |
+| `.table-row-hover` | `<tr>` cliquable — hover → `primary-50` |
+| `.nav-item` | Liens sidebar — hover `gray-100` via CSS (pas d'inline) |
+| `.input` | Tous les `<input>` / `<textarea>` du back-office |
+| `.dot-pulse` | Indicateur animé "en cours" (ping vert) |
+
+**Couleurs sémantiques status badges (en inline style dans les tables/listes) :**
+- Répondu / Actif → `#DBEAFE / #1E40AF`
+- Offre générée / En cours → `#FEF3C7 / #78350F`
+- Acceptée / Succès → `#DCFCE7 / #14532D`
+- Lien envoyé / Neutre → `#E2E8F0 / #374151`
+- Nouveau / Violet → `#EDE9FE / #5B21B6`
+- Urgent / Danger → `#FEE2E2 / #991B1B`
+
+**Règle sidebar** : `navItemStyle(active)` dans `Sidebar.tsx` — actif = `primary-100` bg + `primary-700` text + `fontWeight 700`. Hover géré par `.nav-item` CSS. Ne pas ajouter `transition` en inline (conflit).
 
 ### Pattern de persistence (JSON local)
 Toutes les données sont persistées en fichiers JSON dans `data/` via des routes API Next.js :

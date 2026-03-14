@@ -10,12 +10,14 @@ import {
   FileText,
   Settings,
   LogOut,
+  Truck,
 } from 'lucide-react'
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/prospects', label: 'Prospects', icon: Users, badge: '5' },
   { href: '/tarifs', label: 'Tarifs', icon: BarChart3 },
+  { href: '/tarifs/transporteurs', label: 'Transporteurs', icon: Truck, sub: true },
   { href: '/regles', label: 'Règles', icon: Settings2 },
   { href: '/offres', label: 'Offres', icon: FileText },
 ]
@@ -93,10 +95,15 @@ export function Sidebar() {
         </p>
         {navItems.map((item) => {
           const Icon = item.icon
-          const active = !!pathname?.startsWith(item.href)
+          const active = pathname === item.href || (item.href !== '/tarifs' && !!pathname?.startsWith(item.href))
+          const sub = !!item.sub
           return (
-            <Link key={item.href} href={item.href} style={navItemStyle(active)} className="nav-item" data-active={String(active)}>
-              <Icon size={16} strokeWidth={active ? 2 : 1.75} style={{ flexShrink: 0, opacity: active ? 1 : 0.75 }} />
+            <Link key={item.href} href={item.href} style={{
+              ...navItemStyle(active),
+              marginLeft: sub ? 20 : 0,
+              fontSize: sub ? 12 : 13,
+            }} className="nav-item" data-active={String(active)}>
+              <Icon size={sub ? 14 : 16} strokeWidth={active ? 2 : 1.75} style={{ flexShrink: 0, opacity: active ? 1 : 0.65 }} />
               <span style={{ flex: 1 }}>{item.label}</span>
               {item.badge && (
                 <span style={{

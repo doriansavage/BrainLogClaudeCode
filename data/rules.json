@@ -1,0 +1,91 @@
+{
+  "rules": [
+    {
+      "id": "rule-suisse",
+      "name": "Marché Suisse (hors UE)",
+      "description": "Appliquer la grille premium si le client expédie en Suisse (volume > 0%)",
+      "enabled": true,
+      "priority": 1,
+      "conditionLogic": "OR",
+      "conditions": [
+        {
+          "id": "yp0zy6f",
+          "questionCode": "Q6.07",
+          "operator": "neq",
+          "value": "0%"
+        }
+      ],
+      "actions": [
+        {
+          "id": "lk3qid9",
+          "type": "select_group",
+          "groupId": "on-se-fait-plaisir"
+        },
+        {
+          "id": "5emx0jk",
+          "type": "adjust_percent",
+          "itemIndex": 9,
+          "percent": 10
+        }
+      ],
+      "createdAt": "2026-03-13",
+      "updatedAt": "2026-03-13"
+    },
+    {
+      "id": "rule-b2b",
+      "name": "Activité B2B active",
+      "description": "Si le client a une activité B2B (Oui ou En projet), appliquer tarif Standard",
+      "enabled": true,
+      "priority": 2,
+      "conditionLogic": "OR",
+      "conditions": [
+        {
+          "id": "gd0kre4",
+          "questionCode": "Q4.05",
+          "operator": "in",
+          "value": "Oui,En projet"
+        }
+      ],
+      "actions": [
+        {
+          "id": "bk5c3kz",
+          "type": "select_group",
+          "groupId": "standard"
+        }
+      ],
+      "createdAt": "2026-03-13",
+      "updatedAt": "2026-03-13"
+    },
+    {
+      "id": "rule-saisonnalite",
+      "name": "Forte saisonnalité",
+      "description": "Si le client a une forte saisonnalité, appliquer grille premium + majoration stockage",
+      "enabled": false,
+      "priority": 3,
+      "conditionLogic": "AND",
+      "conditions": [
+        {
+          "id": "if79ya0",
+          "questionCode": "Q3.05",
+          "operator": "eq",
+          "value": "Forte saisonnalité ×2+"
+        }
+      ],
+      "actions": [
+        {
+          "id": "jcn992j",
+          "type": "select_group",
+          "groupId": "on-se-fait-plaisir"
+        },
+        {
+          "id": "ih312kt",
+          "type": "adjust_percent",
+          "itemIndex": 9,
+          "percent": 15
+        }
+      ],
+      "createdAt": "2026-03-13",
+      "updatedAt": "2026-03-13"
+    }
+  ]
+}

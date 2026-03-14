@@ -1,0 +1,28 @@
+[
+  {
+    "id": "34548c22-b3da-48cd-a314-c0468c81b7c0",
+    "token": "6267af7f-050e-4d22-a141-2a5c14e195ce",
+    "companyName": "Acme SRL",
+    "contactName": "Jean Dupont",
+    "contactEmail": "jean.dupont@acme.be",
+    "websiteUrl": "https://www.acme.be",
+    "sector": "Mode & Textile",
+    "notes": "Lead via salon Paris — intéressé par la formule Premium",
+    "status": "en_cours",
+    "createdAt": "2026-03-13T22:52:49.740Z",
+    "updatedAt": "2026-03-13T23:01:52.822Z"
+  },
+  {
+    "id": "e1aeecbe-26af-4ec5-9e9e-045e8652ffc1",
+    "token": "a8218e02-a6e2-4d58-ab93-22f859caed0c",
+    "companyName": "bescott",
+    "contactName": "Dorian savage",
+    "contactEmail": "doriansavage89@gmail.dom",
+    "websiteUrl": "https:/bescott.be",
+    "sector": "Autre",
+    "notes": "",
+    "status": "nouveau",
+    "createdAt": "2026-03-13T22:42:35.290Z",
+    "updatedAt": "2026-03-13T22:42:35.290Z"
+  }
+]

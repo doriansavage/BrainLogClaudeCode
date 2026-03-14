@@ -31,7 +31,26 @@ Types : `feat`, `fix`, `docs`, `refactor`, `chore`, `test`
 ## Changelog
 
 ### 2026-03-14
-- **feat(regles)**: Ajout opérateurs de comparaison — `lt` (<), `lte` (≤), `gt` (>), `gte` (≥), `contains` (⊃), `not_contains` (⊅) — select groupé, input number pour numériques, input texte pour contains
+- **feat(theme)**: Redesign Material Design (Google-style) — `globals.css`, `Sidebar.tsx`, `dashboard/page.tsx`
+  - Cards : ombres renforcées + `.card-interactive` hover lift (translateY -2px + shadow)
+  - Boutons : `.btn-primary` avec box-shadow + lift, `.btn-secondary` border 1.5px + hover primary
+  - Badges : palettes saturées (DBEAFE/#1E40AF, DCFCE7/#14532D, FEF3C7/#78350F…)
+  - Sidebar : actif `primary-100` + fontWeight 700, `.nav-item` hover CSS
+  - Dashboard KPI : `border-top` colorée par métrique + card-interactive, delta pill vert
+  - Table : `table-row-hover` → primary-50, status badges haute saturation sémantique
+- **feat(tarifs)**: Items personnalisés dans TariffManager
+  - Types `TariffItemFormula`, `FormulaType` dans `src/types/tariffs.ts`
+  - `TariffItem` étendu avec `isCustom?: boolean` et `formula?: TariffItemFormula`
+  - Store: `addCustomItem` + `deleteCustomItem` dans `src/store/tariffs.ts`
+  - Modal `AddItemModal` : 5 modes de prix (fixe, à définir, sur devis, ×variable questionnaire, basé sur item)
+  - `ItemRow` : badge "custom", sous-texte formule violet, bouton suppression au survol
+- **feat(regles)**: Opérateurs numériques + Simulateur de prix
+  - `ConditionOperator` étendu : `lt`, `lte`, `gt`, `gte`, `contains`, `not_contains`
+  - `Q_FIELDS` : flag `isNumeric + unit` sur Q4.01 (Volume B2C), Q4.04 (B2B), Q5.01 (Stock)
+  - Tab **⚡ Simulateur** dans `/regles` :
+    - Inputs : number pour champs numériques, dropdown pour catégoriels
+    - Engine `runSimulation()` : cascade — première règle gagne pour le preset, toutes les règles empilent leurs ajustements
+    - Résultats : règles déclenchées, grille sélectionnée, tableau prix base vs final avec diff surlignée
 - **feat(parametres)**: Page Paramètres — v1 (6 onglets) → v2 (7 onglets, valeurs business extraites du prompt) → v3 (onglet Documents avec versioning) → v4 (grilles tarifaires comme sources de pricing)
   - `src/app/(admin)/parametres/page.tsx` — ~1240 lignes, 8 onglets
   - **Entreprise** : raison sociale, légal, adresse, contact
@@ -98,36 +117,81 @@ Types : `feat`, `fix`, `docs`, `refactor`, `chore`, `test`
 - **CSS**: Tailwind CSS 4 + CSS variables Brain E-Log
 - **Font**: Inter (Google Fonts via CSS @import)
 - **Icons**: Lucide React
-- **State**: Zustand (installé)
-- **Forms**: React Hook Form + Zod (installé)
+- **State**: Zustand
+- **Forms**: React Hook Form + Zod
+- **Persistence**: JSON local (`data/`) via API routes Next.js (pas de Supabase — abandonné)
 - **Hosting**: Vercel (à configurer)
-- **DB**: Supabase (à configurer)
+
+### Pattern de persistence (JSON local)
+Toutes les données sont persistées en fichiers JSON dans `data/` via des routes API Next.js :
+- `data/tariffs.json` ← `GET/POST /api/tariffs` ← store `useTariffStore`
+- `data/rules.json`   ← `GET/POST /api/rules`   ← store `useRulesStore`
+- `data/carrier-tariffs/` ← `GET/POST /api/carrier-tariffs` ← (à construire)
+
+Chaque store a un helper `save()` qui POST l'état complet après chaque mutation (pattern optimiste).
 
 ### Structure des routes
 ```
 src/app/
 ├── page.tsx                          → redirect /dashboard
-├── layout.tsx                        → root layout (Nunito, globals.css)
+├── layout.tsx                        → root layout
 ├── login/page.tsx
 ├── prospect/[token]/page.tsx         → portail public prospect
 └── (admin)/
     ├── layout.tsx                    → sidebar + main content
     ├── dashboard/page.tsx            ✅ Dashboard complet
-    ├── prospects/page.tsx            → à développer (Module 2)
+    ├── prospects/page.tsx            → Module 2 (à développer)
     ├── prospects/[id]/page.tsx
     ├── prospects/nouveau/page.tsx
-    ├── tarifs/page.tsx               → à développer (Module 1 — priorité)
-    ├── tarifs/[id]/comparer/page.tsx
-    ├── regles/page.tsx               → à développer (Module 3)
-    ├── regles/[id]/page.tsx
-    ├── offres/page.tsx               → à développer (Module 4)
+    ├── tarifs/page.tsx               ✅ Module 1 — TariffManager complet
+    │   └── transporteurs/page.tsx   🔜 Module Transporteurs (Excel import)
+    ├── regles/page.tsx               ✅ Module 3 — Moteur de règles + Simulateur
+    ├── offres/page.tsx               → Module 4 (à développer)
     ├── offres/[id]/page.tsx
     ├── offres/generer/page.tsx
-    └── parametres/page.tsx
+    └── parametres/page.tsx           ✅ 8 onglets (entreprise, commercial, offres, CGV, documents, questionnaire, notifs, intégrations)
 ```
 
-### Prochaine priorité : Module 1 — Gestionnaire de Tarifs
-Voir `docs/brain-elog-app-plan.md` pour les 24 user stories et le schéma DB.
+### Modules construits
+
+#### Module 1 — Tarifs (`/tarifs`) ✅
+- **TariffManager** : 3 groupes, 22 postes, 3 catégories
+- **Store** `src/store/tariffs.ts` : CRUD groupes, ajustements bulk, snapshots historique
+- **Types** `src/types/tariffs.ts` : TariffItem, TariffGroup, TariffItemFormula (formula types)
+- **Items custom** : AddItemModal avec 5 modes de prix (fixe, tbd, quote, questionnaire×, item_ref)
+- **Composant** : `src/components/tarifs/TariffManager.tsx` (~1100 lignes)
+
+#### Module 3 — Règles (`/regles`) ✅
+- **Moteur de règles** : PricingRule = SI conditions(Q) → ALORS actions(preset+prix)
+- **Store** `src/store/rules.ts` : CRUD, priorités, persistence
+- **Types** `src/types/rules.ts` : ConditionOperator (10 opérateurs incl. gt/lt/gte/lte/contains)
+- **Simulateur** : engine `runSimulation()` — cascade (1ère règle gagne pour preset, toutes empilent ajustements)
+- **Q_FIELDS** : 19 champs avec `isNumeric` pour Q4.01/Q4.04/Q5.01 (volumes)
+- **4 tabs** : Règles | ⚡ Simulateur | Grille tarifaire | Conditions de vente
+
+### Prochaine priorité : Module Transporteurs (`/tarifs/transporteurs`)
+
+Système d'import de grilles tarifaires transporteurs depuis Excel :
+
+**Format structuré cible** (`data/carrier-tariffs/{id}.json`) :
+```json
+{
+  "id": "dpd-2024-q1",
+  "carrierName": "DPD",
+  "isActive": true,
+  "zones": [{ "id": "Z1", "label": "Zone 1", "countries": ["FR"] }],
+  "weightUnit": "kg",
+  "weightRanges": [{ "id": "W1", "min": 0, "max": 1 }],
+  "prices": { "W1": { "Z1": 5.20, "Z2": 6.40 } }
+}
+```
+
+**Steps à implémenter** :
+1. Installer `xlsx` (SheetJS) pour parsing Excel serveur-side
+2. `POST /api/carrier-tariffs/parse` — reçoit fichier, retourne sheets + données brutes
+3. `GET|POST /api/carrier-tariffs` — liste + sauvegarde grilles structurées
+4. Page `/tarifs/transporteurs` : upload drag&drop → sélection sheet → preview → mapping zones/poids → save
+5. Intégration dans le moteur de pricing (génération offres)
 
 ---
 
@@ -201,4 +265,9 @@ npx tsx scripts/[nom-du-script].ts
 
 ## Notes & Décisions
 
-_Documenter ici les décisions importantes prises pendant le développement._
+### Décisions architecturales
+- **Supabase abandonné** : persistence JSON local via API routes Next.js, plus simple et sans coût
+- **Pattern store Zustand** : chaque mutation appelle `save()` → POST `/api/{resource}` → écrit le fichier JSON. Premier boot = seed données initiales + save.
+- **Moteur de règles — cascade** : pour la sélection de preset, la **première** règle qui matche gagne. Pour les ajustements de prix, **toutes** les règles matchées s'empilent dans l'ordre de priorité.
+- **Items tarifaires — itemIndex** : les règles référencent les items par index 0-21 correspondant à l'ordre de `BASE_ITEMS` dans `src/store/tariffs.ts`. IDs items = `${groupId}-item-${index}`.
+- **Custom items** : IDs = `${groupId}-custom-${Date.now()}`, ne sont pas affectés par les règles (qui n'opèrent que sur les 22 items base).

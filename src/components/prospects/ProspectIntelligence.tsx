@@ -99,30 +99,38 @@ function buildSteps(prospect: Prospect): Step[] {
 
 export function ProspectIntelligence({ prospect }: { prospect: Prospect }) {
   const steps = buildSteps(prospect)
+  const storageKey = `prospect-intel-done-${prospect.id}`
+
   const [statuses, setStatuses] = useState<Record<string, StepStatus>>(() =>
-    Object.fromEntries(steps.map((s) => [s.id, 'waiting']))
+    Object.fromEntries(steps.map((s) => [s.id, 'waiting' as StepStatus]))
   )
   const [started, setStarted] = useState(false)
 
   useEffect(() => {
-    // Démarrage automatique 600ms après le mount
+    // Si déjà vu, afficher tout immédiatement sans animation
+    if (localStorage.getItem(storageKey)) {
+      setStatuses(Object.fromEntries(steps.map((s) => [s.id, 'done' as StepStatus])))
+      setStarted(true)
+      return
+    }
+    // Sinon démarrer l'animation 600ms après le mount
     const boot = setTimeout(() => setStarted(true), 600)
     return () => clearTimeout(boot)
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!started) return
+    // Si déjà tout done (cas "déjà vu"), ne pas relancer les timers
+    if (Object.values(statuses).every((s) => s === 'done')) return
 
     const timers: ReturnType<typeof setTimeout>[] = []
 
     steps.forEach((step) => {
-      // Début du loading
       timers.push(
         setTimeout(() => {
           setStatuses((prev) => ({ ...prev, [step.id]: 'loading' }))
         }, step.startAt),
       )
-      // Fin → done
       timers.push(
         setTimeout(() => {
           setStatuses((prev) => ({ ...prev, [step.id]: 'done' }))
@@ -132,6 +140,13 @@ export function ProspectIntelligence({ prospect }: { prospect: Prospect }) {
 
     return () => timers.forEach(clearTimeout)
   }, [started]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Persiste dans localStorage quand l'animation est terminée
+  useEffect(() => {
+    if (Object.values(statuses).every((s) => s === 'done') && started) {
+      localStorage.setItem(storageKey, '1')
+    }
+  }, [statuses]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const doneCount = Object.values(statuses).filter((s) => s === 'done').length
   const allDone = doneCount === steps.length

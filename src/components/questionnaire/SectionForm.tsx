@@ -8,12 +8,14 @@ import { ProgressBar } from './ProgressBar'
 
 interface SectionFormProps {
   section: SectionDefinition
-  sectionIndex: number       // 0-based
+  sectionIndex: number
   totalSections: number
   initialAnswers: QuestionnaireAnswers
+  initialComments: Record<string, string>
   isFirst: boolean
   isLast: boolean
-  onNext: (answers: QuestionnaireAnswers) => void
+  shareUrl?: string
+  onNext: (answers: QuestionnaireAnswers, comments: Record<string, string>) => void
   onPrev: () => void
 }
 
@@ -22,22 +24,28 @@ export function SectionForm({
   sectionIndex,
   totalSections,
   initialAnswers,
+  initialComments,
   isFirst,
   isLast,
+  shareUrl,
   onNext,
   onPrev,
 }: SectionFormProps) {
   const [answers, setAnswers] = useState<QuestionnaireAnswers>(initialAnswers)
+  const [comments, setComments] = useState<Record<string, string>>(initialComments)
   const [errors, setErrors] = useState<SectionErrors>({})
   const [touched, setTouched] = useState(false)
 
   function handleChange(fieldId: string, value: string) {
     const updated = { ...answers, [fieldId]: value }
     setAnswers(updated)
-    // Efface l'erreur du champ modifié
     if (errors[fieldId]) {
       setErrors((prev) => { const e = { ...prev }; delete e[fieldId]; return e })
     }
+  }
+
+  function handleCommentChange(fieldId: string, comment: string) {
+    setComments(prev => comment ? { ...prev, [fieldId]: comment } : Object.fromEntries(Object.entries(prev).filter(([k]) => k !== fieldId)))
   }
 
   function handleNext() {
@@ -45,24 +53,18 @@ export function SectionForm({
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors)
       setTouched(true)
-      // Scroll vers le premier champ en erreur
       const firstErrorId = Object.keys(validationErrors)[0]
       document.getElementById(firstErrorId)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       return
     }
-    onNext(answers)
+    onNext(answers, comments)
   }
 
   const progress = Math.round(((sectionIndex + 1) / totalSections) * 100)
 
   return (
     <div className="flex flex-col gap-7">
-      {/* Progress */}
-      <ProgressBar
-        currentStep={sectionIndex + 1}
-        totalSteps={totalSections}
-        progress={progress}
-      />
+      <ProgressBar currentStep={sectionIndex + 1} totalSteps={totalSections} progress={progress} />
 
       {/* Titre section */}
       <div className="flex flex-col gap-1.5">
@@ -83,7 +85,6 @@ export function SectionForm({
         </p>
       </div>
 
-      {/* Séparateur */}
       <div className="h-px" style={{ backgroundColor: 'var(--border)' }} />
 
       {/* Champs */}
@@ -93,8 +94,11 @@ export function SectionForm({
             key={field.id}
             field={field}
             value={answers[field.id] ?? ''}
+            comment={comments[field.id] ?? ''}
             error={touched ? errors[field.id] : undefined}
+            shareUrl={shareUrl}
             onChange={handleChange}
+            onCommentChange={handleCommentChange}
           />
         ))}
       </div>
@@ -105,11 +109,7 @@ export function SectionForm({
           <button
             onClick={onPrev}
             className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold border-2 transition-all cursor-pointer"
-            style={{
-              borderColor: 'var(--border)',
-              color: 'var(--text-muted)',
-              backgroundColor: 'transparent',
-            }}
+            style={{ borderColor: 'var(--border)', color: 'var(--text-muted)', backgroundColor: 'transparent' }}
             onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.color = 'var(--primary)' }}
             onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-muted)' }}
           >
@@ -122,10 +122,7 @@ export function SectionForm({
         <button
           onClick={handleNext}
           className="flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-bold text-white transition-all cursor-pointer"
-          style={{
-            background: 'linear-gradient(90deg, var(--primary) 0%, #1A72B5 100%)',
-            boxShadow: '0 4px 14px rgba(9,77,128,0.28)',
-          }}
+          style={{ background: 'linear-gradient(90deg, var(--primary) 0%, #1A72B5 100%)', boxShadow: '0 4px 14px rgba(9,77,128,0.28)' }}
           onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 18px rgba(9,77,128,0.36)' }}
           onMouseLeave={(e) => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 4px 14px rgba(9,77,128,0.28)' }}
         >

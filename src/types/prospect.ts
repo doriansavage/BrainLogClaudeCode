@@ -23,11 +23,16 @@ export interface Prospect {
   updatedAt: string
 }
 
+// commentsBySection[sectionId][fieldId] = note libre laissée par le remplisseur
+export type CommentsBySection = Record<string, Record<string, string>>
+
 export interface QuestionnaireResponse {
   prospectId: string
   answers: AnswersBySection
+  commentsBySection: CommentsBySection
   currentSectionIndex: number
   completedAt: string | null
+  lastAccessAt: string   // horodatage du dernier chargement de l'URL
   updatedAt: string
 }
 

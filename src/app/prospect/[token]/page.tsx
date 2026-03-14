@@ -1,8 +1,10 @@
 import { notFound } from 'next/navigation'
-import { getProspectByToken, getResponses } from '@/lib/db/prospects'
+import { headers } from 'next/headers'
+import { getProspectByToken, getResponses, touchLastAccess } from '@/lib/db/prospects'
 import { QuestionnaireShell } from '@/components/questionnaire/QuestionnaireShell'
 import { autoSaveAnswers, submitQuestionnaire } from '@/app/actions/questionnaire'
 import type { AnswersBySection, QuestionnaireAnswers } from '@/types/questionnaire'
+import type { CommentsBySection } from '@/types/prospect'
 
 interface PageProps {
   params: Promise<{ token: string }>
@@ -14,21 +16,34 @@ export default async function ProspectPortalPage({ params }: PageProps) {
   const prospect = getProspectByToken(token)
   if (!prospect) notFound()
 
+  // Mettre à jour le timestamp de dernier accès (côté serveur, à chaque visite)
+  touchLastAccess(prospect.id)
+
   const responses = getResponses(prospect.id)
   const savedAnswers = (responses?.answers ?? {}) as AnswersBySection
+  const savedComments = (responses?.commentsBySection ?? {}) as CommentsBySection
+  const savedSectionIndex = responses?.currentSectionIndex ?? -1
+  const lastAccessAt = responses?.lastAccessAt ?? null
+
+  // Construire l'URL de partage à partir des headers
+  const hdrs = await headers()
+  const host = hdrs.get('host') ?? 'localhost:3000'
+  const proto = hdrs.get('x-forwarded-proto') ?? 'http'
+  const shareUrl = `${proto}://${host}/prospect/${token}`
 
   async function handleAutoSave(
     sectionId: string,
     answers: QuestionnaireAnswers,
     sectionIndex: number,
+    sectionComments?: Record<string, string>,
   ) {
     'use server'
-    await autoSaveAnswers(token, sectionId, answers, sectionIndex)
+    await autoSaveAnswers(token, sectionId, answers, sectionIndex, sectionComments)
   }
 
-  async function handleSubmit(answers: AnswersBySection) {
+  async function handleSubmit(answers: AnswersBySection, comments?: CommentsBySection) {
     'use server'
-    await submitQuestionnaire(token, answers)
+    await submitQuestionnaire(token, answers, comments)
   }
 
   return (
@@ -46,7 +61,7 @@ export default async function ProspectPortalPage({ params }: PageProps) {
           border: '1px solid rgba(9,77,128,0.08)',
         }}
       >
-        {/* Header */}
+        {/* Header gradient */}
         <div
           className="px-8 py-4 flex items-center justify-between"
           style={{
@@ -81,6 +96,10 @@ export default async function ProspectPortalPage({ params }: PageProps) {
             token={token}
             companyName={prospect.companyName}
             savedAnswers={savedAnswers}
+            savedComments={savedComments}
+            savedSectionIndex={savedSectionIndex}
+            lastAccessAt={lastAccessAt}
+            shareUrl={shareUrl}
             onAutoSave={handleAutoSave}
             onSubmit={handleSubmit}
           />

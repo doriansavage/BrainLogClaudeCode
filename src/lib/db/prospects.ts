@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import { randomUUID } from 'crypto'
-import type { Prospect, QuestionnaireResponse, ProspectStatus } from '@/types/prospect'
+import type { Prospect, QuestionnaireResponse, ProspectStatus, CommentsBySection } from '@/types/prospect'
 import type { AnswersBySection } from '@/types/questionnaire'
 
 const DATA_DIR = path.join(process.cwd(), 'data')
@@ -109,14 +109,18 @@ export function upsertResponses(
   answers: AnswersBySection,
   currentSectionIndex: number,
   completed: boolean,
+  commentsBySection?: CommentsBySection,
 ): QuestionnaireResponse {
   const store = readResponsesStore()
   const now = new Date().toISOString()
+  const existing = store[prospectId]
   store[prospectId] = {
     prospectId,
     answers,
+    commentsBySection: commentsBySection ?? existing?.commentsBySection ?? {},
     currentSectionIndex,
-    completedAt: completed ? (store[prospectId]?.completedAt ?? now) : null,
+    completedAt: completed ? (existing?.completedAt ?? now) : null,
+    lastAccessAt: existing?.lastAccessAt ?? now,
     updatedAt: now,
   }
   writeResponsesStore(store)
@@ -126,6 +130,16 @@ export function upsertResponses(
   updateProspect(prospectId, { status: newStatus })
 
   return store[prospectId]
+}
+
+/** Met à jour uniquement le timestamp de dernier accès. */
+export function touchLastAccess(prospectId: string): void {
+  const store = readResponsesStore()
+  const now = new Date().toISOString()
+  if (store[prospectId]) {
+    store[prospectId] = { ...store[prospectId], lastAccessAt: now }
+    writeResponsesStore(store)
+  }
 }
 
 function deleteResponses(prospectId: string) {

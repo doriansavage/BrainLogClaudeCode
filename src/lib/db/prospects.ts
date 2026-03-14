@@ -37,6 +37,7 @@ export function createProspect(data: {
   companyName: string
   contactName: string
   contactEmail: string
+  contactPhone?: string
   websiteUrl: string
   sector: string
   notes?: string
@@ -48,6 +49,7 @@ export function createProspect(data: {
     companyName: data.companyName,
     contactName: data.contactName,
     contactEmail: data.contactEmail,
+    contactPhone: data.contactPhone ?? '',
     websiteUrl: data.websiteUrl,
     sector: data.sector,
     notes: data.notes ?? '',

@@ -1,15 +1,29 @@
 import { readFileSync, existsSync } from 'fs'
 import { join } from 'path'
 import { QUESTIONNAIRE_SCHEMA } from './schema'
-import type { QuestionnaireSchema } from '@/types/questionnaire'
+import type { QuestionnaireSchema, FieldType } from '@/types/questionnaire'
 
 export interface FieldCfg {
   enabled?: boolean
   required?: boolean
+  labelOverride?: string
+  hintOverride?: string
+  optionsOverride?: string[]
 }
+
+export interface CustomFieldDef {
+  id: string
+  label: string
+  type: string
+  required: boolean
+  hint?: string
+  options?: string[]
+}
+
 export interface SectionCfg {
   enabled?: boolean
   fields?: Record<string, FieldCfg>
+  customFields?: CustomFieldDef[]
 }
 export interface QuestionnaireConfig {
   sections: Record<string, SectionCfg>
@@ -27,10 +41,21 @@ export function applyConfig(config: QuestionnaireConfig): QuestionnaireSchema {
           const fCfg = sectionCfg.fields?.[field.id] ?? {}
           return {
             ...field,
+            label: fCfg.labelOverride ?? field.label,
+            hint: fCfg.hintOverride !== undefined ? fCfg.hintOverride : field.hint,
+            options: fCfg.optionsOverride ?? field.options,
             required: fCfg.required !== undefined ? fCfg.required : field.required,
           }
         })
-      return { ...section, fields }
+      const customFields = (sectionCfg.customFields ?? []).map(cf => ({
+        id: cf.id,
+        label: cf.label,
+        type: cf.type as FieldType,
+        required: cf.required,
+        ...(cf.hint ? { hint: cf.hint } : {}),
+        ...(cf.options ? { options: cf.options } : {}),
+      }))
+      return { ...section, fields: [...fields, ...customFields] }
     })
   return { sections }
 }

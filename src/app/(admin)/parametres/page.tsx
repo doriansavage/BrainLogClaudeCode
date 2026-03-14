@@ -1,14 +1,15 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, Fragment } from 'react'
 import type { ReactNode, CSSProperties, ElementType } from 'react'
 import {
   Building2, UserCheck, FileText, ShieldCheck, Folder, ClipboardList, Bell, Plug,
   Save, Check, CheckCircle2, Mail, Phone, CreditCard, Hash,
   Upload, Archive, Plus, ChevronDown, ChevronRight, RotateCcw, Paperclip,
-  BarChart3, Truck, Zap, Eye, EyeOff,
+  BarChart3, Truck, Zap, Eye, EyeOff, Pencil, Trash2, X,
 } from 'lucide-react'
 import { QUESTIONNAIRE_SCHEMA } from '@/lib/questionnaire'
+import type { FieldType, FieldDefinition } from '@/types/questionnaire'
 
 /* ═══════════════════════════════════════════════════════
    TABS
@@ -337,9 +338,12 @@ function StatusBadge({ ok, label }: { ok: boolean; label: string }) {
 /* ═══════════════════════════════════════════════════════
    QUESTIONNAIRE CONFIG — types & helpers
 ═══════════════════════════════════════════════════════ */
-interface QFieldCfg { enabled: boolean; required: boolean }
-interface QSectionCfg { enabled: boolean; fields: Record<string, QFieldCfg> }
+interface QFieldCfg { enabled: boolean; required: boolean; labelOverride?: string; hintOverride?: string; optionsOverride?: string[] }
+interface CustomFieldDef { id: string; label: string; type: string; required: boolean; hint?: string; options?: string[] }
+interface QSectionCfg { enabled: boolean; fields: Record<string, QFieldCfg>; customFields?: CustomFieldDef[] }
 type QCfg = Record<string, QSectionCfg>
+
+const FIELD_HAS_OPTIONS = new Set(['radio_cards', 'icon_grid', 'multi_select', 'logo_picker', 'price_range', 'timeline_sel', 'toggle'])
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function buildDefaultQCfg(loaded: { sections: Record<string, any> }): QCfg {
@@ -352,11 +356,15 @@ function buildDefaultQCfg(loaded: { sections: Record<string, any> }): QCfg {
       fields[field.id] = {
         enabled: loadedF.enabled !== false,
         required: loadedF.required !== undefined ? loadedF.required : field.required,
+        labelOverride: loadedF.labelOverride,
+        hintOverride: loadedF.hintOverride,
+        optionsOverride: loadedF.optionsOverride,
       }
     }
     result[section.id] = {
       enabled: loadedSec.enabled !== false,
       fields,
+      customFields: loadedSec.customFields ?? [],
     }
   }
   return result
@@ -369,9 +377,15 @@ function qCfgToPayload(cfg: QCfg) {
     const fields: Record<string, unknown> = {}
     for (const field of section.fields) {
       const f = sec.fields[field.id]
-      fields[field.id] = { enabled: f.enabled, required: f.required }
+      const fp: Record<string, unknown> = { enabled: f.enabled, required: f.required }
+      if (f.labelOverride !== undefined) fp.labelOverride = f.labelOverride
+      if (f.hintOverride !== undefined) fp.hintOverride = f.hintOverride
+      if (f.optionsOverride !== undefined) fp.optionsOverride = f.optionsOverride
+      fields[field.id] = fp
     }
-    sections[section.id] = { enabled: sec.enabled, fields }
+    const sp: Record<string, unknown> = { enabled: sec.enabled, fields }
+    if (sec.customFields && sec.customFields.length > 0) sp.customFields = sec.customFields
+    sections[section.id] = sp
   }
   return { sections }
 }
@@ -396,6 +410,10 @@ export default function ParametresPage() {
   const [qExpanded, setQExpanded] = useState<Set<string>>(new Set())
   const [qSaving, setQSaving] = useState(false)
   const [qSaved, setQSaved] = useState(false)
+  const [editingField, setEditingField] = useState<{ sId: string; fId: string } | null>(null)
+  const [editForm, setEditForm] = useState({ label: '', hint: '', options: '' })
+  const [addingFieldTo, setAddingFieldTo] = useState<string | null>(null)
+  const [newFieldForm, setNewFieldForm] = useState<{ label: string; type: FieldType; required: boolean; hint: string; options: string }>({ label: '', type: 'text', required: false, hint: '', options: '' })
 
   useEffect(() => {
     fetch('/api/questionnaire-config')
@@ -424,6 +442,92 @@ export default function ParametresPage() {
 
   const toggleQExpanded = useCallback((sId: string) => {
     setQExpanded(prev => { const n = new Set(prev); n.has(sId) ? n.delete(sId) : n.add(sId); return n })
+  }, [])
+
+  const openEditBaseField = useCallback((sId: string, field: FieldDefinition) => {
+    const fCfg = qCfg[sId]?.fields[field.id]
+    setEditingField({ sId, fId: field.id })
+    setAddingFieldTo(null)
+    setEditForm({
+      label: fCfg?.labelOverride ?? field.label,
+      hint: fCfg?.hintOverride !== undefined ? fCfg.hintOverride : (field.hint ?? ''),
+      options: (fCfg?.optionsOverride ?? field.options ?? []).join('\n'),
+    })
+  }, [qCfg])
+
+  const saveEditBaseField = useCallback(() => {
+    if (!editingField) return
+    const { sId, fId } = editingField
+    setQCfg(prev => ({
+      ...prev,
+      [sId]: {
+        ...prev[sId],
+        fields: {
+          ...prev[sId].fields,
+          [fId]: {
+            ...prev[sId].fields[fId],
+            labelOverride: editForm.label.trim() || undefined,
+            hintOverride: editForm.hint.trim() || undefined,
+            optionsOverride: editForm.options.trim() ? editForm.options.split('\n').map(o => o.trim()).filter(Boolean) : undefined,
+          },
+        },
+      },
+    }))
+    setEditingField(null)
+  }, [editingField, editForm])
+
+  const openEditCustomField = useCallback((sId: string, cf: CustomFieldDef) => {
+    setEditingField({ sId, fId: cf.id })
+    setAddingFieldTo(null)
+    setEditForm({ label: cf.label, hint: cf.hint ?? '', options: (cf.options ?? []).join('\n') })
+  }, [])
+
+  const saveEditCustomField = useCallback(() => {
+    if (!editingField) return
+    const { sId, fId } = editingField
+    setQCfg(prev => ({
+      ...prev,
+      [sId]: {
+        ...prev[sId],
+        customFields: (prev[sId].customFields ?? []).map(cf =>
+          cf.id !== fId ? cf : {
+            ...cf,
+            label: editForm.label.trim() || cf.label,
+            hint: editForm.hint.trim() || undefined,
+            options: editForm.options.trim() ? editForm.options.split('\n').map(o => o.trim()).filter(Boolean) : undefined,
+          }
+        ),
+      },
+    }))
+    setEditingField(null)
+  }, [editingField, editForm])
+
+  const addCustomField = useCallback((sId: string) => {
+    if (!newFieldForm.label.trim()) return
+    const cf: CustomFieldDef = {
+      id: `${sId}-custom-${Date.now()}`,
+      label: newFieldForm.label.trim(),
+      type: newFieldForm.type,
+      required: newFieldForm.required,
+      ...(newFieldForm.hint.trim() ? { hint: newFieldForm.hint.trim() } : {}),
+      ...(newFieldForm.options.trim() ? { options: newFieldForm.options.split('\n').map(o => o.trim()).filter(Boolean) } : {}),
+    }
+    setQCfg(prev => ({ ...prev, [sId]: { ...prev[sId], customFields: [...(prev[sId].customFields ?? []), cf] } }))
+    setAddingFieldTo(null)
+    setNewFieldForm({ label: '', type: 'text', required: false, hint: '', options: '' })
+  }, [newFieldForm])
+
+  const deleteCustomField = useCallback((sId: string, fId: string) => {
+    setQCfg(prev => ({ ...prev, [sId]: { ...prev[sId], customFields: (prev[sId].customFields ?? []).filter(cf => cf.id !== fId) } }))
+    if (editingField?.fId === fId) setEditingField(null)
+  }, [editingField])
+
+  const resetFieldOverrides = useCallback((sId: string, fId: string) => {
+    setQCfg(prev => ({
+      ...prev,
+      [sId]: { ...prev[sId], fields: { ...prev[sId].fields, [fId]: { ...prev[sId].fields[fId], labelOverride: undefined, hintOverride: undefined, optionsOverride: undefined } } },
+    }))
+    setEditingField(null)
   }, [])
 
   async function saveQCfg() {

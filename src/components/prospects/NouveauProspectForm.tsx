@@ -41,6 +41,7 @@ export function NouveauProspectForm() {
     companyName: 'Acme SRL',
     contactName: 'Jean Dupont',
     contactEmail: 'jean.dupont@acme.be',
+    contactPhone: '+32 470 00 00 00',
     websiteUrl: 'https://www.acme.be',
     sector: 'Mode & Textile',
     notes: 'Lead via salon Paris — intéressé par la formule Premium',
@@ -54,7 +55,7 @@ export function NouveauProspectForm() {
     e.preventDefault()
     setError('')
 
-    if (!form.companyName || !form.contactName || !form.contactEmail || !form.sector) {
+    if (!form.companyName || !form.contactName || !form.contactEmail || !form.sector || !form.contactPhone) {
       setError('Merci de remplir tous les champs obligatoires.')
       return
     }
@@ -64,7 +65,7 @@ export function NouveauProspectForm() {
       const res = await fetch('/api/prospects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form }),
       })
 
       if (!res.ok) {
@@ -111,7 +112,7 @@ export function NouveauProspectForm() {
             padding: '12px 16px', borderRadius: 8, background: 'var(--primary-50)',
             border: '1px solid var(--primary-100)', fontSize: 12, color: 'var(--primary)',
           }}>
-            💡 Après création, vous pourrez copier le lien du questionnaire et l&apos;envoyer au prospect.
+            💡 Après création, le lien du questionnaire sera envoyé automatiquement par WhatsApp.
           </div>
 
           {/* Section Société */}
@@ -185,18 +186,30 @@ export function NouveauProspectForm() {
                 />
               </Field>
 
-              <Field label="Email" required>
+              <Field label="Téléphone / WhatsApp" required hint="Format international : +32 470 00 00 00">
                 <input
                   style={inputStyle}
-                  value={form.contactEmail}
-                  onChange={(e) => set('contactEmail', e.target.value)}
-                  placeholder="jean@acme.com"
-                  type="email"
+                  value={form.contactPhone}
+                  onChange={(e) => set('contactPhone', e.target.value)}
+                  placeholder="+32 470 00 00 00"
+                  type="tel"
                   onFocus={(e) => (e.target.style.borderColor = 'var(--primary)')}
                   onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
                 />
               </Field>
             </div>
+
+            <Field label="Email" required>
+              <input
+                style={inputStyle}
+                value={form.contactEmail}
+                onChange={(e) => set('contactEmail', e.target.value)}
+                placeholder="jean@acme.com"
+                type="email"
+                onFocus={(e) => (e.target.style.borderColor = 'var(--primary)')}
+                onBlur={(e) => (e.target.style.borderColor = 'var(--border)')}
+              />
+            </Field>
           </div>
 
           {/* Notes */}

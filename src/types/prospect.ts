@@ -15,6 +15,7 @@ export interface Prospect {
   companyName: string
   contactName: string
   contactEmail: string
+  contactPhone: string
   websiteUrl: string
   sector: string
   notes: string

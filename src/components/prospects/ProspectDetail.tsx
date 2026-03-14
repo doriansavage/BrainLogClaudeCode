@@ -314,7 +314,7 @@ export function ProspectDetail({ id, schema = QUESTIONNAIRE_SCHEMA }: ProspectDe
                       display: 'flex', alignItems: 'center', gap: 10,
                     }}>
                       <span style={{ width: 6, height: 6, borderRadius: 99, background: 'var(--gray-200)', flexShrink: 0 }} />
-                      <span style={{ fontSize: 13, color: 'var(--gray-400)' }}>{section.title}</span>
+                      <span style={{ fontSize: 13, color: 'var(--gray-400)' }}>{section.label}</span>
                     </div>
                   )
                   const answered = Object.values(sectionAnswers).filter(v => v !== '').length
@@ -326,7 +326,7 @@ export function ProspectDetail({ id, schema = QUESTIONNAIRE_SCHEMA }: ProspectDe
                       }}>
                         <span style={{ width: 6, height: 6, borderRadius: 99, background: 'var(--success-500)', flexShrink: 0 }} />
                         <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--gray-800)', flex: 1 }}>
-                          {section.title}
+                          {section.label}
                         </span>
                         <span style={{ fontSize: 11, color: 'var(--gray-400)' }}>
                           {answered} réponse{answered > 1 ? 's' : ''}

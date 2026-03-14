@@ -30,6 +30,16 @@ Types : `feat`, `fix`, `docs`, `refactor`, `chore`, `test`
 
 ## Changelog
 
+### 2026-03-14 (suite)
+- **feat(whatsapp)**: Notifications WhatsApp automatiques à la création de prospect
+  - `src/lib/whatsapp.ts` : service Baileys — `sendWhatsAppMessage(toNumber, message)`, session persistée dans `scripts/whatsapp-session/`, timeout 15s, gestion reconnexion
+  - `scripts/whatsapp-test.ts` : script de test QR code + envoi message, usage : `npx tsx scripts/whatsapp-test.ts`
+  - `package.json` : ajout `@whiskeysockets/baileys` + `qrcode-terminal`
+  - `src/app/api/prospects/route.ts` : appel `sendWhatsAppMessage` asynchrone (non-bloquant) après création prospect — message avec nom société, contact, lien questionnaire
+  - `src/types/prospect.ts` : ajout champ `contactPhone: string`
+  - `src/lib/db/prospects.ts` : `createProspect()` accepte `contactPhone?`
+  - `src/components/prospects/NouveauProspectForm.tsx` : champ Téléphone/WhatsApp rendu obligatoire, hint format international, message info mis à jour ("envoyé automatiquement par WhatsApp")
+
 ### 2026-03-14
 - **feat(transporteurs)**: Module import Excel grilles tarifaires transporteurs
   - `src/types/carrier-tariffs.ts` : types `CarrierTariff`, `CarrierZone`, `CarrierWeightRange`, `CarrierPriceMatrix`, `ParseResult`, `ZoneMapping`, `WeightMapping`
@@ -169,7 +179,7 @@ Types : `feat`, `fix`, `docs`, `refactor`, `chore`, `test`
 Toutes les données sont persistées en fichiers JSON dans `data/` via des routes API Next.js :
 - `data/tariffs.json` ← `GET/POST /api/tariffs` ← store `useTariffStore`
 - `data/rules.json`   ← `GET/POST /api/rules`   ← store `useRulesStore`
-- `data/carrier-tariffs/` ← `GET/POST /api/carrier-tariffs` ← (à construire)
+- `data/carrier-tariffs/` ← `GET/POST/DELETE /api/carrier-tariffs` ← wizard transporteurs
 
 Chaque store a un helper `save()` qui POST l'état complet après chaque mutation (pattern optimiste).
 
@@ -187,7 +197,7 @@ src/app/
     ├── prospects/[id]/page.tsx
     ├── prospects/nouveau/page.tsx
     ├── tarifs/page.tsx               ✅ Module 1 — TariffManager complet
-    │   └── transporteurs/page.tsx   🔜 Module Transporteurs (Excel import)
+    │   └── transporteurs/page.tsx   ✅ Module Transporteurs (Excel import — wizard 6 étapes)
     ├── regles/page.tsx               ✅ Module 3 — Moteur de règles + Simulateur
     ├── offres/page.tsx               → Module 4 (à développer)
     ├── offres/[id]/page.tsx
@@ -204,6 +214,19 @@ src/app/
 - **Items custom** : AddItemModal avec 5 modes de prix (fixe, tbd, quote, questionnaire×, item_ref)
 - **Composant** : `src/components/tarifs/TariffManager.tsx` (~1100 lignes)
 
+#### Module 1b — Transporteurs (`/tarifs/transporteurs`) ✅
+- **Wizard 6 étapes** : Upload → Feuille → Zones → Poids → Aperçu → Done
+- **API** `src/app/api/carrier-tariffs/route.ts` : GET/POST/DELETE, stockage `data/carrier-tariffs/index.json`
+- **API Parse** `src/app/api/carrier-tariffs/parse/route.ts` : POST multipart → SheetJS, retourne sheets brutes
+- **Types** `src/types/carrier-tariffs.ts` : `CarrierTariff`, `CarrierZone`, `CarrierWeightRange`, `CarrierPriceMatrix`, `ParseResult`
+- **Auto-détection** heuristique des zones et tranches depuis l'Excel
+
+#### Module 2 — Prospects (`/prospects`) 🔧
+- **Types** `src/types/prospect.ts` : `Prospect` avec `contactPhone`
+- **DB** `src/lib/db/prospects.ts` : `readProspects`, `createProspect` (JSON local)
+- **API** `src/app/api/prospects/route.ts` : GET/POST — notification WhatsApp auto à la création
+- **Form** `src/components/prospects/NouveauProspectForm.tsx` : champ Téléphone/WhatsApp obligatoire
+
 #### Module 3 — Règles (`/regles`) ✅
 - **Moteur de règles** : PricingRule = SI conditions(Q) → ALORS actions(preset+prix)
 - **Store** `src/store/rules.ts` : CRUD, priorités, persistence
@@ -212,29 +235,9 @@ src/app/
 - **Q_FIELDS** : 19 champs avec `isNumeric` pour Q4.01/Q4.04/Q5.01 (volumes)
 - **4 tabs** : Règles | ⚡ Simulateur | Grille tarifaire | Conditions de vente
 
-### Prochaine priorité : Module Transporteurs (`/tarifs/transporteurs`)
+### Prochaine priorité : Module Offres (`/offres`)
 
-Système d'import de grilles tarifaires transporteurs depuis Excel :
-
-**Format structuré cible** (`data/carrier-tariffs/{id}.json`) :
-```json
-{
-  "id": "dpd-2024-q1",
-  "carrierName": "DPD",
-  "isActive": true,
-  "zones": [{ "id": "Z1", "label": "Zone 1", "countries": ["FR"] }],
-  "weightUnit": "kg",
-  "weightRanges": [{ "id": "W1", "min": 0, "max": 1 }],
-  "prices": { "W1": { "Z1": 5.20, "Z2": 6.40 } }
-}
-```
-
-**Steps à implémenter** :
-1. Installer `xlsx` (SheetJS) pour parsing Excel serveur-side
-2. `POST /api/carrier-tariffs/parse` — reçoit fichier, retourne sheets + données brutes
-3. `GET|POST /api/carrier-tariffs` — liste + sauvegarde grilles structurées
-4. Page `/tarifs/transporteurs` : upload drag&drop → sélection sheet → preview → mapping zones/poids → save
-5. Intégration dans le moteur de pricing (génération offres)
+Génération automatique d'offres commerciales PDF à partir du questionnaire prospect + grilles tarifaires transporteurs.
 
 ---
 

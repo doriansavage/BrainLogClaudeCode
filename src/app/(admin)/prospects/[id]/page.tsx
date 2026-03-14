@@ -1,4 +1,5 @@
 import { ProspectDetail } from '@/components/prospects/ProspectDetail'
+import { loadActiveSchema } from '@/lib/questionnaire/config'
 
 export default async function ProspectDetailPage({
   params,
@@ -6,5 +7,6 @@ export default async function ProspectDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  return <ProspectDetail id={id} />
+  const schema = loadActiveSchema()
+  return <ProspectDetail id={id} schema={schema} />
 }

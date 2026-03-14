@@ -8,10 +8,12 @@ import type { Prospect } from '@/types/prospect'
 import type { QuestionnaireResponse } from '@/types/prospect'
 import { STATUS_CONFIG, SECTORS } from '@/types/prospect'
 import { QUESTIONNAIRE_SCHEMA } from '@/lib/questionnaire'
+import type { QuestionnaireSchema } from '@/types/questionnaire'
 import { ProspectIntelligence } from './ProspectIntelligence'
 
 interface ProspectDetailProps {
   id: string
+  schema?: QuestionnaireSchema
 }
 
 function StatusBadge({ status }: { status: Prospect['status'] }) {
@@ -26,7 +28,7 @@ function StatusBadge({ status }: { status: Prospect['status'] }) {
   )
 }
 
-export function ProspectDetail({ id }: ProspectDetailProps) {
+export function ProspectDetail({ id, schema = QUESTIONNAIRE_SCHEMA }: ProspectDetailProps) {
   const router = useRouter()
   const [prospect, setProspect] = useState<Prospect | null>(null)
   const [responses, setResponses] = useState<QuestionnaireResponse | null>(null)
@@ -93,7 +95,7 @@ export function ProspectDetail({ id }: ProspectDetailProps) {
   }
 
   const questionnaireUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/prospect/${prospect.token}`
-  const totalSections = QUESTIONNAIRE_SCHEMA.sections.length
+  const totalSections = schema.sections.length
   const answeredSections = responses ? Object.keys(responses.answers).length : 0
   const progress = Math.round((answeredSections / totalSections) * 100)
 
@@ -304,7 +306,7 @@ export function ProspectDetail({ id }: ProspectDetailProps) {
                 </p>
               </div>
               <div style={{ maxHeight: 480, overflow: 'auto' }}>
-                {QUESTIONNAIRE_SCHEMA.sections.map((section) => {
+                {schema.sections.map((section) => {
                   const sectionAnswers = responses.answers[section.id]
                   if (!sectionAnswers) return (
                     <div key={section.id} style={{

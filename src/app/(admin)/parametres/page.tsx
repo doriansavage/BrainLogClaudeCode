@@ -341,13 +341,14 @@ interface QFieldCfg { enabled: boolean; required: boolean }
 interface QSectionCfg { enabled: boolean; fields: Record<string, QFieldCfg> }
 type QCfg = Record<string, QSectionCfg>
 
-function buildDefaultQCfg(loaded: { sections: Record<string, Partial<QSectionCfg>> }): QCfg {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function buildDefaultQCfg(loaded: { sections: Record<string, any> }): QCfg {
   const result: QCfg = {}
   for (const section of QUESTIONNAIRE_SCHEMA.sections) {
     const loadedSec = loaded.sections[section.id] ?? {}
     const fields: Record<string, QFieldCfg> = {}
     for (const field of section.fields) {
-      const loadedF = loadedSec.fields?.[field.id] ?? {}
+      const loadedF: Partial<QFieldCfg> = loadedSec.fields?.[field.id] ?? {}
       fields[field.id] = {
         enabled: loadedF.enabled !== false,
         required: loadedF.required !== undefined ? loadedF.required : field.required,

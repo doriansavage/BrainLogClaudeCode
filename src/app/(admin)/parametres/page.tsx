@@ -1157,7 +1157,11 @@ export default function ParametresPage() {
                   const secCfg = qCfg[section.id]
                   if (!secCfg) return null
                   const isOpen = qExpanded.has(section.id)
-                  const enabledFieldsCount = section.fields.filter(f => secCfg.fields[f.id]?.enabled !== false).length
+                  const enabledFieldsCount = section.fields.filter(f => secCfg.fields[f.id]?.enabled !== false).length + (secCfg.customFields?.length ?? 0)
+                  const totalFieldsCount = section.fields.length + (secCfg.customFields?.length ?? 0)
+                  const inlineEditStyle: CSSProperties = { background: '#EFF6FF', borderTop: '1px solid #BFDBFE', borderBottom: '1px solid #BFDBFE', padding: '10px 16px' }
+                  const editLabelStyle: CSSProperties = { fontSize: 11, fontWeight: 600, color: 'var(--gray-600)', display: 'block', marginBottom: 3 }
+                  const editInpStyle: CSSProperties = { ...inp, fontSize: 12, padding: '5px 10px' }
                   return (
                     <div key={section.id} style={{ borderBottom: si < arr.length - 1 ? '1px solid var(--gray-50)' : 'none' }}>
                       {/* Section row */}
@@ -1185,7 +1189,7 @@ export default function ParametresPage() {
                         {/* Label */}
                         <div style={{ flex: 1 }}>
                           <span style={{ fontSize: 13, fontWeight: 600, color: secCfg.enabled ? 'var(--gray-900)' : 'var(--gray-400)' }}>{section.label}</span>
-                          <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 8 }}>{enabledFieldsCount}/{section.fields.length} questions</span>
+                          <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 8 }}>{enabledFieldsCount}/{totalFieldsCount} questions</span>
                         </div>
                         {/* Expand button */}
                         <button
@@ -1202,56 +1206,260 @@ export default function ParametresPage() {
                           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
                               <tr style={{ background: '#F1F5F9' }}>
-                                <th style={{ padding: '6px 16px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textAlign: 'left', width: 56 }}>ID</th>
+                                <th style={{ padding: '6px 16px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textAlign: 'left', width: 68 }}>ID</th>
                                 <th style={{ padding: '6px 8px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textAlign: 'left' }}>Question</th>
                                 <th style={{ padding: '6px 8px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textAlign: 'center', width: 90 }}>Type</th>
-                                <th style={{ padding: '6px 8px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textAlign: 'center', width: 80 }}>Visible</th>
-                                <th style={{ padding: '6px 16px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textAlign: 'center', width: 90 }}>Obligatoire</th>
+                                <th style={{ padding: '6px 8px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textAlign: 'center', width: 72 }}>Visible</th>
+                                <th style={{ padding: '6px 8px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textAlign: 'center', width: 90 }}>Obligatoire</th>
+                                <th style={{ padding: '6px 12px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textAlign: 'right', width: 64 }}>Actions</th>
                               </tr>
                             </thead>
                             <tbody>
-                              {section.fields.map((field, fi, farr) => {
+                              {/* ── Champs de base ── */}
+                              {section.fields.map((field) => {
                                 const fCfg = secCfg.fields[field.id] ?? { enabled: true, required: field.required }
                                 const isVisible = fCfg.enabled
+                                const isEditingThis = editingField?.sId === section.id && editingField?.fId === field.id
+                                const hasEdits = !!(fCfg.labelOverride || fCfg.hintOverride !== undefined || fCfg.optionsOverride)
                                 return (
-                                  <tr key={field.id} style={{ borderBottom: fi < farr.length - 1 ? '1px solid var(--gray-50)' : 'none', background: isVisible ? '#fff' : '#F8FAFC', opacity: isVisible ? 1 : 0.55 }}>
-                                    <td style={{ padding: '7px 16px' }}>
-                                      <span style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--text-muted)', background: '#EEF4FB', padding: '1px 5px', borderRadius: 4 }}>{field.id}</span>
-                                    </td>
-                                    <td style={{ padding: '7px 8px', fontSize: 12, color: 'var(--gray-800)' }}>{field.label}</td>
-                                    <td style={{ padding: '7px 8px', textAlign: 'center' }}>
-                                      <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: '#EEF4FB', color: 'var(--primary)', fontWeight: 500 }}>
-                                        {FIELD_TYPE_LABEL[field.type] ?? field.type}
-                                      </span>
-                                    </td>
-                                    <td style={{ padding: '7px 8px', textAlign: 'center' }}>
-                                      <button
-                                        onClick={() => toggleQField(section.id, field.id)}
-                                        title={isVisible ? 'Masquer' : 'Afficher'}
-                                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: isVisible ? '#15803d' : 'var(--gray-300)', display: 'flex', alignItems: 'center', margin: '0 auto' }}
-                                      >
-                                        {isVisible ? <Eye size={14} /> : <EyeOff size={14} />}
-                                      </button>
-                                    </td>
-                                    <td style={{ padding: '7px 16px', textAlign: 'center' }}>
-                                      <button
-                                        onClick={() => isVisible && toggleQRequired(section.id, field.id)}
-                                        title={fCfg.required ? 'Rendre optionnel' : 'Rendre obligatoire'}
-                                        disabled={!isVisible}
-                                        style={{ background: 'none', border: 'none', cursor: isVisible ? 'pointer' : 'default', padding: 4, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                      >
-                                        <span style={{
-                                          width: 16, height: 16, borderRadius: 4, border: `2px solid ${fCfg.required && isVisible ? 'var(--primary)' : 'var(--gray-200)'}`,
-                                          background: fCfg.required && isVisible ? 'var(--primary)' : 'transparent',
-                                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        }}>
-                                          {fCfg.required && isVisible && <Check size={9} color="#fff" strokeWidth={3} />}
+                                  <Fragment key={field.id}>
+                                    <tr style={{ borderBottom: '1px solid var(--gray-50)', background: isVisible ? '#fff' : '#F8FAFC', opacity: isVisible ? 1 : 0.55 }}>
+                                      <td style={{ padding: '7px 16px' }}>
+                                        <span style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--text-muted)', background: '#EEF4FB', padding: '1px 5px', borderRadius: 4 }}>{field.id}</span>
+                                      </td>
+                                      <td style={{ padding: '7px 8px', fontSize: 12, color: 'var(--gray-800)' }}>
+                                        {fCfg.labelOverride ?? field.label}
+                                        {hasEdits && <span style={{ fontSize: 10, color: 'var(--primary)', marginLeft: 5, fontStyle: 'italic' }}>modifié</span>}
+                                      </td>
+                                      <td style={{ padding: '7px 8px', textAlign: 'center' }}>
+                                        <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: '#EEF4FB', color: 'var(--primary)', fontWeight: 500 }}>
+                                          {FIELD_TYPE_LABEL[field.type] ?? field.type}
                                         </span>
-                                      </button>
-                                    </td>
-                                  </tr>
+                                      </td>
+                                      <td style={{ padding: '7px 8px', textAlign: 'center' }}>
+                                        <button
+                                          onClick={() => toggleQField(section.id, field.id)}
+                                          title={isVisible ? 'Masquer' : 'Afficher'}
+                                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: isVisible ? '#15803d' : 'var(--gray-300)', display: 'flex', alignItems: 'center', margin: '0 auto' }}
+                                        >
+                                          {isVisible ? <Eye size={14} /> : <EyeOff size={14} />}
+                                        </button>
+                                      </td>
+                                      <td style={{ padding: '7px 8px', textAlign: 'center' }}>
+                                        <button
+                                          onClick={() => isVisible && toggleQRequired(section.id, field.id)}
+                                          title={fCfg.required ? 'Rendre optionnel' : 'Rendre obligatoire'}
+                                          disabled={!isVisible}
+                                          style={{ background: 'none', border: 'none', cursor: isVisible ? 'pointer' : 'default', padding: 4, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                        >
+                                          <span style={{
+                                            width: 16, height: 16, borderRadius: 4, border: `2px solid ${fCfg.required && isVisible ? 'var(--primary)' : 'var(--gray-200)'}`,
+                                            background: fCfg.required && isVisible ? 'var(--primary)' : 'transparent',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                          }}>
+                                            {fCfg.required && isVisible && <Check size={9} color="#fff" strokeWidth={3} />}
+                                          </span>
+                                        </button>
+                                      </td>
+                                      <td style={{ padding: '7px 12px', textAlign: 'right' }}>
+                                        <button
+                                          onClick={() => isEditingThis ? setEditingField(null) : openEditBaseField(section.id, field)}
+                                          title="Modifier le libellé / les options"
+                                          style={{ background: isEditingThis ? '#DBEAFE' : 'none', border: 'none', cursor: 'pointer', padding: '3px 5px', borderRadius: 5, color: isEditingThis ? 'var(--primary)' : 'var(--gray-400)', display: 'inline-flex', alignItems: 'center' }}
+                                        >
+                                          {isEditingThis ? <X size={13} /> : <Pencil size={13} />}
+                                        </button>
+                                      </td>
+                                    </tr>
+                                    {/* Inline edit panel */}
+                                    {isEditingThis && (
+                                      <tr>
+                                        <td colSpan={6} style={{ padding: 0 }}>
+                                          <div style={inlineEditStyle}>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 8 }}>
+                                              <div>
+                                                <label style={editLabelStyle}>Libellé</label>
+                                                <input style={editInpStyle} value={editForm.label} onChange={e => setEditForm(p => ({ ...p, label: e.target.value }))} />
+                                              </div>
+                                              <div>
+                                                <label style={editLabelStyle}>Aide contextuelle (hint)</label>
+                                                <input style={editInpStyle} value={editForm.hint} onChange={e => setEditForm(p => ({ ...p, hint: e.target.value }))} placeholder="Optionnel" />
+                                              </div>
+                                            </div>
+                                            {FIELD_HAS_OPTIONS.has(field.type) && (
+                                              <div style={{ marginBottom: 8 }}>
+                                                <label style={editLabelStyle}>Options (une par ligne)</label>
+                                                <textarea style={{ ...txa, fontSize: 12, padding: '5px 10px', minHeight: 64 }} value={editForm.options} onChange={e => setEditForm(p => ({ ...p, options: e.target.value }))} placeholder={'Option A\nOption B\nOption C'} />
+                                              </div>
+                                            )}
+                                            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                                              <button onClick={saveEditBaseField} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 11px', background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+                                                <Check size={11} />Enregistrer
+                                              </button>
+                                              <button onClick={() => setEditingField(null)} style={{ padding: '5px 11px', background: 'none', color: 'var(--gray-500)', border: '1px solid var(--border)', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}>
+                                                Annuler
+                                              </button>
+                                              {hasEdits && (
+                                                <button onClick={() => resetFieldOverrides(section.id, field.id)} style={{ padding: '5px 11px', background: 'none', color: '#DC2626', border: '1px solid #FCA5A5', borderRadius: 6, fontSize: 12, cursor: 'pointer', marginLeft: 'auto' }}>
+                                                  Réinitialiser
+                                                </button>
+                                              )}
+                                            </div>
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    )}
+                                  </Fragment>
                                 )
                               })}
+
+                              {/* ── Champs personnalisés ── */}
+                              {(secCfg.customFields ?? []).map(cf => {
+                                const isEditingThis = editingField?.sId === section.id && editingField?.fId === cf.id
+                                return (
+                                  <Fragment key={cf.id}>
+                                    <tr style={{ borderBottom: '1px solid var(--gray-50)', background: '#F0FDF4' }}>
+                                      <td style={{ padding: '7px 16px' }}>
+                                        <span style={{ fontSize: 10, fontFamily: 'monospace', color: '#15803d', background: '#DCFCE7', padding: '1px 5px', borderRadius: 4 }}>custom</span>
+                                      </td>
+                                      <td style={{ padding: '7px 8px', fontSize: 12, color: 'var(--gray-800)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                                        {cf.label}
+                                        <span style={{ fontSize: 10, color: '#15803d', background: '#DCFCE7', padding: '1px 6px', borderRadius: 99 }}>+ajouté</span>
+                                      </td>
+                                      <td style={{ padding: '7px 8px', textAlign: 'center' }}>
+                                        <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: '#DCFCE7', color: '#15803d', fontWeight: 500 }}>
+                                          {FIELD_TYPE_LABEL[cf.type] ?? cf.type}
+                                        </span>
+                                      </td>
+                                      <td style={{ padding: '7px 8px', textAlign: 'center' }}>
+                                        <Eye size={14} style={{ color: '#15803d', margin: '0 auto', display: 'block' }} />
+                                      </td>
+                                      <td style={{ padding: '7px 8px', textAlign: 'center' }}>
+                                        <span style={{
+                                          width: 16, height: 16, borderRadius: 4, border: `2px solid ${cf.required ? '#15803d' : 'var(--gray-200)'}`,
+                                          background: cf.required ? '#15803d' : 'transparent',
+                                          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                                        }}>
+                                          {cf.required && <Check size={9} color="#fff" strokeWidth={3} />}
+                                        </span>
+                                      </td>
+                                      <td style={{ padding: '7px 12px', textAlign: 'right', display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
+                                        <button
+                                          onClick={() => isEditingThis ? setEditingField(null) : openEditCustomField(section.id, cf)}
+                                          title="Modifier"
+                                          style={{ background: isEditingThis ? '#DBEAFE' : 'none', border: 'none', cursor: 'pointer', padding: '3px 5px', borderRadius: 5, color: isEditingThis ? 'var(--primary)' : 'var(--gray-400)', display: 'inline-flex', alignItems: 'center' }}
+                                        >
+                                          {isEditingThis ? <X size={13} /> : <Pencil size={13} />}
+                                        </button>
+                                        <button
+                                          onClick={() => deleteCustomField(section.id, cf.id)}
+                                          title="Supprimer ce champ"
+                                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '3px 5px', borderRadius: 5, color: '#DC2626', display: 'inline-flex', alignItems: 'center' }}
+                                        >
+                                          <Trash2 size={13} />
+                                        </button>
+                                      </td>
+                                    </tr>
+                                    {isEditingThis && (
+                                      <tr>
+                                        <td colSpan={6} style={{ padding: 0 }}>
+                                          <div style={{ ...inlineEditStyle, background: '#F0FDF4', borderColor: '#BBF7D0' }}>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 8 }}>
+                                              <div>
+                                                <label style={editLabelStyle}>Libellé</label>
+                                                <input style={editInpStyle} value={editForm.label} onChange={e => setEditForm(p => ({ ...p, label: e.target.value }))} />
+                                              </div>
+                                              <div>
+                                                <label style={editLabelStyle}>Aide contextuelle (hint)</label>
+                                                <input style={editInpStyle} value={editForm.hint} onChange={e => setEditForm(p => ({ ...p, hint: e.target.value }))} placeholder="Optionnel" />
+                                              </div>
+                                            </div>
+                                            {FIELD_HAS_OPTIONS.has(cf.type) && (
+                                              <div style={{ marginBottom: 8 }}>
+                                                <label style={editLabelStyle}>Options (une par ligne)</label>
+                                                <textarea style={{ ...txa, fontSize: 12, padding: '5px 10px', minHeight: 64 }} value={editForm.options} onChange={e => setEditForm(p => ({ ...p, options: e.target.value }))} placeholder={'Option A\nOption B\nOption C'} />
+                                              </div>
+                                            )}
+                                            <div style={{ display: 'flex', gap: 6 }}>
+                                              <button onClick={saveEditCustomField} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 11px', background: '#15803d', color: '#fff', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+                                                <Check size={11} />Enregistrer
+                                              </button>
+                                              <button onClick={() => setEditingField(null)} style={{ padding: '5px 11px', background: 'none', color: 'var(--gray-500)', border: '1px solid var(--border)', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}>
+                                                Annuler
+                                              </button>
+                                            </div>
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    )}
+                                  </Fragment>
+                                )
+                              })}
+
+                              {/* ── Ajout d'un champ personnalisé ── */}
+                              {addingFieldTo === section.id ? (
+                                <tr>
+                                  <td colSpan={6} style={{ padding: 0 }}>
+                                    <div style={{ background: '#F0FDF4', borderTop: '1px solid #BBF7D0', padding: '12px 16px' }}>
+                                      <p style={{ fontSize: 12, fontWeight: 700, color: '#15803d', marginBottom: 10 }}>Nouveau champ personnalisé</p>
+                                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px', gap: 10, marginBottom: 8 }}>
+                                        <div>
+                                          <label style={editLabelStyle}>Libellé *</label>
+                                          <input style={editInpStyle} value={newFieldForm.label} onChange={e => setNewFieldForm(p => ({ ...p, label: e.target.value }))} placeholder="Ex : Budget mensuel marketing" autoFocus />
+                                        </div>
+                                        <div>
+                                          <label style={editLabelStyle}>Type</label>
+                                          <select style={{ ...editInpStyle, cursor: 'pointer' } as CSSProperties} value={newFieldForm.type} onChange={e => setNewFieldForm(p => ({ ...p, type: e.target.value as FieldType }))}>
+                                            <option value="text">Texte</option>
+                                            <option value="textarea">Zone texte</option>
+                                            <option value="url">URL</option>
+                                            <option value="toggle">Oui / Non</option>
+                                            <option value="radio_cards">Choix unique</option>
+                                            <option value="multi_select">Multi-choix</option>
+                                          </select>
+                                        </div>
+                                      </div>
+                                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 8 }}>
+                                        <div>
+                                          <label style={editLabelStyle}>Aide contextuelle (hint)</label>
+                                          <input style={editInpStyle} value={newFieldForm.hint} onChange={e => setNewFieldForm(p => ({ ...p, hint: e.target.value }))} placeholder="Optionnel" />
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: 2 }}>
+                                          <label style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 12, cursor: 'pointer', color: 'var(--gray-700)' }}>
+                                            <input type="checkbox" checked={newFieldForm.required} onChange={e => setNewFieldForm(p => ({ ...p, required: e.target.checked }))} />
+                                            Obligatoire
+                                          </label>
+                                        </div>
+                                      </div>
+                                      {FIELD_HAS_OPTIONS.has(newFieldForm.type) && (
+                                        <div style={{ marginBottom: 8 }}>
+                                          <label style={editLabelStyle}>Options (une par ligne)</label>
+                                          <textarea style={{ ...txa, fontSize: 12, padding: '5px 10px', minHeight: 64 }} value={newFieldForm.options} onChange={e => setNewFieldForm(p => ({ ...p, options: e.target.value }))} placeholder={'Option A\nOption B\nOption C'} />
+                                        </div>
+                                      )}
+                                      <div style={{ display: 'flex', gap: 6 }}>
+                                        <button onClick={() => addCustomField(section.id)} disabled={!newFieldForm.label.trim()} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 11px', background: newFieldForm.label.trim() ? '#15803d' : 'var(--gray-200)', color: newFieldForm.label.trim() ? '#fff' : 'var(--gray-400)', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: newFieldForm.label.trim() ? 'pointer' : 'default' }}>
+                                          <Plus size={11} />Ajouter
+                                        </button>
+                                        <button onClick={() => setAddingFieldTo(null)} style={{ padding: '5px 11px', background: 'none', color: 'var(--gray-500)', border: '1px solid var(--border)', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}>
+                                          Annuler
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </td>
+                                </tr>
+                              ) : (
+                                <tr>
+                                  <td colSpan={6} style={{ padding: '7px 16px', background: '#F8FAFC' }}>
+                                    <button
+                                      onClick={() => { setAddingFieldTo(section.id); setEditingField(null) }}
+                                      style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#15803d', background: 'none', border: '1px dashed #86EFAC', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontWeight: 500 }}
+                                    >
+                                      <Plus size={12} />Ajouter un champ
+                                    </button>
+                                  </td>
+                                </tr>
+                              )}
                             </tbody>
                           </table>
                         </div>

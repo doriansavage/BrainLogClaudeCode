@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react'
 import type { FormScreen, AnswersBySection, QuestionnaireAnswers, QuestionnaireSchema } from '@/types/questionnaire'
 import type { CommentsBySection } from '@/types/prospect'
-import { QUESTIONNAIRE_SCHEMA, mergeAnswers } from '@/lib/questionnaire'
+import { QUESTIONNAIRE_SCHEMA, mergeAnswers, nextScreen, prevScreen } from '@/lib/questionnaire'
 import { SectionForm } from './SectionForm'
 import { RecapView } from './RecapView'
 

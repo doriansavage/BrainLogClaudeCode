@@ -85,10 +85,8 @@ export function SectionForm({
         </p>
       </div>
 
-      <div className="h-px" style={{ backgroundColor: 'var(--border)' }} />
-
-      {/* Champs */}
-      <div className="flex flex-col gap-6">
+      {/* Champs — chaque question est une card autonome */}
+      <div className="flex flex-col gap-3">
         {section.fields.map((field) => (
           <FormField
             key={field.id}

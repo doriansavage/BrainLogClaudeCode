@@ -25,7 +25,7 @@ const s = {
     width: 240,
     minHeight: '100vh',
     background: '#fff',
-    borderRight: '1px solid var(--border)',
+    borderRight: '1px solid var(--border-strong)',
     display: 'flex' as const,
     flexDirection: 'column' as const,
     flexShrink: 0,
@@ -63,11 +63,10 @@ export function Sidebar() {
       borderRadius: 8,
       marginBottom: 2,
       fontSize: 13,
-      fontWeight: active ? 600 : 500,
-      color: active ? 'var(--primary)' : 'var(--gray-600)',
-      background: active ? 'var(--primary-light)' : 'transparent',
+      fontWeight: active ? 700 : 500,
+      color: active ? 'var(--primary-700)' : 'var(--gray-600)',
+      background: active ? 'var(--primary-100)' : undefined,
       textDecoration: 'none',
-      transition: 'all 150ms',
       cursor: 'pointer',
     } as const
   }
@@ -96,14 +95,14 @@ export function Sidebar() {
           const Icon = item.icon
           const active = !!pathname?.startsWith(item.href)
           return (
-            <Link key={item.href} href={item.href} style={navItemStyle(active)}>
+            <Link key={item.href} href={item.href} style={navItemStyle(active)} className="nav-item" data-active={String(active)}>
               <Icon size={16} strokeWidth={active ? 2 : 1.75} style={{ flexShrink: 0, opacity: active ? 1 : 0.75 }} />
               <span style={{ flex: 1 }}>{item.label}</span>
               {item.badge && (
                 <span style={{
-                  fontSize: 11, fontWeight: 600, padding: '1px 6px', borderRadius: 99,
-                  background: active ? 'var(--primary)' : 'var(--gray-100)',
-                  color: active ? '#fff' : 'var(--gray-500)',
+                  fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 99,
+                  background: active ? 'var(--primary)' : '#DBEAFE',
+                  color: active ? '#fff' : '#1E40AF',
                 }}>
                   {item.badge}
                 </span>

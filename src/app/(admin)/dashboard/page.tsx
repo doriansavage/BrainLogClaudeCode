@@ -2,34 +2,29 @@ import { Users, FileText, Clock, CheckCircle2, Plus, Link2, BarChart3, ArrowRigh
 import Link from 'next/link'
 
 const kpis = [
-  { label: 'Prospects actifs', value: '12', delta: '+3 ce mois', icon: Users, iconBg: '#EEF4FB', iconColor: '#094D80' },
-  { label: 'Offres générées', value: '34', delta: '+8 ce mois', icon: FileText, iconBg: '#F0FDF4', iconColor: '#16a34a' },
-  { label: 'En attente', value: '5', delta: '2 urgents', icon: Clock, iconBg: '#FFFBEB', iconColor: '#d97706' },
-  { label: 'Offres acceptées', value: '8', delta: '76% taux', icon: CheckCircle2, iconBg: '#FFF1F2', iconColor: '#e11d48' },
+  { label: 'Prospects actifs', value: '12', delta: '+3 ce mois', icon: Users, iconBg: '#DBEAFE', iconColor: '#1D4ED8', accentColor: '#1A72B5' },
+  { label: 'Offres générées', value: '34', delta: '+8 ce mois', icon: FileText, iconBg: '#DCFCE7', iconColor: '#15803D', accentColor: '#16A34A' },
+  { label: 'En attente', value: '5', delta: '2 urgents', icon: Clock, iconBg: '#FEF9C3', iconColor: '#A16207', accentColor: '#D97706' },
+  { label: 'Offres acceptées', value: '8', delta: '76% taux', icon: CheckCircle2, iconBg: '#FEE2E2', iconColor: '#B91C1C', accentColor: '#E11D48' },
 ]
 
 const activity = [
-  { id: 1, text: 'Acme SRL a rempli son questionnaire', time: 'il y a 2h', dot: '#094D80' },
-  { id: 2, text: 'Offre générée pour Shop BV', time: 'il y a 5h', dot: '#16a34a' },
-  { id: 3, text: 'Offre acceptée par Mode & Co', time: 'hier', dot: '#16a34a' },
-  { id: 4, text: 'Lien questionnaire envoyé à Luxe Retail', time: 'hier', dot: '#d97706' },
-  { id: 5, text: 'Nouveau prospect créé : BeautyBox', time: 'il y a 2j', dot: '#94a3b8' },
+  { id: 1, text: 'Acme SRL a rempli son questionnaire', time: 'il y a 2h', dot: '#1D4ED8', pulse: true },
+  { id: 2, text: 'Offre générée pour Shop BV', time: 'il y a 5h', dot: '#15803D', pulse: true },
+  { id: 3, text: 'Offre acceptée par Mode & Co', time: 'hier', dot: '#15803D', pulse: false },
+  { id: 4, text: 'Lien questionnaire envoyé à Luxe Retail', time: 'hier', dot: '#D97706', pulse: false },
+  { id: 5, text: 'Nouveau prospect créé : BeautyBox', time: 'il y a 2j', dot: '#94a3b8', pulse: false },
 ]
 
 const prospects = [
-  { id: 1, name: 'Acme SRL', sector: 'Mode', date: '13/03', status: 'Répondu', sBg: '#EEF4FB', sColor: '#094D80', group: 'Standard' },
-  { id: 2, name: 'Shop BV', sector: 'Beauté', date: '12/03', status: 'Offre générée', sBg: '#FFFBEB', sColor: '#b45309', group: 'Pâquerettes' },
-  { id: 3, name: 'Mode & Co', sector: 'Mode', date: '11/03', status: 'Acceptée', sBg: '#F0FDF4', sColor: '#15803d', group: 'Standard' },
-  { id: 4, name: 'Luxe Retail', sector: 'Luxe', date: '10/03', status: 'Lien envoyé', sBg: '#F8FAFC', sColor: '#475569', group: '—' },
-  { id: 5, name: 'BeautyBox', sector: 'Beauté', date: '09/03', status: 'Nouveau', sBg: '#F8FAFC', sColor: '#475569', group: '—' },
+  { id: 1, name: 'Acme SRL', sector: 'Mode', date: '13/03', status: 'Répondu', sBg: '#DBEAFE', sColor: '#1E40AF', group: 'Standard' },
+  { id: 2, name: 'Shop BV', sector: 'Beauté', date: '12/03', status: 'Offre générée', sBg: '#FEF3C7', sColor: '#78350F', group: 'Pâquerettes' },
+  { id: 3, name: 'Mode & Co', sector: 'Mode', date: '11/03', status: 'Acceptée', sBg: '#DCFCE7', sColor: '#14532D', group: 'Standard' },
+  { id: 4, name: 'Luxe Retail', sector: 'Luxe', date: '10/03', status: 'Lien envoyé', sBg: '#E2E8F0', sColor: '#374151', group: '—' },
+  { id: 5, name: 'BeautyBox', sector: 'Beauté', date: '09/03', status: 'Nouveau', sBg: '#EDE9FE', sColor: '#5B21B6', group: '—' },
 ]
 
-const card: React.CSSProperties = {
-  background: '#fff',
-  border: '1px solid var(--border)',
-  borderRadius: 12,
-  boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-}
+// Utilise la classe CSS .card
 
 export default function DashboardPage() {
   return (
@@ -59,21 +54,21 @@ export default function DashboardPage() {
           {kpis.map((k) => {
             const Icon = k.icon
             return (
-              <div key={k.label} style={card}>
+              <div key={k.label} className="card card-interactive" style={{ borderTop: `3px solid ${k.accentColor}` }}>
                 <div style={{ padding: '18px 20px' }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: 8, background: k.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Icon size={18} strokeWidth={1.75} style={{ color: k.iconColor }} />
+                    <div style={{ width: 38, height: 38, borderRadius: 10, background: k.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Icon size={19} strokeWidth={2} style={{ color: k.iconColor }} />
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: 'var(--text-muted)' }}>
-                      <TrendingUp size={10} style={{ color: '#16a34a' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: '#15803D', fontWeight: 600, background: '#DCFCE7', padding: '2px 7px', borderRadius: 99 }}>
+                      <TrendingUp size={10} />
                       {k.delta}
                     </div>
                   </div>
-                  <p style={{ fontSize: 30, fontWeight: 700, color: 'var(--gray-900)', letterSpacing: '-0.03em', lineHeight: 1 }}>
+                  <p style={{ fontSize: 32, fontWeight: 800, color: 'var(--gray-900)', letterSpacing: '-0.04em', lineHeight: 1 }}>
                     {k.value}
                   </p>
-                  <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 5 }}>{k.label}</p>
+                  <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 6, fontWeight: 500 }}>{k.label}</p>
                 </div>
               </div>
             )
@@ -83,7 +78,7 @@ export default function DashboardPage() {
         {/* Middle row */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 272px', gap: 14 }}>
           {/* Activity */}
-          <div style={card}>
+          <div className="card">
             <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--gray-900)' }}>Activité récente</h2>
             </div>
@@ -94,7 +89,7 @@ export default function DashboardPage() {
                   padding: '12px 20px',
                   borderBottom: i < activity.length - 1 ? '1px solid var(--gray-50)' : 'none',
                 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: 99, background: a.dot, flexShrink: 0 }} />
+                  <div style={{ width: 10, height: 10, borderRadius: 99, background: a.dot, flexShrink: 0, boxShadow: a.pulse ? `0 0 0 3px ${a.dot}22` : 'none' }} />
                   <span style={{ flex: 1, fontSize: 13, color: 'var(--gray-700)' }}>{a.text}</span>
                   <span style={{ fontSize: 12, color: 'var(--gray-400)', flexShrink: 0 }}>{a.time}</span>
                 </div>
@@ -103,33 +98,18 @@ export default function DashboardPage() {
           </div>
 
           {/* Quick actions */}
-          <div style={card}>
+          <div className="card">
             <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)' }}>
               <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--gray-900)' }}>Actions rapides</h2>
             </div>
             <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <Link href="/prospects/nouveau" style={{
-                display: 'flex', alignItems: 'center', gap: 9,
-                padding: '10px 14px', borderRadius: 8,
-                background: 'var(--primary)', color: '#fff',
-                fontSize: 13, fontWeight: 600, textDecoration: 'none',
-              }}>
+              <Link href="/prospects/nouveau" className="btn-primary" style={{ justifyContent: 'flex-start', padding: '10px 14px', borderRadius: 8 }}>
                 <Plus size={15} /> Nouveau prospect
               </Link>
-              <button style={{
-                display: 'flex', alignItems: 'center', gap: 9,
-                padding: '10px 14px', borderRadius: 8,
-                background: '#fff', color: 'var(--gray-700)',
-                border: '1px solid var(--border)', fontSize: 13, fontWeight: 500, cursor: 'pointer',
-              }}>
+              <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start', padding: '10px 14px', borderRadius: 8 }}>
                 <Link2 size={15} style={{ color: 'var(--primary)' }} /> Envoyer un lien
               </button>
-              <Link href="/tarifs" style={{
-                display: 'flex', alignItems: 'center', gap: 9,
-                padding: '10px 14px', borderRadius: 8,
-                background: '#fff', color: 'var(--gray-700)',
-                border: '1px solid var(--border)', fontSize: 13, fontWeight: 500, textDecoration: 'none',
-              }}>
+              <Link href="/tarifs" className="btn-secondary" style={{ justifyContent: 'flex-start', padding: '10px 14px', borderRadius: 8 }}>
                 <BarChart3 size={15} style={{ color: 'var(--primary)' }} /> Gérer les tarifs
               </Link>
             </div>
@@ -150,10 +130,10 @@ export default function DashboardPage() {
         </div>
 
         {/* Prospects table */}
-        <div style={card}>
+        <div className="card">
           <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--gray-900)' }}>Prospects récents</h2>
-            <Link href="/prospects" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 500, color: 'var(--primary)', textDecoration: 'none' }}>
+            <Link href="/prospects" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 600, color: 'var(--primary)', textDecoration: 'none' }}>
               Voir tout <ArrowRight size={13} />
             </Link>
           </div>
@@ -174,18 +154,18 @@ export default function DashboardPage() {
             </thead>
             <tbody>
               {prospects.map((p, i) => (
-                <tr key={p.id} style={{ borderBottom: i < prospects.length - 1 ? '1px solid var(--gray-50)' : 'none', cursor: 'pointer' }}>
+                <tr key={p.id} className="table-row-hover" style={{ borderBottom: i < prospects.length - 1 ? '1px solid var(--gray-100)' : 'none', cursor: 'pointer' }}>
                   <td style={{ padding: '13px 20px', fontSize: 13, fontWeight: 600, color: 'var(--gray-900)' }}>{p.name}</td>
                   <td style={{ padding: '13px 20px', fontSize: 13, color: 'var(--text-muted)' }}>{p.sector}</td>
                   <td style={{ padding: '13px 20px', fontSize: 13, color: 'var(--text-muted)' }}>{p.date}</td>
                   <td style={{ padding: '13px 20px' }}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 10px', borderRadius: 99, fontSize: 12, fontWeight: 500, background: p.sBg, color: p.sColor }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 10px', borderRadius: 99, fontSize: 12, fontWeight: 600, background: p.sBg, color: p.sColor }}>
                       {p.status}
                     </span>
                   </td>
                   <td style={{ padding: '13px 20px', fontSize: 13, color: 'var(--text-muted)' }}>{p.group}</td>
                   <td style={{ padding: '13px 20px' }}>
-                    <Link href={`/prospects/${p.id}`} style={{ fontSize: 13, fontWeight: 500, color: 'var(--primary)', textDecoration: 'none' }}>
+                    <Link href={`/prospects/${p.id}`} style={{ fontSize: 13, fontWeight: 600, color: 'var(--primary)', textDecoration: 'none' }}>
                       Voir →
                     </Link>
                   </td>

@@ -31,6 +31,19 @@ Types : `feat`, `fix`, `docs`, `refactor`, `chore`, `test`
 ## Changelog
 
 ### 2026-03-14
+- **feat(transporteurs)**: Module import Excel grilles tarifaires transporteurs
+  - `src/types/carrier-tariffs.ts` : types `CarrierTariff`, `CarrierZone`, `CarrierWeightRange`, `CarrierPriceMatrix`, `ParseResult`, `ZoneMapping`, `WeightMapping`
+  - `src/app/api/carrier-tariffs/parse/route.ts` : POST multipart → SheetJS parsing, retourne sheets brutes (headers + rows)
+  - `src/app/api/carrier-tariffs/route.ts` : GET/POST/DELETE stockage dans `data/carrier-tariffs/index.json`
+  - `src/app/(admin)/tarifs/transporteurs/page.tsx` : wizard 6 étapes
+    - **Upload** : drag & drop / clic, champs nom transporteur + libellé grille
+    - **Feuille** : sélection parmi les sheets du fichier (auto-skip si 1 seule)
+    - **Zones** : mapping colonne Excel → zone géographique (ID, libellé, pays preset)
+    - **Poids** : mapping ligne Excel → tranche de poids (min, max, unité kg/g)
+    - **Aperçu** : tableau grille finale avec stats (zones, tranches, prix définis)
+    - **Done** : confirmation sauvegarde
+  - Auto-détection heuristique des zones et tranches depuis le fichier
+  - `src/components/layout/Sidebar.tsx` : ajout lien Transporteurs (sous-item indenté de Tarifs)
 - **feat(theme)**: Redesign Material Design (Google-style) — `globals.css`, `Sidebar.tsx`, `dashboard/page.tsx`
   - Cards : ombres renforcées + `.card-interactive` hover lift (translateY -2px + shadow)
   - Boutons : `.btn-primary` avec box-shadow + lift, `.btn-secondary` border 1.5px + hover primary

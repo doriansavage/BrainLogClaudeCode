@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Plus, Search, ExternalLink, Copy, Check, Loader2 } from 'lucide-react'
+import { Plus, Search, ExternalLink, Copy, Check, Loader2, Trash2, Files, AlertTriangle } from 'lucide-react'
 import type { Prospect } from '@/types/prospect'
 import { STATUS_CONFIG } from '@/types/prospect'
 
@@ -51,11 +51,37 @@ function CopyLinkButton({ token }: { token: string }) {
   )
 }
 
+function ActionButton({ onClick, title, children, danger }: {
+  onClick: (e: React.MouseEvent) => void
+  title: string
+  children: React.ReactNode
+  danger?: boolean
+}) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 4,
+        fontSize: 11, fontWeight: 500, padding: '4px 8px', borderRadius: 6,
+        border: `1px solid ${danger ? '#fca5a5' : 'var(--border)'}`,
+        background: danger ? '#FEF2F2' : '#fff',
+        color: danger ? '#DC2626' : 'var(--gray-600)',
+        cursor: 'pointer', transition: 'all 150ms',
+      }}
+    >
+      {children}
+    </button>
+  )
+}
+
 export function ProspectsList() {
   const [prospects, setProspects] = useState<Prospect[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('tous')
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+  const [duplicating, setDuplicating] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/prospects')
@@ -63,6 +89,23 @@ export function ProspectsList() {
       .then((data) => { setProspects(Array.isArray(data) ? data : []); setLoading(false) })
       .catch(() => setLoading(false))
   }, [])
+
+  async function handleDelete(id: string) {
+    if (confirmDelete !== id) { setConfirmDelete(id); return }
+    await fetch(`/api/prospects/${id}`, { method: 'DELETE' })
+    setProspects((prev) => prev.filter((p) => p.id !== id))
+    setConfirmDelete(null)
+  }
+
+  async function handleDuplicate(id: string) {
+    setDuplicating(id)
+    const res = await fetch(`/api/prospects/${id}/duplicate`, { method: 'POST' })
+    if (res.ok) {
+      const copy = await res.json()
+      setProspects((prev) => [copy, ...prev])
+    }
+    setDuplicating(null)
+  }
 
   const filtered = prospects.filter((p) => {
     const matchSearch =
@@ -226,7 +269,7 @@ export function ProspectsList() {
                     </span>
                   </td>
                   <td style={{ padding: '12px', verticalAlign: 'middle' }}>
-                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'nowrap' }}>
                       <CopyLinkButton token={p.token} />
                       <Link
                         href={`/prospects/${p.id}`}
@@ -238,6 +281,35 @@ export function ProspectsList() {
                       >
                         Voir
                       </Link>
+                      <ActionButton
+                        onClick={(e) => { e.preventDefault(); handleDuplicate(p.id) }}
+                        title="Dupliquer ce prospect"
+                      >
+                        {duplicating === p.id
+                          ? <Loader2 size={11} style={{ animation: 'spin 1s linear infinite' }} />
+                          : <Files size={11} />}
+                      </ActionButton>
+                      <ActionButton
+                        onClick={(e) => { e.preventDefault(); handleDelete(p.id) }}
+                        title={confirmDelete === p.id ? 'Cliquer pour confirmer la suppression' : 'Supprimer ce prospect'}
+                        danger={confirmDelete === p.id}
+                      >
+                        {confirmDelete === p.id
+                          ? <><AlertTriangle size={11} />Confirmer</>
+                          : <Trash2 size={11} />}
+                      </ActionButton>
+                      {confirmDelete === p.id && (
+                        <button
+                          onClick={(e) => { e.preventDefault(); setConfirmDelete(null) }}
+                          style={{
+                            fontSize: 11, padding: '4px 6px', borderRadius: 6,
+                            border: '1px solid var(--border)', background: '#fff',
+                            color: 'var(--gray-400)', cursor: 'pointer',
+                          }}
+                        >
+                          ✕
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

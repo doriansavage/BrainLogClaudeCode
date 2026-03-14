@@ -74,6 +74,25 @@ export function updateProspect(id: string, data: Partial<Omit<Prospect, 'id' | '
   return prospects[idx]
 }
 
+export function duplicateProspect(id: string): Prospect | null {
+  const original = getProspectById(id)
+  if (!original) return null
+  const now = new Date().toISOString()
+  const copy: Prospect = {
+    ...original,
+    id: randomUUID(),
+    token: randomUUID(),
+    status: 'nouveau',
+    companyName: `${original.companyName} (copie)`,
+    createdAt: now,
+    updatedAt: now,
+  }
+  const prospects = readProspects()
+  prospects.unshift(copy)
+  writeProspects(prospects)
+  return copy
+}
+
 export function deleteProspect(id: string): boolean {
   const prospects = readProspects()
   const filtered = prospects.filter((p) => p.id !== id)

@@ -1020,26 +1020,142 @@ export default function ParametresPage() {
                 </F>
               </G2>
             </Card>
-            <Card title="Sections du questionnaire" desc="8 sections — 97 champs (Q1 à Q8)">
-              {[
-                { id: 'Q1', label: 'Identité & base article', n: 15 },
-                { id: 'Q2', label: 'Réception & approvisionnement', n: 13 },
-                { id: 'Q3', label: 'Stockage', n: 10 },
-                { id: 'Q4', label: 'Préparation de commandes', n: 14 },
-                { id: 'Q5', label: 'Packaging & colisage', n: 10 },
-                { id: 'Q6', label: 'Expédition', n: 15 },
-                { id: 'Q7', label: 'Gestion des retours', n: 9 },
-                { id: 'Q8', label: 'Informations complémentaires', n: 11 },
-              ].map((q, i, arr) => (
-                <div key={q.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--gray-50)' : 'none' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary)', background: '#EEF4FB', padding: '2px 7px', borderRadius: 99, fontFamily: 'monospace' }}>{q.id}</span>
-                    <span style={{ fontSize: 13, color: 'var(--gray-800)' }}>{q.label}</span>
+            {/* ── Éditeur de structure questionnaire ── */}
+            {Object.keys(qCfg).length > 0 && (
+              <div style={{ background: '#fff', borderRadius: 12, border: '1px solid var(--border)', overflow: 'hidden' }}>
+                {/* Header card */}
+                <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--gray-50)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--gray-900)' }}>Structure du questionnaire</p>
+                    <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>
+                      {QUESTIONNAIRE_SCHEMA.sections.filter(s => qCfg[s.id]?.enabled !== false).length} étapes actives —{' '}
+                      {QUESTIONNAIRE_SCHEMA.sections.reduce((t, s) => t + s.fields.filter(f => qCfg[s.id]?.fields[f.id]?.enabled !== false).length, 0)} questions visibles
+                    </p>
                   </div>
-                  <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{q.n} champs</span>
+                  <button
+                    onClick={saveQCfg}
+                    disabled={qSaving}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 6,
+                      padding: '7px 14px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none',
+                      background: qSaved ? '#DCFCE7' : 'var(--primary)', color: qSaved ? '#15803d' : '#fff',
+                      transition: 'background 0.2s',
+                    }}
+                  >
+                    {qSaved ? <Check size={13} /> : <Save size={13} />}
+                    {qSaved ? 'Enregistré' : qSaving ? 'Enregistrement…' : 'Enregistrer'}
+                  </button>
                 </div>
-              ))}
-            </Card>
+
+                {/* Sections accordéon */}
+                {QUESTIONNAIRE_SCHEMA.sections.map((section, si, arr) => {
+                  const secCfg = qCfg[section.id]
+                  if (!secCfg) return null
+                  const isOpen = qExpanded.has(section.id)
+                  const enabledFieldsCount = section.fields.filter(f => secCfg.fields[f.id]?.enabled !== false).length
+                  return (
+                    <div key={section.id} style={{ borderBottom: si < arr.length - 1 ? '1px solid var(--gray-50)' : 'none' }}>
+                      {/* Section row */}
+                      <div style={{ display: 'flex', alignItems: 'center', padding: '10px 16px', gap: 10, background: secCfg.enabled ? '#fff' : '#FAFAFA' }}>
+                        {/* Toggle section on/off */}
+                        <button
+                          onClick={() => toggleQSection(section.id)}
+                          title={secCfg.enabled ? 'Masquer cette étape' : 'Afficher cette étape'}
+                          style={{
+                            width: 32, height: 18, borderRadius: 99, border: 'none', cursor: 'pointer', flexShrink: 0,
+                            background: secCfg.enabled ? 'var(--primary)' : 'var(--gray-200)',
+                            position: 'relative', transition: 'background 0.15s',
+                          }}
+                        >
+                          <span style={{
+                            position: 'absolute', top: 2, left: secCfg.enabled ? 16 : 2,
+                            width: 14, height: 14, borderRadius: '50%', background: '#fff',
+                            transition: 'left 0.15s', display: 'block',
+                          }} />
+                        </button>
+                        {/* ID badge */}
+                        <span style={{ fontSize: 11, fontWeight: 700, color: secCfg.enabled ? 'var(--primary)' : 'var(--gray-400)', background: secCfg.enabled ? '#EEF4FB' : '#F1F5F9', padding: '2px 7px', borderRadius: 99, fontFamily: 'monospace', flexShrink: 0 }}>
+                          {section.id}
+                        </span>
+                        {/* Label */}
+                        <div style={{ flex: 1 }}>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: secCfg.enabled ? 'var(--gray-900)' : 'var(--gray-400)' }}>{section.label}</span>
+                          <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 8 }}>{enabledFieldsCount}/{section.fields.length} questions</span>
+                        </div>
+                        {/* Expand button */}
+                        <button
+                          onClick={() => toggleQExpanded(section.id)}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--gray-400)', padding: 4, display: 'flex', alignItems: 'center' }}
+                        >
+                          {isOpen ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
+                        </button>
+                      </div>
+
+                      {/* Fields table */}
+                      {isOpen && (
+                        <div style={{ background: '#F8FAFC', borderTop: '1px solid var(--gray-50)' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <thead>
+                              <tr style={{ background: '#F1F5F9' }}>
+                                <th style={{ padding: '6px 16px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textAlign: 'left', width: 56 }}>ID</th>
+                                <th style={{ padding: '6px 8px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textAlign: 'left' }}>Question</th>
+                                <th style={{ padding: '6px 8px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textAlign: 'center', width: 90 }}>Type</th>
+                                <th style={{ padding: '6px 8px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textAlign: 'center', width: 80 }}>Visible</th>
+                                <th style={{ padding: '6px 16px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textAlign: 'center', width: 90 }}>Obligatoire</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {section.fields.map((field, fi, farr) => {
+                                const fCfg = secCfg.fields[field.id] ?? { enabled: true, required: field.required }
+                                const isVisible = fCfg.enabled
+                                return (
+                                  <tr key={field.id} style={{ borderBottom: fi < farr.length - 1 ? '1px solid var(--gray-50)' : 'none', background: isVisible ? '#fff' : '#F8FAFC', opacity: isVisible ? 1 : 0.55 }}>
+                                    <td style={{ padding: '7px 16px' }}>
+                                      <span style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--text-muted)', background: '#EEF4FB', padding: '1px 5px', borderRadius: 4 }}>{field.id}</span>
+                                    </td>
+                                    <td style={{ padding: '7px 8px', fontSize: 12, color: 'var(--gray-800)' }}>{field.label}</td>
+                                    <td style={{ padding: '7px 8px', textAlign: 'center' }}>
+                                      <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: '#EEF4FB', color: 'var(--primary)', fontWeight: 500 }}>
+                                        {FIELD_TYPE_LABEL[field.type] ?? field.type}
+                                      </span>
+                                    </td>
+                                    <td style={{ padding: '7px 8px', textAlign: 'center' }}>
+                                      <button
+                                        onClick={() => toggleQField(section.id, field.id)}
+                                        title={isVisible ? 'Masquer' : 'Afficher'}
+                                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: isVisible ? '#15803d' : 'var(--gray-300)', display: 'flex', alignItems: 'center', margin: '0 auto' }}
+                                      >
+                                        {isVisible ? <Eye size={14} /> : <EyeOff size={14} />}
+                                      </button>
+                                    </td>
+                                    <td style={{ padding: '7px 16px', textAlign: 'center' }}>
+                                      <button
+                                        onClick={() => isVisible && toggleQRequired(section.id, field.id)}
+                                        title={fCfg.required ? 'Rendre optionnel' : 'Rendre obligatoire'}
+                                        disabled={!isVisible}
+                                        style={{ background: 'none', border: 'none', cursor: isVisible ? 'pointer' : 'default', padding: 4, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                      >
+                                        <span style={{
+                                          width: 16, height: 16, borderRadius: 4, border: `2px solid ${fCfg.required && isVisible ? 'var(--primary)' : 'var(--gray-200)'}`,
+                                          background: fCfg.required && isVisible ? 'var(--primary)' : 'transparent',
+                                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        }}>
+                                          {fCfg.required && isVisible && <Check size={9} color="#fff" strokeWidth={3} />}
+                                        </span>
+                                      </button>
+                                    </td>
+                                  </tr>
+                                )
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </>}
 
           {/* ── NOTIFICATIONS ── */}

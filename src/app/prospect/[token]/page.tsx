@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import { getProspectByToken, getResponses, touchLastAccess } from '@/lib/db/prospects'
 import { QuestionnaireShell } from '@/components/questionnaire/QuestionnaireShell'
 import { autoSaveAnswers, submitQuestionnaire } from '@/app/actions/questionnaire'
+import { loadActiveSchema } from '@/lib/questionnaire/config'
 import type { AnswersBySection, QuestionnaireAnswers } from '@/types/questionnaire'
 import type { CommentsBySection } from '@/types/prospect'
 
@@ -18,6 +19,9 @@ export default async function ProspectPortalPage({ params }: PageProps) {
 
   // Mettre à jour le timestamp de dernier accès (côté serveur, à chaque visite)
   touchLastAccess(prospect.id)
+
+  // Charger le schéma actif (avec config questionnaire appliquée)
+  const activeSchema = loadActiveSchema()
 
   const responses = getResponses(prospect.id)
   const savedAnswers = (responses?.answers ?? {}) as AnswersBySection
@@ -100,6 +104,7 @@ export default async function ProspectPortalPage({ params }: PageProps) {
             savedSectionIndex={savedSectionIndex}
             lastAccessAt={lastAccessAt}
             shareUrl={shareUrl}
+            schema={activeSchema}
             onAutoSave={handleAutoSave}
             onSubmit={handleSubmit}
           />

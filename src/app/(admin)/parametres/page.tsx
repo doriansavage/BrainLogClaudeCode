@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import type { ReactNode, CSSProperties, ElementType } from 'react'
 import {
   Building2, UserCheck, FileText, ShieldCheck, Folder, ClipboardList, Bell, Plug,
   Save, Check, CheckCircle2, Mail, Phone, CreditCard, Hash,
   Upload, Archive, Plus, ChevronDown, ChevronRight, RotateCcw, Paperclip,
-  BarChart3, Truck, Zap,
+  BarChart3, Truck, Zap, Eye, EyeOff,
 } from 'lucide-react'
+import { QUESTIONNAIRE_SCHEMA } from '@/lib/questionnaire'
 
 /* ═══════════════════════════════════════════════════════
    TABS
@@ -334,12 +335,106 @@ function StatusBadge({ ok, label }: { ok: boolean; label: string }) {
 }
 
 /* ═══════════════════════════════════════════════════════
+   QUESTIONNAIRE CONFIG — types & helpers
+═══════════════════════════════════════════════════════ */
+interface QFieldCfg { enabled: boolean; required: boolean }
+interface QSectionCfg { enabled: boolean; fields: Record<string, QFieldCfg> }
+type QCfg = Record<string, QSectionCfg>
+
+function buildDefaultQCfg(loaded: { sections: Record<string, Partial<QSectionCfg>> }): QCfg {
+  const result: QCfg = {}
+  for (const section of QUESTIONNAIRE_SCHEMA.sections) {
+    const loadedSec = loaded.sections[section.id] ?? {}
+    const fields: Record<string, QFieldCfg> = {}
+    for (const field of section.fields) {
+      const loadedF = loadedSec.fields?.[field.id] ?? {}
+      fields[field.id] = {
+        enabled: loadedF.enabled !== false,
+        required: loadedF.required !== undefined ? loadedF.required : field.required,
+      }
+    }
+    result[section.id] = {
+      enabled: loadedSec.enabled !== false,
+      fields,
+    }
+  }
+  return result
+}
+
+function qCfgToPayload(cfg: QCfg) {
+  const sections: Record<string, unknown> = {}
+  for (const section of QUESTIONNAIRE_SCHEMA.sections) {
+    const sec = cfg[section.id]
+    const fields: Record<string, unknown> = {}
+    for (const field of section.fields) {
+      const f = sec.fields[field.id]
+      fields[field.id] = { enabled: f.enabled, required: f.required }
+    }
+    sections[section.id] = { enabled: sec.enabled, fields }
+  }
+  return { sections }
+}
+
+const FIELD_TYPE_LABEL: Record<string, string> = {
+  text: 'Texte', url: 'URL', textarea: 'Zone texte', toggle: 'Oui/Non',
+  radio_cards: 'Choix unique', icon_grid: 'Grille icônes', slider: 'Curseur',
+  multi_select: 'Multi-choix', price_range: 'Fourchette €', geo_split: 'Géo %',
+  scale_3: 'Échelle 3', logo_picker: 'Logos', timeline_sel: 'Timeline',
+}
+
+/* ═══════════════════════════════════════════════════════
    PAGE PRINCIPALE
 ═══════════════════════════════════════════════════════ */
 export default function ParametresPage() {
   const [tab, setTab] = useState<TabId>('entreprise')
   const [s, setS] = useState<S>(DEFAULTS)
   const [saved, setSaved] = useState(false)
+
+  // Questionnaire config editor state
+  const [qCfg, setQCfg] = useState<QCfg>({})
+  const [qExpanded, setQExpanded] = useState<Set<string>>(new Set())
+  const [qSaving, setQSaving] = useState(false)
+  const [qSaved, setQSaved] = useState(false)
+
+  useEffect(() => {
+    fetch('/api/questionnaire-config')
+      .then(r => r.json())
+      .then(data => setQCfg(buildDefaultQCfg(data)))
+      .catch(() => setQCfg(buildDefaultQCfg({ sections: {} })))
+  }, [])
+
+  const toggleQSection = useCallback((sId: string) => {
+    setQCfg(prev => ({ ...prev, [sId]: { ...prev[sId], enabled: !prev[sId].enabled } }))
+  }, [])
+
+  const toggleQField = useCallback((sId: string, fId: string) => {
+    setQCfg(prev => ({
+      ...prev,
+      [sId]: { ...prev[sId], fields: { ...prev[sId].fields, [fId]: { ...prev[sId].fields[fId], enabled: !prev[sId].fields[fId].enabled } } },
+    }))
+  }, [])
+
+  const toggleQRequired = useCallback((sId: string, fId: string) => {
+    setQCfg(prev => ({
+      ...prev,
+      [sId]: { ...prev[sId], fields: { ...prev[sId].fields, [fId]: { ...prev[sId].fields[fId], required: !prev[sId].fields[fId].required } } },
+    }))
+  }, [])
+
+  const toggleQExpanded = useCallback((sId: string) => {
+    setQExpanded(prev => { const n = new Set(prev); n.has(sId) ? n.delete(sId) : n.add(sId); return n })
+  }, [])
+
+  async function saveQCfg() {
+    setQSaving(true)
+    try {
+      await fetch('/api/questionnaire-config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(qCfgToPayload(qCfg)) })
+      setQSaved(true)
+      setTimeout(() => setQSaved(false), 2500)
+    } finally {
+      setQSaving(false)
+    }
+  }
 
   // Documents state
   const [docs, setDocs] = useState<Doc[]>(INITIAL_DOCS)

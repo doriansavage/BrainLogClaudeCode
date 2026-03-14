@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import type { FormScreen, AnswersBySection, QuestionnaireAnswers } from '@/types/questionnaire'
+import type { FormScreen, AnswersBySection, QuestionnaireAnswers, QuestionnaireSchema } from '@/types/questionnaire'
 import type { CommentsBySection } from '@/types/prospect'
-import { QUESTIONNAIRE_SCHEMA, TOTAL_SECTIONS, mergeAnswers, nextScreen, prevScreen } from '@/lib/questionnaire'
+import { QUESTIONNAIRE_SCHEMA, mergeAnswers } from '@/lib/questionnaire'
 import { SectionForm } from './SectionForm'
 import { RecapView } from './RecapView'
 
@@ -15,6 +15,7 @@ interface QuestionnaireShellProps {
   savedSectionIndex?: number        // -1 = jamais commencé
   lastAccessAt?: string | null      // ISO datetime du dernier accès
   shareUrl?: string                 // URL complète du formulaire
+  schema?: QuestionnaireSchema      // schema actif (avec config appliquée) — sinon schéma par défaut
   onAutoSave?: (sectionId: string, answers: QuestionnaireAnswers, sectionIndex: number, comments?: Record<string, string>) => Promise<void>
   onSubmit?: (answers: AnswersBySection, comments?: CommentsBySection) => Promise<void>
 }
@@ -105,9 +106,12 @@ export function QuestionnaireShell({
   savedSectionIndex = -1,
   lastAccessAt,
   shareUrl,
+  schema: schemaProp,
   onAutoSave,
   onSubmit,
 }: QuestionnaireShellProps) {
+  const activeSchema = schemaProp ?? QUESTIONNAIRE_SCHEMA
+  const TOTAL_SECTIONS = activeSchema.sections.length
   // Reprendre depuis la section sauvegardée (si déjà commencé)
   const initialScreen: FormScreen = savedSectionIndex >= 0
     ? { screen: 'step', sectionIndex: savedSectionIndex }
@@ -216,7 +220,7 @@ export function QuestionnaireShell({
   // ── Step ─────────────────────────────────────────────────────────────────
   if (screen.screen === 'step') {
     const { sectionIndex } = screen
-    const section = QUESTIONNAIRE_SCHEMA.sections[sectionIndex]
+    const section = activeSchema.sections[sectionIndex]
     return (
       <div className="flex flex-col gap-0">
         {showShareBar && <ShareBar shareUrl={shareUrl!} lastAccessAt={lastAccessAt} />}

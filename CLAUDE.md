@@ -30,6 +30,11 @@ Types : `feat`, `fix`, `docs`, `refactor`, `chore`, `test`
 
 ## Changelog
 
+### 2026-03-23
+- **feat(scraping)**: Discovery & vérification URLs Shopify Belgique
+  - `scripts/shopify-discover-belgium.ts` : discovery multi-sources (DuckDuckGo dorks ×15, crt.sh Certificate Transparency, annuaires shopistores/myip.ms), output `storage/shopify-belgium-discovered.json`
+  - `scripts/shopify-verify.ts` : vérification multi-signaux avec scoring /100 — /cart.json (+30), cookies _shopify (+25), headers X-ShopId (+15), window.Shopify (+10), meta checkout-token (+10), checkout link (+5), cdn scripts (+5), routes /collections (+5), malus blog (-20). Seuil ≥30 = Shopify confirmé. Sauvegarde incrémentale, output `storage/shopify-belgium-verified.json`
+
 ### 2026-03-14 (suite)
 - **feat(whatsapp)**: Notifications WhatsApp automatiques à la création de prospect
   - `src/lib/whatsapp.ts` : service Baileys — `sendWhatsAppMessage(toNumber, message)`, session persistée dans `scripts/whatsapp-session/`, timeout 15s, gestion reconnexion
@@ -301,6 +306,8 @@ Toute la documentation Crawlee (crawlers disponibles, options, API `page`, `enqu
 | Fichier | Cible | Output |
 |---|---|---|
 | `scripts/scrape-brain-log.ts` | brain-log.com (8 pages FR) | `storage/brain-log-full.json` |
+| `scripts/shopify-discover-belgium.ts` | Discovery URLs Shopify belges (DuckDuckGo dorks, crt.sh, annuaires) | `storage/shopify-belgium-discovered.json` |
+| `scripts/shopify-verify.ts` | Vérification multi-signaux (score /100 : cart.json, cookies, headers, JS, malus blog) | `storage/shopify-belgium-verified.json` |
 
 **Lancer un scraper :**
 ```bash

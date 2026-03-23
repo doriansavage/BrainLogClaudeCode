@@ -2,54 +2,48 @@
  * Shopify URL Discovery — Belgian Sites
  *
  * Sources utilisées :
- * 1. DuckDuckGo dorks (site:.be + signatures Shopify)
- * 2. crt.sh (Certificate Transparency — *.myshopify.com avec noms belges)
- * 3. Vérification Shopify robuste (multi-signaux)
+ * 1. DuckDuckGo HTML dorks (site:.be + signatures Shopify)
+ * 2. crt.sh (Certificate Transparency)
+ * 3. Annuaires de shops Shopify
  *
  * Usage : npx tsx scripts/shopify-discover-belgium.ts
  * Output : storage/shopify-belgium-discovered.json
  */
 
-import { PlaywrightCrawler, Dataset } from 'crawlee';
-import { writeFileSync, readFileSync, existsSync } from 'fs';
+import { CheerioCrawler, Dataset } from 'crawlee';
+import { writeFileSync, readFileSync, existsSync, mkdirSync } from 'fs';
 
 // ─── Configuration ───────────────────────────────────────────────
 const OUTPUT_FILE = 'storage/shopify-belgium-discovered.json';
-const MAX_PAGES_PER_DORK = 5; // pages de résultats par dork
+
+// Assurer que le dossier storage existe
+if (!existsSync('storage')) mkdirSync('storage');
 
 // ─── Dorks ciblant les sites belges Shopify ──────────────────────
 const DORKS = [
-  // Signature technique directe
   'site:.be "powered by shopify"',
   'site:.be "myshopify.com"',
   'site:.be "shopify-checkout-api-token"',
-
-  // TLD .be + indices e-commerce Shopify
-  'site:.be inurl:/collections/',
+  'site:.be inurl:/collections/ "add to cart"',
   'site:.be inurl:/products/ "add to cart"',
   'site:.be "checkout.shopify.com"',
-
-  // Variantes pays + langue
   '"powered by shopify" belgique livraison',
   '"powered by shopify" belgie levering',
   '"powered by shopify" belgium shipping site:.be',
   '"myshopify.com" site:.be -blog -article -review',
-
-  // Niches courantes
-  'site:.be "shopify" mode vêtements',
-  'site:.be "shopify" bijoux accessoires',
-  'site:.be "shopify" cosmétique beauté',
-  'site:.be "shopify" décoration maison',
-  'site:.be "shopify" alimentation bio',
+  'site:.be "shopify" mode vêtements boutique',
+  'site:.be "shopify" bijoux accessoires boutique',
+  'site:.be "shopify" cosmétique beauté boutique',
+  'site:.be "shopify" décoration maison boutique',
+  'site:.be "shopify" alimentation bio boutique',
 ];
 
 // ─── Stockage des URLs découvertes ──────────────────────────────
-const discoveredUrls = new Set<string>();
+const discoveredUrls = new Map<string, { url: string; source: string }>();
 
 function normalizeUrl(url: string): string {
   try {
     const u = new URL(url);
-    // Garder uniquement le domaine racine
     return `${u.protocol}//${u.hostname}`.toLowerCase();
   } catch {
     return url.toLowerCase();
@@ -59,8 +53,7 @@ function normalizeUrl(url: string): string {
 function isRelevantUrl(url: string): boolean {
   try {
     const u = new URL(url);
-    const dominated = u.hostname.toLowerCase();
-    // Exclure les résultats non pertinents
+    const host = u.hostname.toLowerCase();
     const excludes = [
       'duckduckgo.com', 'google.com', 'bing.com', 'yahoo.com',
       'youtube.com', 'facebook.com', 'instagram.com', 'twitter.com',
@@ -68,242 +61,225 @@ function isRelevantUrl(url: string): boolean {
       'shopify.com', 'myshopify.com', 'apps.shopify.com',
       'builtwith.com', 'wappalyzer.com', 'similartech.com',
       'github.com', 'stackoverflow.com', 'medium.com',
+      'trustpilot.com', 'yelp.com', 'tripadvisor.com',
     ];
-    if (excludes.some(ex => dominated.includes(ex))) return false;
-    // Priorité aux .be mais accepter aussi d'autres TLD belges
-    return true;
+    return !excludes.some(ex => host.includes(ex));
   } catch {
     return false;
   }
 }
 
-// ─── Phase 1 : DuckDuckGo Scraping ──────────────────────────────
+function addUrl(url: string, source: string) {
+  if (!isRelevantUrl(url)) return;
+  const normalized = normalizeUrl(url);
+  if (!discoveredUrls.has(normalized)) {
+    discoveredUrls.set(normalized, { url: normalized, source });
+  }
+}
+
+// ─── Phase 1 : DuckDuckGo HTML Scraping ─────────────────────────
 async function scrapeDuckDuckGo() {
   console.log('\n🔍 Phase 1 : DuckDuckGo Dorks\n');
 
-  const dorkUrls = DORKS.map(dork => {
-    const encoded = encodeURIComponent(dork);
-    return {
-      url: `https://duckduckgo.com/?q=${encoded}&ia=web`,
-      userData: { dork },
-    };
-  });
+  const dorkRequests = DORKS.map(dork => ({
+    url: `https://html.duckduckgo.com/html/?q=${encodeURIComponent(dork)}`,
+    userData: { dork, source: 'duckduckgo' },
+  }));
 
-  const crawler = new PlaywrightCrawler({
-    async requestHandler({ page, request, log }) {
+  const crawler = new CheerioCrawler({
+    async requestHandler({ $, request, log }) {
       const dork = request.userData.dork as string;
-      log.info(`Dork: ${dork}`);
-
-      // Attendre les résultats
-      await page.waitForLoadState('domcontentloaded');
-      await page.waitForTimeout(2000);
-
-      // Essayer de cliquer sur "More results" quelques fois
-      for (let i = 0; i < MAX_PAGES_PER_DORK - 1; i++) {
-        try {
-          const moreBtn = page.locator('a.result--more__btn, button#more-results, a[id="more-results"]');
-          if (await moreBtn.isVisible({ timeout: 3000 })) {
-            await moreBtn.click();
-            await page.waitForTimeout(2000);
-          } else {
-            break;
-          }
-        } catch {
-          break;
-        }
-      }
-
-      // Extraire les liens de résultats
-      const links = await page.$$eval(
-        'a.result__a, article a[data-testid="result-title-a"], a[href*="//uddg"]',
-        els => els.map(el => (el as HTMLAnchorElement).href).filter(Boolean)
-      );
-
-      // Fallback : extraire tous les liens qui ressemblent à des résultats
-      const allLinks = await page.$$eval('a[href]', els =>
-        els.map(el => (el as HTMLAnchorElement).href)
-          .filter(h => h && !h.includes('duckduckgo.com') && h.startsWith('http'))
-      );
-
-      const combined = [...new Set([...links, ...allLinks])];
       let count = 0;
 
-      for (const link of combined) {
-        // DuckDuckGo utilise des redirections uddg — extraire l'URL réelle
-        let realUrl = link;
+      // DuckDuckGo HTML version — liens dans .result__a
+      $('a.result__a').each((_, el) => {
+        const href = $(el).attr('href') || '';
+        // DuckDuckGo wraps URLs in //duckduckgo.com/l/?uddg=...
+        let realUrl = href;
         try {
-          const urlObj = new URL(link);
-          const uddg = urlObj.searchParams.get('uddg');
-          if (uddg) realUrl = uddg;
+          if (href.includes('uddg=')) {
+            const params = new URL(href, 'https://duckduckgo.com').searchParams;
+            realUrl = params.get('uddg') || href;
+          }
         } catch { /* keep original */ }
 
-        if (isRelevantUrl(realUrl)) {
-          const normalized = normalizeUrl(realUrl);
-          if (!discoveredUrls.has(normalized)) {
-            discoveredUrls.add(normalized);
-            count++;
-          }
+        if (realUrl.startsWith('http')) {
+          addUrl(realUrl, `dork:${dork}`);
+          count++;
         }
-      }
+      });
 
-      log.info(`  → ${count} nouvelles URLs (total: ${discoveredUrls.size})`);
+      // Fallback : tous les liens avec href http
+      $('a[href^="http"]').each((_, el) => {
+        const href = $(el).attr('href') || '';
+        if (href.startsWith('http') && !href.includes('duckduckgo.com')) {
+          addUrl(href, `dork:${dork}`);
+        }
+      });
+
+      log.info(`[DDG] "${dork.slice(0, 50)}..." → ${count} résultats (total: ${discoveredUrls.size})`);
     },
 
     maxRequestsPerCrawl: DORKS.length,
-    maxConcurrency: 2, // pas trop agressif
-    headless: true,
+    maxConcurrency: 2,
     navigationTimeoutSecs: 30,
-    requestHandlerTimeoutSecs: 45,
-    launchContext: {
-      launchOptions: {
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      },
-    },
+    maxRequestRetries: 1,
   });
 
-  await crawler.run(dorkUrls);
-  console.log(`\n✅ Phase 1 terminée : ${discoveredUrls.size} URLs uniques découvertes\n`);
+  await crawler.run(dorkRequests);
+  console.log(`\n✅ Phase 1 terminée : ${discoveredUrls.size} URLs\n`);
 }
 
-// ─── Phase 2 : Certificate Transparency (crt.sh) ────────────────
+// ─── Phase 2 : crt.sh (Certificate Transparency) ────────────────
 async function scrapeCrtSh() {
   console.log('\n🔐 Phase 2 : Certificate Transparency (crt.sh)\n');
 
-  // Rechercher les certificats pour des domaines .be liés à Shopify
-  const queries = [
-    '%.be',  // tous les .be avec wildcard (via shops.myshopify.com on peut trouver les custom domains)
-  ];
-
-  const crawler = new PlaywrightCrawler({
-    async requestHandler({ page, request, log }) {
-      log.info(`crt.sh query: ${request.url}`);
-      await page.waitForLoadState('domcontentloaded');
-      await page.waitForTimeout(3000);
-
-      // Extraire les noms de domaines des certificats
-      const domains = await page.$$eval('td', els => {
-        return els
-          .map(el => el.textContent?.trim() || '')
-          .filter(t => t.includes('.be') && !t.includes(' '))
-          .map(t => t.replace(/^\*\./, ''));
-      });
-
-      let count = 0;
-      for (const domain of domains) {
-        const normalized = `https://${domain}`.toLowerCase();
-        if (!discoveredUrls.has(normalized) && domain.endsWith('.be')) {
-          discoveredUrls.add(normalized);
-          count++;
-        }
-      }
-
-      log.info(`  → ${count} domaines .be trouvés`);
-    },
-
-    maxRequestsPerCrawl: 5,
-    maxConcurrency: 1,
-    headless: true,
-    navigationTimeoutSecs: 60,
-    requestHandlerTimeoutSecs: 90,
-    launchContext: {
-      launchOptions: {
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      },
-    },
-  });
-
-  // Chercher les certificats émis par Shopify pour des domaines .be
-  // Shopify utilise Let's Encrypt et leurs propres certificats
-  const crtUrls = [
+  // Shopify héberge les sites sur leurs serveurs et émet des certificats
+  // On cherche les certificats liés à des domaines .be sur l'infra Shopify
+  const crtQueries = [
     'https://crt.sh/?q=%25.myshopify.com&output=json',
   ];
 
-  // Utilisation directe via fetch pour le JSON de crt.sh
-  console.log('  Requête crt.sh pour les domaines myshopify.com...');
-  try {
-    const resp = await fetch('https://crt.sh/?q=%25.be&Identity=myshopify.com&output=json');
-    if (resp.ok) {
+  for (const queryUrl of crtQueries) {
+    try {
+      console.log('  Requête crt.sh...');
+      const resp = await fetch(queryUrl, {
+        signal: AbortSignal.timeout(30000),
+      });
+      if (!resp.ok) {
+        console.log(`  ⚠️ crt.sh HTTP ${resp.status}`);
+        continue;
+      }
       const certs = await resp.json() as Array<{ common_name: string; name_value: string }>;
       let count = 0;
       for (const cert of certs) {
         const names = (cert.name_value || '').split('\n');
         for (const name of names) {
           const clean = name.replace(/^\*\./, '').trim().toLowerCase();
-          if (clean.endsWith('.be')) {
-            const normalized = `https://${clean}`;
-            if (!discoveredUrls.has(normalized)) {
-              discoveredUrls.add(normalized);
-              count++;
-            }
+          if (clean.endsWith('.be') && clean.includes('.') && !clean.includes(' ')) {
+            addUrl(`https://${clean}`, 'crt.sh');
+            count++;
           }
         }
+        // Aussi le common_name
+        const cn = (cert.common_name || '').trim().toLowerCase();
+        if (cn.endsWith('.be') && cn.includes('.') && !cn.includes(' ')) {
+          addUrl(`https://${cn}`, 'crt.sh');
+          count++;
+        }
       }
-      console.log(`  → ${count} domaines .be via crt.sh`);
+      console.log(`  → ${count} entrées .be trouvées (total: ${discoveredUrls.size})`);
+    } catch (e: any) {
+      console.log(`  ⚠️ crt.sh erreur: ${e.message?.slice(0, 60)}`);
     }
-  } catch (e) {
-    console.log('  ⚠️ crt.sh timeout ou erreur, on continue...');
   }
 
   console.log(`\n✅ Phase 2 terminée : ${discoveredUrls.size} URLs total\n`);
 }
 
-// ─── Phase 3 : Scraper des annuaires de shops Shopify ────────────
+// ─── Phase 3 : Annuaires ────────────────────────────────────────
 async function scrapeDirectories() {
-  console.log('\n📋 Phase 3 : Annuaires de boutiques Shopify\n');
+  console.log('\n📋 Phase 3 : Annuaires de boutiques\n');
 
-  const crawler = new PlaywrightCrawler({
-    async requestHandler({ page, request, log }) {
-      log.info(`Directory: ${request.url}`);
-      await page.waitForLoadState('domcontentloaded');
-      await page.waitForTimeout(3000);
-
-      // Extraire tous les liens externes
-      const links = await page.$$eval('a[href]', els =>
-        els.map(el => (el as HTMLAnchorElement).href)
-          .filter(h => h && h.startsWith('http'))
-      );
-
-      let count = 0;
-      for (const link of links) {
-        try {
-          const u = new URL(link);
-          if (u.hostname.endsWith('.be') && isRelevantUrl(link)) {
-            const normalized = normalizeUrl(link);
-            if (!discoveredUrls.has(normalized)) {
-              discoveredUrls.add(normalized);
-              count++;
-            }
-          }
-        } catch { /* skip */ }
-      }
-
-      log.info(`  → ${count} nouvelles URLs .be`);
+  const directoryRequests = [
+    {
+      url: 'https://www.shopistores.com/country/belgium',
+      userData: { source: 'shopistores' },
     },
-
-    maxRequestsPerCrawl: 20,
-    maxConcurrency: 2,
-    headless: true,
-    navigationTimeoutSecs: 30,
-    launchContext: {
-      launchOptions: {
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      },
-    },
-  });
-
-  // Annuaires connus de shops Shopify
-  const directoryUrls = [
-    'https://www.shopistores.com/country/belgium',
-    'https://www.myip.ms/browse/sites/1/ipID/23.227.38.0/ipIDlast/23.227.38.255',
   ];
 
+  const crawler = new CheerioCrawler({
+    async requestHandler({ $, request, log }) {
+      let count = 0;
+
+      $('a[href]').each((_, el) => {
+        const href = $(el).attr('href') || '';
+        try {
+          const u = new URL(href, request.url);
+          if (u.hostname.endsWith('.be') && isRelevantUrl(u.href)) {
+            addUrl(u.href, request.userData.source as string);
+            count++;
+          }
+        } catch { /* skip */ }
+      });
+
+      log.info(`[DIR] ${request.url} → ${count} URLs .be (total: ${discoveredUrls.size})`);
+    },
+
+    maxRequestsPerCrawl: 10,
+    maxConcurrency: 2,
+    navigationTimeoutSecs: 30,
+    maxRequestRetries: 1,
+  });
+
   try {
-    await crawler.run(directoryUrls);
-  } catch (e) {
-    console.log('  ⚠️ Certains annuaires inaccessibles, on continue...');
+    await crawler.run(directoryRequests);
+  } catch {
+    console.log('  ⚠️ Certains annuaires inaccessibles');
   }
 
   console.log(`\n✅ Phase 3 terminée : ${discoveredUrls.size} URLs total\n`);
+}
+
+// ─── Phase 4 : Bing (alternative à Google) ──────────────────────
+async function scrapeBing() {
+  console.log('\n🔎 Phase 4 : Bing Search\n');
+
+  const bingDorks = [
+    'site:.be "powered by shopify"',
+    'site:.be "myshopify.com"',
+    'site:.be "cdn.shopify.com" "add to cart"',
+    'site:.be "checkout.shopify.com"',
+  ];
+
+  const bingRequests = bingDorks.map(dork => ({
+    url: `https://www.bing.com/search?q=${encodeURIComponent(dork)}&count=50`,
+    userData: { dork, source: 'bing' },
+  }));
+
+  const crawler = new CheerioCrawler({
+    async requestHandler({ $, request, log }) {
+      const dork = request.userData.dork as string;
+      let count = 0;
+
+      // Bing result links
+      $('li.b_algo a, .b_algo h2 a').each((_, el) => {
+        const href = $(el).attr('href') || '';
+        if (href.startsWith('http')) {
+          addUrl(href, `bing:${dork}`);
+          count++;
+        }
+      });
+
+      // Fallback
+      $('a[href^="http"]').each((_, el) => {
+        const href = $(el).attr('href') || '';
+        if (href.startsWith('http') && !href.includes('bing.com') && !href.includes('microsoft.com')) {
+          try {
+            const u = new URL(href);
+            if (u.hostname.endsWith('.be')) {
+              addUrl(href, `bing:${dork}`);
+            }
+          } catch { /* skip */ }
+        }
+      });
+
+      log.info(`[Bing] "${dork.slice(0, 50)}..." → ${count} résultats (total: ${discoveredUrls.size})`);
+    },
+
+    maxRequestsPerCrawl: bingDorks.length,
+    maxConcurrency: 1,
+    navigationTimeoutSecs: 30,
+    maxRequestRetries: 1,
+  });
+
+  try {
+    await crawler.run(bingRequests);
+  } catch {
+    console.log('  ⚠️ Bing inaccessible');
+  }
+
+  console.log(`\n✅ Phase 4 terminée : ${discoveredUrls.size} URLs total\n`);
 }
 
 // ─── Main ────────────────────────────────────────────────────────
@@ -311,32 +287,43 @@ async function main() {
   console.log('🇧🇪 Shopify Belgium URL Discovery');
   console.log('═══════════════════════════════════\n');
 
-  // Charger les URLs précédemment découvertes si elles existent
+  // Charger les URLs précédemment découvertes
   if (existsSync(OUTPUT_FILE)) {
     try {
       const existing = JSON.parse(readFileSync(OUTPUT_FILE, 'utf-8'));
       if (Array.isArray(existing)) {
         for (const entry of existing) {
-          if (entry.url) discoveredUrls.add(entry.url);
+          if (entry.url) discoveredUrls.set(entry.url, { url: entry.url, source: entry.source || 'previous' });
         }
         console.log(`📂 ${discoveredUrls.size} URLs chargées depuis ${OUTPUT_FILE}\n`);
       }
     } catch { /* fresh start */ }
   }
 
-  // Exécuter les 3 phases
   await scrapeDuckDuckGo();
   await scrapeCrtSh();
   await scrapeDirectories();
+  await scrapeBing();
 
-  // Sauvegarder les résultats
-  const results = Array.from(discoveredUrls).map(url => ({
-    url,
-    domain: new URL(url).hostname,
-    tld: new URL(url).hostname.split('.').pop(),
-    discoveredAt: new Date().toISOString(),
-    verified: false, // sera rempli par shopify-verify.ts
-  }));
+  // Sauvegarder
+  const results = Array.from(discoveredUrls.values()).map(({ url, source }) => {
+    let domain = '';
+    let tld = '';
+    try {
+      const u = new URL(url);
+      domain = u.hostname;
+      tld = u.hostname.split('.').pop() || '';
+    } catch { /* skip */ }
+
+    return {
+      url,
+      domain,
+      tld,
+      source,
+      discoveredAt: new Date().toISOString(),
+      verified: false,
+    };
+  });
 
   // Trier : .be d'abord
   results.sort((a, b) => {

@@ -28,3 +28,8 @@ next-env.d.ts
 
 # WhatsApp session
 scripts/whatsapp-session/
+
+# Crawlee cache
+storage/key_value_stores/
+storage/request_queues/
+storage/datasets/

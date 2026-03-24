@@ -1,29 +1,2019 @@
 [
-  {"url": "https://dierendonck.be", "domain": "dierendonck.be", "isShopify": true, "score": 30, "signals": ["api:/cart.json valid"], "name": "Dierendonck", "verifiedAt": "2026-03-23"},
-  {"url": "https://shop.clubbrugge.be", "domain": "shop.clubbrugge.be", "isShopify": true, "score": 30, "signals": ["api:/cart.json valid"], "name": "Club Brugge", "verifiedAt": "2026-03-23"},
-  {"url": "https://shop.graspop.be", "domain": "shop.graspop.be", "isShopify": true, "score": 30, "signals": ["api:/cart.json valid"], "name": "Graspop Metal Meeting", "verifiedAt": "2026-03-23"},
-  {"url": "https://pharmabox.be", "domain": "pharmabox.be", "isShopify": true, "score": 30, "signals": ["api:/cart.json valid"], "name": "Pharmabox", "verifiedAt": "2026-03-23"},
-  {"url": "https://parfumsamples.be", "domain": "parfumsamples.be", "isShopify": true, "score": 30, "signals": ["api:/cart.json valid"], "name": "Parfum Samples", "verifiedAt": "2026-03-23"},
-  {"url": "https://pronti.be", "domain": "pronti.be", "isShopify": true, "score": 30, "signals": ["api:/cart.json valid"], "name": "Pronti", "verifiedAt": "2026-03-23"},
-  {"url": "https://morrison.be", "domain": "morrison.be", "isShopify": true, "score": 30, "signals": ["api:/cart.json valid"], "name": "Morrison", "verifiedAt": "2026-03-23"},
-  {"url": "https://billy.be", "domain": "billy.be", "isShopify": true, "score": 30, "signals": ["api:/cart.json valid"], "name": "BILLY.BE Boardshop", "verifiedAt": "2026-03-23"},
-  {"url": "https://skinnylove.be", "domain": "skinnylove.be", "isShopify": true, "score": 30, "signals": ["api:/cart.json valid"], "name": "Skinny Love", "verifiedAt": "2026-03-23"},
-  {"url": "https://kaartmarkt.be", "domain": "kaartmarkt.be", "isShopify": true, "score": 30, "signals": ["api:/cart.json valid"], "name": "Kaartmarkt", "verifiedAt": "2026-03-23"},
-  {"url": "https://paperpigeon.be", "domain": "paperpigeon.be", "isShopify": true, "score": 30, "signals": ["api:/cart.json valid"], "name": "Paper Pigeon", "verifiedAt": "2026-03-23"},
-  {"url": "https://www.kleirantwerp.be", "domain": "www.kleirantwerp.be", "isShopify": true, "score": 30, "signals": ["api:/cart.json valid"], "name": "Kleir Antwerp", "verifiedAt": "2026-03-23"},
-  {"url": "https://axess.be", "domain": "axess.be", "isShopify": true, "score": 30, "signals": ["api:/cart.json valid"], "name": "Axess", "verifiedAt": "2026-03-23"},
-  {"url": "https://angelo.be", "domain": "angelo.be", "isShopify": true, "score": 30, "signals": ["api:/cart.json valid"], "name": "Angelo", "verifiedAt": "2026-03-23"},
-  {"url": "https://www.petitbonbon.be", "domain": "www.petitbonbon.be", "isShopify": true, "score": 30, "signals": ["api:/cart.json valid"], "name": "Petit Bonbon", "verifiedAt": "2026-03-23"},
-  {"url": "https://gimber.com", "domain": "gimber.com", "isShopify": true, "score": 30, "signals": ["api:/cart.json valid"], "name": "Gimber", "verifiedAt": "2026-03-23"},
-  {"url": "https://serax.com", "domain": "serax.com", "isShopify": true, "score": 30, "signals": ["api:/cart.json valid"], "name": "Serax", "verifiedAt": "2026-03-23"},
-  {"url": "https://arte-antwerp.com", "domain": "arte-antwerp.com", "isShopify": true, "score": 30, "signals": ["api:/cart.json valid"], "name": "Arte Antwerp", "verifiedAt": "2026-03-23"},
-  {"url": "https://rainpharma.com", "domain": "rainpharma.com", "isShopify": true, "score": 30, "signals": ["api:/cart.json valid"], "name": "RainPharma", "verifiedAt": "2026-03-23"},
-  {"url": "https://bellerose.com", "domain": "bellerose.com", "isShopify": true, "score": 30, "signals": ["api:/cart.json valid"], "name": "Bellerose", "verifiedAt": "2026-03-23"},
-  {"url": "https://atelierjupe.com", "domain": "atelierjupe.com", "isShopify": true, "score": 30, "signals": ["api:/cart.json valid"], "name": "Atelier Jupe", "verifiedAt": "2026-03-23"},
-  {"url": "https://godiva.eu", "domain": "godiva.eu", "isShopify": true, "score": 30, "signals": ["api:/cart.json valid"], "name": "Godiva", "verifiedAt": "2026-03-23"},
-  {"url": "https://4gold.eu", "domain": "4gold.eu", "isShopify": true, "score": 30, "signals": ["api:/cart.json valid"], "name": "4Gold", "verifiedAt": "2026-03-23"},
-  {"url": "https://lup.be", "domain": "lup.be", "isShopify": false, "score": 0, "signals": ["api:/cart.json 404"], "name": "Lup", "verifiedAt": "2026-03-23"},
-  {"url": "https://theothershop.be", "domain": "theothershop.be", "isShopify": false, "score": 0, "signals": ["api:/cart.json 404"], "name": "The Other Shop", "verifiedAt": "2026-03-23"},
-  {"url": "https://shop.libelle.be", "domain": "shop.libelle.be", "isShopify": false, "score": 0, "signals": ["unreachable"], "name": "Libelle Shop", "verifiedAt": "2026-03-23"},
-  {"url": "https://store.tomorrowland.com", "domain": "store.tomorrowland.com", "isShopify": false, "score": 0, "signals": ["unreachable"], "name": "Tomorrowland Store", "verifiedAt": "2026-03-23"}
+  {
+    "url": "https://dierendonck.be",
+    "domain": "dierendonck.be",
+    "isShopify": true,
+    "score": 30,
+    "signals": [
+      "api:/cart.json valid"
+    ],
+    "name": "Dierendonck",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://shop.clubbrugge.be",
+    "domain": "shop.clubbrugge.be",
+    "isShopify": true,
+    "score": 30,
+    "signals": [
+      "api:/cart.json valid"
+    ],
+    "name": "Club Brugge",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://shop.graspop.be",
+    "domain": "shop.graspop.be",
+    "isShopify": true,
+    "score": 30,
+    "signals": [
+      "api:/cart.json valid"
+    ],
+    "name": "Graspop Metal Meeting",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://pharmabox.be",
+    "domain": "pharmabox.be",
+    "isShopify": true,
+    "score": 30,
+    "signals": [
+      "api:/cart.json valid"
+    ],
+    "name": "Pharmabox",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://parfumsamples.be",
+    "domain": "parfumsamples.be",
+    "isShopify": true,
+    "score": 30,
+    "signals": [
+      "api:/cart.json valid"
+    ],
+    "name": "Parfum Samples",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://pronti.be",
+    "domain": "pronti.be",
+    "isShopify": true,
+    "score": 30,
+    "signals": [
+      "api:/cart.json valid"
+    ],
+    "name": "Pronti",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://morrison.be",
+    "domain": "morrison.be",
+    "isShopify": true,
+    "score": 30,
+    "signals": [
+      "api:/cart.json valid"
+    ],
+    "name": "Morrison",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://billy.be",
+    "domain": "billy.be",
+    "isShopify": true,
+    "score": 30,
+    "signals": [
+      "api:/cart.json valid"
+    ],
+    "name": "BILLY.BE Boardshop",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://skinnylove.be",
+    "domain": "skinnylove.be",
+    "isShopify": true,
+    "score": 30,
+    "signals": [
+      "api:/cart.json valid"
+    ],
+    "name": "Skinny Love",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://kaartmarkt.be",
+    "domain": "kaartmarkt.be",
+    "isShopify": true,
+    "score": 30,
+    "signals": [
+      "api:/cart.json valid"
+    ],
+    "name": "Kaartmarkt",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://paperpigeon.be",
+    "domain": "paperpigeon.be",
+    "isShopify": true,
+    "score": 30,
+    "signals": [
+      "api:/cart.json valid"
+    ],
+    "name": "Paper Pigeon",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://www.kleirantwerp.be",
+    "domain": "www.kleirantwerp.be",
+    "isShopify": true,
+    "score": 30,
+    "signals": [
+      "api:/cart.json valid"
+    ],
+    "name": "Kleir Antwerp",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://axess.be",
+    "domain": "axess.be",
+    "isShopify": true,
+    "score": 30,
+    "signals": [
+      "api:/cart.json valid"
+    ],
+    "name": "Axess",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://angelo.be",
+    "domain": "angelo.be",
+    "isShopify": true,
+    "score": 30,
+    "signals": [
+      "api:/cart.json valid"
+    ],
+    "name": "Angelo",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://www.petitbonbon.be",
+    "domain": "www.petitbonbon.be",
+    "isShopify": true,
+    "score": 30,
+    "signals": [
+      "api:/cart.json valid"
+    ],
+    "name": "Petit Bonbon",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://gimber.com",
+    "domain": "gimber.com",
+    "isShopify": true,
+    "score": 30,
+    "signals": [
+      "api:/cart.json valid"
+    ],
+    "name": "Gimber",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://serax.com",
+    "domain": "serax.com",
+    "isShopify": true,
+    "score": 30,
+    "signals": [
+      "api:/cart.json valid"
+    ],
+    "name": "Serax",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://arte-antwerp.com",
+    "domain": "arte-antwerp.com",
+    "isShopify": true,
+    "score": 30,
+    "signals": [
+      "api:/cart.json valid"
+    ],
+    "name": "Arte Antwerp",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://rainpharma.com",
+    "domain": "rainpharma.com",
+    "isShopify": true,
+    "score": 30,
+    "signals": [
+      "api:/cart.json valid"
+    ],
+    "name": "RainPharma",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://bellerose.com",
+    "domain": "bellerose.com",
+    "isShopify": true,
+    "score": 30,
+    "signals": [
+      "api:/cart.json valid"
+    ],
+    "name": "Bellerose",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://atelierjupe.com",
+    "domain": "atelierjupe.com",
+    "isShopify": true,
+    "score": 30,
+    "signals": [
+      "api:/cart.json valid"
+    ],
+    "name": "Atelier Jupe",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://godiva.eu",
+    "domain": "godiva.eu",
+    "isShopify": true,
+    "score": 30,
+    "signals": [
+      "api:/cart.json valid"
+    ],
+    "name": "Godiva",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://4gold.eu",
+    "domain": "4gold.eu",
+    "isShopify": true,
+    "score": 30,
+    "signals": [
+      "api:/cart.json valid"
+    ],
+    "name": "4Gold",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://lup.be",
+    "domain": "lup.be",
+    "isShopify": false,
+    "score": 0,
+    "signals": [
+      "api:/cart.json 404"
+    ],
+    "name": "Lup",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://theothershop.be",
+    "domain": "theothershop.be",
+    "isShopify": false,
+    "score": 0,
+    "signals": [
+      "api:/cart.json 404"
+    ],
+    "name": "The Other Shop",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://shop.libelle.be",
+    "domain": "shop.libelle.be",
+    "isShopify": false,
+    "score": 0,
+    "signals": [
+      "unreachable"
+    ],
+    "name": "Libelle Shop",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://store.tomorrowland.com",
+    "domain": "store.tomorrowland.com",
+    "isShopify": false,
+    "score": 0,
+    "signals": [
+      "unreachable"
+    ],
+    "name": "Tomorrowland Store",
+    "verifiedAt": "2026-03-23"
+  },
+  {
+    "url": "https://antwerpbikestore.be",
+    "domain": "antwerpbikestore.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://babyscloset.be",
+    "domain": "babyscloset.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://batteryservicelimburg.be",
+    "domain": "batteryservicelimburg.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://befrenchie.be",
+    "domain": "befrenchie.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://bel-bo.be",
+    "domain": "bel-bo.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://berghoff-belgium.be",
+    "domain": "berghoff-belgium.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://bioderma.be",
+    "domain": "bioderma.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://boutiquebyjlk.be",
+    "domain": "boutiquebyjlk.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://brantano.be",
+    "domain": "brantano.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://carlofelice.be",
+    "domain": "carlofelice.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://carobhandmade.be",
+    "domain": "carobhandmade.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://colora.be",
+    "domain": "colora.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://depuntwinkel.be",
+    "domain": "depuntwinkel.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://dothegreen.be",
+    "domain": "dothegreen.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://e5.be",
+    "domain": "e5.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://ego.be",
+    "domain": "ego.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://farmaline.be",
+    "domain": "farmaline.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://flipthebird.be",
+    "domain": "flipthebird.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://ixina.be",
+    "domain": "ixina.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://jbc.be",
+    "domain": "jbc.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://juttu.be",
+    "domain": "juttu.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://kruidvat.be",
+    "domain": "kruidvat.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://leenbakker.be",
+    "domain": "leenbakker.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://libelle-lekker.be",
+    "domain": "libelle-lekker.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://mayerline.be",
+    "domain": "mayerline.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://mrcollection.be",
+    "domain": "mrcollection.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://mykralli.be",
+    "domain": "mykralli.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://myshoppy.be",
+    "domain": "myshoppy.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://nailscosmetics.be",
+    "domain": "nailscosmetics.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://natan.be",
+    "domain": "natan.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://nerundo.be",
+    "domain": "nerundo.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://neuhaus.be",
+    "domain": "neuhaus.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://onyxcookware.be",
+    "domain": "onyxcookware.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://oysterfood.be",
+    "domain": "oysterfood.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://pollinasclothes.be",
+    "domain": "pollinasclothes.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://prik-tik.be",
+    "domain": "prik-tik.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://rent4event.be",
+    "domain": "rent4event.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://samsonite.be",
+    "domain": "samsonite.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://saryna.be",
+    "domain": "saryna.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://shop-fr.attentia.be",
+    "domain": "shop-fr.attentia.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://shop.aveve.be",
+    "domain": "shop.aveve.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://shop.hethaakbeest.be",
+    "domain": "shop.hethaakbeest.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://shopmagazijn.be",
+    "domain": "shopmagazijn.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://sportdirect.be",
+    "domain": "sportdirect.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://starttoart.be",
+    "domain": "starttoart.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://styliz.be",
+    "domain": "styliz.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://supergoods.be",
+    "domain": "supergoods.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://torfs.be",
+    "domain": "torfs.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://travelight.be",
+    "domain": "travelight.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://unigro.be",
+    "domain": "unigro.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://veritas.be",
+    "domain": "veritas.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://www.cestdujoly.be",
+    "domain": "www.cestdujoly.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://www.extremeskateshop.be",
+    "domain": "www.extremeskateshop.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://www.lecomte-alpirando.be",
+    "domain": "www.lecomte-alpirando.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://www.omidcarpets.be",
+    "domain": "www.omidcarpets.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://www.unikq.be",
+    "domain": "www.unikq.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://youjuice.be",
+    "domain": "youjuice.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://zeb.be",
+    "domain": "zeb.be",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://finesmile.eu",
+    "domain": "finesmile.eu",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://nattou.eu",
+    "domain": "nattou.eu",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://pootr.eu",
+    "domain": "pootr.eu",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://pouches.eu",
+    "domain": "pouches.eu",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://studioloco.eu",
+    "domain": "studioloco.eu",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://walkerandhunt.eu",
+    "domain": "walkerandhunt.eu",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://aboutariane.com",
+    "domain": "aboutariane.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://al-imen.com",
+    "domain": "al-imen.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://anndemeulemeester.com",
+    "domain": "anndemeulemeester.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://anziyya.com",
+    "domain": "anziyya.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://arventoshop.com",
+    "domain": "arventoshop.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://bambaw-zerowaste.myshopify.com",
+    "domain": "bambaw-zerowaste.myshopify.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://be.svr.com",
+    "domain": "be.svr.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://belgianshop.com",
+    "domain": "belgianshop.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://belgique-boutique.myshopify.com",
+    "domain": "belgique-boutique.myshopify.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://bifrosti.com",
+    "domain": "bifrosti.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://bovicci.com",
+    "domain": "bovicci.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://bringme.com",
+    "domain": "bringme.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://buddybuddy.co",
+    "domain": "buddybuddy.co",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://cks-fashion.com",
+    "domain": "cks-fashion.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://closed.com",
+    "domain": "closed.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://cowboy.com",
+    "domain": "cowboy.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://creativebelgium.myshopify.com",
+    "domain": "creativebelgium.myshopify.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://dakidani.com",
+    "domain": "dakidani.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://delvaux.com",
+    "domain": "delvaux.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://dezuttermode.com",
+    "domain": "dezuttermode.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://dogsuppy.com",
+    "domain": "dogsuppy.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://dragondiffusion.com",
+    "domain": "dragondiffusion.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://dunkrecords.com",
+    "domain": "dunkrecords.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://eclire.com",
+    "domain": "eclire.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://edgardcooper.com",
+    "domain": "edgardcooper.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://el-creations.net",
+    "domain": "el-creations.net",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://ellemillashop.com",
+    "domain": "ellemillashop.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://elvor-antwerpen.com",
+    "domain": "elvor-antwerpen.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://essentiel-antwerp.com",
+    "domain": "essentiel-antwerp.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://expecteddisappointment.com",
+    "domain": "expecteddisappointment.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://fit-superhumain.com",
+    "domain": "fit-superhumain.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://geccashop.com",
+    "domain": "geccashop.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://getthinkit.com",
+    "domain": "getthinkit.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://gimmyvitamins.com",
+    "domain": "gimmyvitamins.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://goedwinkel.com",
+    "domain": "goedwinkel.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://hedgren.com",
+    "domain": "hedgren.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://herbalstorebe.com",
+    "domain": "herbalstorebe.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://honest-by.com",
+    "domain": "honest-by.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://idyl.com",
+    "domain": "idyl.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://joesgroomingworld.com",
+    "domain": "joesgroomingworld.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://kassl-editions.com",
+    "domain": "kassl-editions.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://kipling.com",
+    "domain": "kipling.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://klafoutis.com",
+    "domain": "klafoutis.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://komono.com",
+    "domain": "komono.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://kongessloejd.com",
+    "domain": "kongessloejd.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://kumocarbon.com",
+    "domain": "kumocarbon.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://labellov.com",
+    "domain": "labellov.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://lamaison-bruxelles.com",
+    "domain": "lamaison-bruxelles.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://leonidas.com",
+    "domain": "leonidas.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://lies-mertens.com",
+    "domain": "lies-mertens.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://liquidesconfidentiels.com",
+    "domain": "liquidesconfidentiels.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://luna-concept-store.com",
+    "domain": "luna-concept-store.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://madtec.myshopify.com",
+    "domain": "madtec.myshopify.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://magicgorilla.io",
+    "domain": "magicgorilla.io",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://maje.com",
+    "domain": "maje.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://mer-du-nord.com",
+    "domain": "mer-du-nord.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://myluminette.com",
+    "domain": "myluminette.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://mysteryoki.com",
+    "domain": "mysteryoki.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://ombrederos.com",
+    "domain": "ombrederos.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://osakaworld.com",
+    "domain": "osakaworld.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://ozrashop.com",
+    "domain": "ozrashop.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://paintingthepast.com",
+    "domain": "paintingthepast.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://pierremarcolini.com",
+    "domain": "pierremarcolini.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://planetb.care",
+    "domain": "planetb.care",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://postermansion.com",
+    "domain": "postermansion.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://ressencewatches.com",
+    "domain": "ressencewatches.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://rituals.com",
+    "domain": "rituals.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://salvun.com",
+    "domain": "salvun.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://scapa.com",
+    "domain": "scapa.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://sciencejewelry1824.shop",
+    "domain": "sciencejewelry1824.shop",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://scotch-soda.com",
+    "domain": "scotch-soda.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://sfratellibelgium.com",
+    "domain": "sfratellibelgium.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://shop.komono.com",
+    "domain": "shop.komono.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://shopblemia.store",
+    "domain": "shopblemia.store",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://sissymarket.com",
+    "domain": "sissymarket.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://smartgiftpick.com",
+    "domain": "smartgiftpick.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://smets.lu",
+    "domain": "smets.lu",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://stanley1913.com",
+    "domain": "stanley1913.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://strikegames.shop",
+    "domain": "strikegames.shop",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://swedishwild.com",
+    "domain": "swedishwild.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://tfrancq.com",
+    "domain": "tfrancq.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://thefabricsales.com",
+    "domain": "thefabricsales.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://theskateroom.com",
+    "domain": "theskateroom.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://turtlecereals.com",
+    "domain": "turtlecereals.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://verantibody.com",
+    "domain": "verantibody.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://vestiri.nl",
+    "domain": "vestiri.nl",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://wideawake.coffee",
+    "domain": "wideawake.coffee",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://wouters-hendrix.com",
+    "domain": "wouters-hendrix.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://www.amazonias.net",
+    "domain": "www.amazonias.net",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://www.auk.eco",
+    "domain": "www.auk.eco",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://www.cliogoldbrenner.com",
+    "domain": "www.cliogoldbrenner.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://www.copackr.com",
+    "domain": "www.copackr.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://www.degeleflamingo.com",
+    "domain": "www.degeleflamingo.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://www.diamond-world.shop",
+    "domain": "www.diamond-world.shop",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://www.driesvannoten.com",
+    "domain": "www.driesvannoten.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://www.foudebassin.com",
+    "domain": "www.foudebassin.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://www.guudwoman.com",
+    "domain": "www.guudwoman.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://www.ice-watch.com",
+    "domain": "www.ice-watch.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://www.liewood.com",
+    "domain": "www.liewood.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://www.loopearplugs.com",
+    "domain": "www.loopearplugs.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://www.mcalson.com",
+    "domain": "www.mcalson.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://www.parlor.coffee",
+    "domain": "www.parlor.coffee",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://www.rymbu.com",
+    "domain": "www.rymbu.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://www.valleyoftea.com",
+    "domain": "www.valleyoftea.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://www.zapmama.com",
+    "domain": "www.zapmama.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://xandres.com",
+    "domain": "xandres.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://yess-belgium.myshopify.com",
+    "domain": "yess-belgium.myshopify.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  },
+  {
+    "url": "https://yezni.com",
+    "domain": "yezni.com",
+    "isShopify": false,
+    "score": -1,
+    "signals": [
+      "error:unreachable"
+    ],
+    "verifiedAt": "2026-03-24T10:31:29.768Z"
+  }
 ]

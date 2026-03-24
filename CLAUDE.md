@@ -30,6 +30,13 @@ Types : `feat`, `fix`, `docs`, `refactor`, `chore`, `test`
 
 ## Changelog
 
+### 2026-03-24
+- **feat(scraping)**: Mass discovery Shopify Belgique — 199 URLs depuis 7 sources gratuites
+  - `scripts/shopify-discover-mass.ts` : discovery Crawlee (DuckDuckGo 80+ dorks villes×secteurs, Bing pagination, crt.sh, reverse DNS, annuaires multi-pages) — pour exécution locale
+  - `scripts/shopify-compile-discovered.ts` : compilation WebSearch/WebFetch depuis storeleads, sellercenter (top 100), eachspy, bootleads, cartinsight + marques belges connues
+  - `storage/shopify-belgium-discovered.json` : 199 URLs (76 .be, 101 .com, 8 .eu) — +103 nouvelles vs 96 précédentes
+  - 23 Shopify confirmés (vérification bloquée par sandbox réseau — relancer `npx tsx scripts/shopify-verify.ts` en local)
+
 ### 2026-03-23
 - **feat(scraping)**: Discovery & vérification URLs Shopify Belgique
   - `scripts/shopify-discover-belgium.ts` : discovery multi-sources (DuckDuckGo dorks ×15, crt.sh Certificate Transparency, annuaires shopistores/myip.ms), output `storage/shopify-belgium-discovered.json`
@@ -307,6 +314,8 @@ Toute la documentation Crawlee (crawlers disponibles, options, API `page`, `enqu
 |---|---|---|
 | `scripts/scrape-brain-log.ts` | brain-log.com (8 pages FR) | `storage/brain-log-full.json` |
 | `scripts/shopify-discover-belgium.ts` | Discovery URLs Shopify belges (DuckDuckGo dorks, crt.sh, annuaires) | `storage/shopify-belgium-discovered.json` |
+| `scripts/shopify-discover-mass.ts` | Discovery massive Crawlee (80+ dorks, Bing, crt.sh, reverse DNS) — exécution locale | `storage/shopify-belgium-discovered.json` |
+| `scripts/shopify-compile-discovered.ts` | Compilation URLs depuis 7 sources gratuites (199 URLs) | `storage/shopify-belgium-discovered.json` |
 | `scripts/shopify-verify.ts` | Vérification multi-signaux (score /100 : cart.json, cookies, headers, JS, malus blog) | `storage/shopify-belgium-verified.json` |
 
 **Lancer un scraper :**
